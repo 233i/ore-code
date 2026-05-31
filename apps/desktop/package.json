@@ -1,0 +1,49 @@
+{
+  "name": "@seekforge/desktop",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "SeekForge Tauri desktop application",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src --passWithNoTests",
+    "lint": "eslint src --ext .ts,.tsx",
+    "smoke": "playwright test",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:build": "tauri build",
+    "tauri:build:win": "tauri build --bundles nsis"
+  },
+  "dependencies": {
+    "@seekforge/agent-core": "workspace:*",
+    "@seekforge/protocol": "workspace:*",
+    "@seekforge/state": "workspace:*",
+    "@seekforge/tools": "workspace:*",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-opener": "^2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "react-virtuoso": "^4.18.7",
+    "remark-gfm": "^4.0.1",
+    "smol-toml": "^1.6.1",
+    "tdesign-icons-react": "^0.6.4",
+    "tdesign-react": "^1.16.9",
+    "zod": "^4.1.12",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4",
+    "vitest": "^4.0.8"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "seekforge",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "DeepSeek-first desktop coding agent workbench",
+  "packageManager": "pnpm@11.0.8",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=11 <12"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @seekforge/desktop tauri dev",
+    "build": "pnpm -r --sort build",
+    "build:desktop:windows": "pnpm --filter @seekforge/desktop tauri:build:win",
+    "typecheck": "pnpm build && pnpm -r --sort typecheck",
+    "test": "pnpm build && pnpm -r --sort test",
+    "test:harness": "pnpm --filter @seekforge/protocol build && pnpm --filter @seekforge/tools build && pnpm --filter @seekforge/agent-core build && pnpm --filter @seekforge/harness test",
+    "smoke:shell-jobs": "bash scripts/smoke-shell-jobs.sh",
+    "ci:local": "pnpm typecheck && pnpm test && pnpm lint && cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml",
+    "lint": "pnpm -r --sort lint"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
+    "eslint": "^9.39.1",
+    "typescript": "~5.8.3",
+    "vitest": "^4.0.8"
+  }
+}

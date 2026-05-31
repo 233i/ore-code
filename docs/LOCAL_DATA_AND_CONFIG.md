@@ -1,0 +1,54 @@
+# Local Data and Configuration
+
+SeekForge stores runtime data outside the repository. Keep these paths out of Git, release artifacts, issue screenshots, and logs unless a maintainer explicitly asks for a redacted excerpt.
+
+## User-Level Data
+
+User-level data lives in the user's home directory:
+
+| Path | Purpose | Commit to Git? |
+| --- | --- | --- |
+| `~/.seekforge/skills` | Global skill definitions loaded by the Skills page. | No |
+| `~/.seekforge/mcp.json` | Local MCP server configuration. | No |
+| `~/.deepseek/config.toml` | DeepSeek-compatible provider configuration. | No |
+
+These files may contain local paths, MCP command details, or provider-specific settings. Treat them as user-private configuration.
+
+## App Data
+
+The desktop app also uses the operating system app-data directory for settings, sessions, artifacts, notes, and runtime indexes. The exact path is OS-specific and should be treated as private user data.
+
+Do not copy app-data files into the repository. If a bug needs session or artifact evidence, share the smallest redacted excerpt that reproduces the issue.
+
+## Project-Local Data
+
+Project-local runtime data under `.seekforge/` is ignored by Git by default. It may include generated indexes, cached metadata, and temporary agent state.
+
+If a project intentionally wants to version an example config, use a clearly named sample file such as `seekforge.example.json` instead of committing real runtime data.
+
+## Secrets and Provider Credentials
+
+- Store API keys through the app's secure storage flow where supported.
+- Do not commit provider API keys, MCP tokens, shell history, `.env` files, or private project logs.
+- Before opening a public issue, remove local absolute paths that reveal private directory names unless the path itself is necessary to reproduce the bug.
+
+## Reset and Backup
+
+For troubleshooting, back up or remove only the specific path related to the issue:
+
+- Skills issue: inspect `~/.seekforge/skills`.
+- MCP issue: inspect `~/.seekforge/mcp.json`.
+- Provider config issue: inspect `~/.deepseek/config.toml` and secure storage state.
+- Session or artifact issue: inspect the OS app-data directory.
+
+Avoid deleting all local data unless you have exported any skills, MCP settings, or session evidence you need to keep.
+
+## Public Reporting Checklist
+
+Before attaching logs or screenshots to GitHub:
+
+- Remove API keys, tokens, and provider secrets.
+- Remove private project source code unless the issue requires a minimal reproduction.
+- Remove private local paths when they are not relevant.
+- Summarize large tool output instead of pasting full logs.
+- Mention the OS and SeekForge version or commit.

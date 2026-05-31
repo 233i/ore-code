@@ -1,0 +1,35 @@
+* text=auto
+
+# Source files are stored with LF line endings.
+*.css text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.jsx text eol=lf
+*.md text eol=lf
+*.mjs text eol=lf
+*.rs text eol=lf
+*.sh text eol=lf
+*.toml text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Windows cmd/bat entrypoints should stay Windows-friendly.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# PowerShell supports LF and this avoids noisy renormalization on macOS/Linux.
+*.ps1 text eol=lf
+
+# Binary assets.
+*.ico binary
+*.icns binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.gif binary
+*.pdf binary
+*.zip binary

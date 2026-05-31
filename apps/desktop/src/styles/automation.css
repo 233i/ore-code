@@ -1,0 +1,659 @@
+.automation-workspace {
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  bottom: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  left: calc(var(--sidebar-width, 288px) + 6px);
+  overflow: hidden;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 33;
+}
+
+.automation-header {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-height: 68px;
+  padding: 12px 28px;
+}
+
+.automation-header > div:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.automation-header h1 {
+  color: var(--text);
+  font-size: 20px;
+  line-height: 25px;
+  margin: 0;
+}
+
+.automation-header p,
+.automation-simple-panel p,
+.automation-simple-card p,
+.automation-empty p,
+.automation-task-row p,
+.automation-task-empty {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 18px;
+  margin: 0;
+}
+
+.automation-actions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.automation-actions .t-button {
+  background: var(--control-bg);
+  border-color: var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  height: 32px;
+}
+
+.automation-actions .t-button:hover {
+  background: var(--control-hover);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.automation-actions .t-button--variant-text {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted-strong);
+}
+
+.automation-actions .t-button--variant-text:hover {
+  background: var(--surface-hover);
+  border-color: transparent;
+  color: var(--text);
+}
+
+.automation-actions .automation-create-button.t-button,
+.automation-empty .automation-create-button.t-button,
+.automation-create-form .t-button--theme-primary,
+.t-dialog .t-dialog__footer .t-button--theme-primary {
+  background: var(--control-bg);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.automation-actions .automation-create-button.t-button:hover,
+.automation-empty .automation-create-button.t-button:hover,
+.automation-create-form .t-button--theme-primary:hover,
+.t-dialog .t-dialog__footer .t-button--theme-primary:hover {
+  background: var(--control-hover);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.automation-actions .automation-create-button.t-button:disabled,
+.automation-actions .automation-create-button.t-button.t-is-disabled,
+.automation-empty .automation-create-button.t-button:disabled,
+.automation-empty .automation-create-button.t-button.t-is-disabled,
+.automation-create-form .t-button--theme-primary:disabled,
+.automation-create-form .t-button--theme-primary.t-is-disabled,
+.t-dialog .t-dialog__footer .t-button--theme-primary:disabled,
+.t-dialog .t-dialog__footer .t-button--theme-primary.t-is-disabled {
+  background: var(--primary-disabled);
+  border-color: var(--primary-disabled);
+  color: var(--text-disabled);
+}
+
+.automation-simple-layout {
+  display: grid;
+  gap: 14px;
+  margin: 0 auto;
+  max-width: 880px;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 28px 32px;
+  width: min(100%, 880px);
+}
+
+.automation-simple-panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: grid;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.automation-simple-panel > header {
+  align-items: center;
+  background: var(--surface-subtle);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.automation-simple-panel h2 {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 21px;
+  margin: 0 0 3px;
+}
+
+.automation-simple-panel > header > span {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  flex: 0 0 auto;
+  font-size: 12px;
+  line-height: 24px;
+  padding: 0 10px;
+}
+
+.automation-simple-list {
+  align-content: start;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.automation-simple-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+}
+
+.automation-card-main {
+  align-items: flex-start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.automation-status-dot {
+  background: var(--muted);
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px var(--surface-subtle);
+  height: 8px;
+  margin-top: 6px;
+  width: 8px;
+}
+
+.automation-status-dot.active {
+  background: var(--success);
+}
+
+.automation-card-main strong,
+.automation-empty strong,
+.automation-task-row strong {
+  color: var(--text);
+  display: block;
+  font-size: 14px;
+  line-height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.automation-card-main p,
+.automation-task-row p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.automation-toggle {
+  background: var(--control-bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  font-size: 12px;
+  height: 28px;
+  min-width: 48px;
+  padding: 0 11px;
+}
+
+.automation-toggle.active {
+  background: var(--success-bg);
+  border-color: color-mix(in srgb, var(--success) 38%, var(--line));
+  color: var(--success);
+  font-weight: 650;
+}
+
+.automation-toggle:disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.automation-meta-row {
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.automation-meta-row span {
+  background: var(--surface);
+  color: var(--text);
+  display: grid;
+  font-size: 12px;
+  gap: 2px;
+  min-width: 0;
+  padding: 9px 10px;
+}
+
+.automation-meta-row small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.automation-simple-card footer {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.automation-simple-card footer .t-button {
+  border-radius: 8px;
+  height: 28px;
+}
+
+.automation-empty {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  min-height: 220px;
+  padding: 28px;
+  text-align: center;
+}
+
+.automation-empty p {
+  max-width: 280px;
+}
+
+.automation-empty .t-button {
+  border-radius: 8px;
+  height: 32px;
+  margin-top: 4px;
+}
+
+.automation-tasks-disclosure {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.automation-tasks-disclosure summary {
+  align-items: center;
+  background: var(--surface-subtle);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 650;
+  justify-content: space-between;
+  line-height: 20px;
+  list-style: none;
+  padding: 13px 16px;
+}
+
+.automation-tasks-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.automation-tasks-disclosure summary small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.automation-tasks-disclosure > div {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.automation-tasks-disclosure > div > .t-button {
+  border-radius: 8px;
+  height: 28px;
+  justify-self: start;
+}
+
+.automation-task-row {
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 10px 11px;
+}
+
+.automation-task-row > div {
+  min-width: 0;
+}
+
+.automation-task-empty {
+  padding: 6px 2px;
+}
+
+.automation-create-form {
+  display: grid;
+  gap: 12px;
+}
+
+.automation-create-dialog .t-dialog {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.automation-create-dialog .t-dialog__header {
+  color: var(--text);
+}
+
+.automation-create-dialog .t-dialog__close {
+  color: var(--muted-strong);
+}
+
+.automation-create-dialog .t-dialog__close:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.automation-create-dialog .t-dialog__footer .t-button {
+  background: var(--control-bg);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.automation-create-dialog .t-dialog__footer .t-button:hover {
+  background: var(--control-hover);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.automation-create-dialog .t-dialog__footer .t-button--theme-primary {
+  background: var(--control-bg);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.automation-create-dialog .t-dialog__footer .t-button--theme-primary:hover {
+  background: var(--control-hover);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.automation-create-form .t-input,
+.automation-create-form .t-select .t-input {
+  background: var(--control-bg);
+  border-color: var(--line);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.automation-create-form .t-input {
+  min-height: 36px;
+}
+
+.automation-create-form .t-textarea {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  min-height: 0;
+  padding: 0;
+}
+
+.automation-create-form .t-input:hover,
+.automation-create-form .t-select .t-input:hover {
+  background: var(--control-hover);
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.automation-create-form .t-textarea__inner:hover {
+  background: var(--control-hover);
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.automation-create-form .t-input:focus-within,
+.automation-create-form .t-select .t-input:focus-within,
+.automation-create-form .t-input.t-is-focused,
+.automation-create-form .t-select .t-input.t-is-focused {
+  background: var(--control-bg);
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.automation-create-form .t-textarea__inner:focus {
+  background: var(--control-bg);
+  border-color: var(--accent);
+  box-shadow: none;
+  outline: none;
+}
+
+.automation-create-form .t-input__inner,
+.automation-create-form .t-select__single {
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.automation-create-form .t-input__inner,
+.automation-create-form .t-select__single {
+  height: 34px;
+}
+
+.automation-create-form .t-textarea__inner {
+  background: var(--control-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 20px;
+  min-height: 112px;
+  outline: 0;
+  padding: 10px 12px;
+  resize: none;
+}
+
+.automation-create-form .t-input__inner:focus,
+.automation-create-form .t-textarea__inner:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.automation-create-form .t-input__inner::placeholder,
+.automation-create-form .t-textarea__inner::placeholder {
+  color: var(--muted);
+}
+
+.automation-create-field {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: start;
+}
+
+.automation-create-field > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  padding-top: 9px;
+}
+
+.automation-custom-schedule {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: grid;
+  gap: 12px;
+  margin-left: 84px;
+  padding: 12px;
+}
+
+.automation-custom-schedule label {
+  display: grid;
+  gap: 7px;
+}
+
+.automation-custom-schedule label > span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.automation-day-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.automation-day-picker button {
+  background: var(--control-bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  font-size: 12px;
+  height: 30px;
+  min-width: 34px;
+  padding: 0 10px;
+}
+
+.automation-day-picker button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.automation-day-picker button.active {
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+  color: var(--text-on-primary);
+  font-weight: 650;
+}
+
+.automation-custom-schedule input[type="time"] {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  height: 34px;
+  padding: 0 10px;
+}
+
+.automation-custom-schedule input[type="time"]:focus {
+  border-color: var(--line-strong);
+  outline: none;
+}
+
+.automation-pause-option {
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  display: grid;
+  gap: 3px;
+  margin-left: 84px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.automation-pause-option:hover,
+.automation-pause-option.active {
+  background: var(--surface-hover);
+  border-color: var(--line-strong);
+}
+
+.automation-pause-option span {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.automation-pause-option small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 980px) {
+  .automation-workspace {
+    left: 0;
+  }
+
+  .automation-header {
+    padding: 12px 18px;
+  }
+
+  .automation-simple-layout {
+    padding: 16px 18px 24px;
+  }
+}
+
+@media (max-width: 620px) {
+  .automation-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .automation-actions {
+    width: 100%;
+  }
+
+  .automation-actions .automation-create-button {
+    flex: 1;
+  }
+
+  .automation-card-main,
+  .automation-task-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .automation-toggle {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .automation-meta-row {
+    grid-template-columns: 1fr;
+  }
+
+  .automation-create-field {
+    gap: 7px;
+    grid-template-columns: 1fr;
+  }
+
+  .automation-create-field > span {
+    padding-top: 0;
+  }
+
+  .automation-custom-schedule,
+  .automation-pause-option {
+    margin-left: 0;
+  }
+}

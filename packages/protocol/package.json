@@ -1,0 +1,29 @@
+{
+  "name": "@seekforge/protocol",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SeekForge runtime event schemas and shared protocol types",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run src --passWithNoTests",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3",
+    "vitest": "^4.0.8"
+  }
+}

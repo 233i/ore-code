@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+build/
+**/build/
+coverage/
+**/coverage/
+.vite/
+**/.vite/
+
+# Tauri / Rust
+target/
+**/target/
+apps/desktop/src-tauri/gen/
+
+# Test and browser artifacts
+test-results/
+**/test-results/
+playwright-report/
+**/playwright-report/
+.playwright-cli/
+output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Local SeekForge runtime data
+.seekforge/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor local files
+.idea/
+docs/.obsidian/
+docs/未命名.*
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+apps/**/.vscode/*
+!apps/**/.vscode/extensions.json
+!apps/**/.vscode/settings.json
+!apps/**/.vscode/launch.json
+!apps/**/.vscode/tasks.json
+
+# TypeScript incremental metadata
+*.tsbuildinfo

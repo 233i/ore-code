@@ -1,0 +1,313 @@
+:root {
+  --app-bg: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-muted: #f5f5f3;
+  --surface-subtle: #f8f8f6;
+  --surface-hover: #f0f0ed;
+  --surface-active: #eaeae6;
+  --control-bg: #f7f7f5;
+  --control-hover: #f0f0ed;
+  --control-active: #e7e7e3;
+  --line: #e5e5e2;
+  --line-strong: #d7d7d2;
+  --text: #1f1f1f;
+  --muted: #70706b;
+  --muted-strong: #4d4d49;
+  --text-disabled: #aaa9a3;
+  --text-on-primary: #ffffff;
+  --primary-bg: #1f1f1f;
+  --primary-hover: #111111;
+  --primary-disabled: #d8d8d3;
+  --accent: #8a5a22;
+  --success: #1f7a3d;
+  --danger: #b83a2f;
+  --warning: #9a6b1f;
+  --success-bg: #eaf7ef;
+  --danger-bg: #fff1f1;
+  --warning-bg: #fff4df;
+  --info-bg: #eeeeec;
+  --code-bg: #f7f7f4;
+  --overlay-bg: rgba(31, 31, 31, 0.5);
+  --topbar-bg: rgba(255, 255, 255, 0.98);
+  --composer-fade: linear-gradient(to top, #ffffff 82%, rgba(255, 255, 255, 0));
+  --shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.025);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 14px 38px rgba(0, 0, 0, 0.14);
+  --focus-ring: rgba(138, 90, 34, 0.28);
+  --radius: 10px;
+  --control-radius: 9px;
+  --chat-content-max-width: 860px;
+  --chat-content-gutter: clamp(22px, 5vw, 88px);
+  --composer-shell-padding-x: 12px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: var(--app-bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme="dark"] {
+  --app-bg: #111210;
+  --surface: #171816;
+  --surface-raised: #1d1e1b;
+  --surface-muted: #141512;
+  --surface-subtle: #1a1b18;
+  --surface-hover: #252620;
+  --surface-active: #2d2e27;
+  --control-bg: #20211d;
+  --control-hover: #282922;
+  --control-active: #34352d;
+  --line: #303129;
+  --line-strong: #45463b;
+  --text: #efefe9;
+  --muted: #a2a299;
+  --muted-strong: #cecec5;
+  --text-disabled: #6f7067;
+  --text-on-primary: #111210;
+  --primary-bg: #f1f1ea;
+  --primary-hover: #ffffff;
+  --primary-disabled: #47483f;
+  --accent: #d9a35c;
+  --success: #65c47d;
+  --danger: #ff8579;
+  --warning: #e0b565;
+  --success-bg: #193422;
+  --danger-bg: #3b201d;
+  --warning-bg: #342a18;
+  --info-bg: #282923;
+  --code-bg: #11120f;
+  --overlay-bg: rgba(0, 0, 0, 0.64);
+  --topbar-bg: rgba(17, 18, 16, 0.96);
+  --composer-fade: linear-gradient(to top, #111210 82%, rgba(17, 18, 16, 0));
+  --shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.34);
+  --shadow-lg: 0 18px 46px rgba(0, 0, 0, 0.46);
+  --focus-ring: rgba(217, 163, 92, 0.34);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  max-width: none;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+body {
+  background: var(--app-bg);
+}
+
+button,
+textarea,
+input,
+select {
+  font: inherit;
+}
+
+button:not(.t-button) {
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  cursor: default;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.t-popup:not(.t-tooltip) > .t-popup__content,
+.t-dropdown,
+.t-dropdown__submenu,
+.t-select__dropdown .t-popup__content {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  color: var(--text);
+}
+
+.t-dialog,
+.t-dialog__header,
+.t-dialog__body,
+.t-dialog__footer,
+.t-drawer,
+.t-drawer__header,
+.t-drawer__body,
+.t-drawer__footer {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.t-button {
+  color: var(--text);
+}
+
+.t-button--theme-primary {
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+  color: var(--text-on-primary);
+}
+
+.t-button--theme-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--text-on-primary);
+}
+
+.t-button.t-is-disabled,
+.t-button:disabled {
+  color: var(--text-disabled);
+}
+
+.t-input,
+.t-textarea,
+.t-input-number {
+  background: var(--control-bg);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.t-select,
+.t-select__wrap {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text);
+}
+
+.t-input:hover,
+.t-textarea:hover,
+.t-select .t-input:hover {
+  background: var(--control-hover);
+  border-color: var(--line-strong);
+}
+
+.t-select,
+.t-select:hover,
+.t-select.t-is-focused,
+.t-select:focus-within,
+.t-select__wrap {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.t-input__inner,
+.t-textarea__inner,
+.t-select-input,
+.t-select__single {
+  color: var(--text);
+}
+
+.t-input__inner::placeholder,
+.t-textarea__inner::placeholder {
+  color: var(--muted);
+}
+
+.t-dropdown {
+  min-width: 190px;
+}
+
+.t-popup:not(.t-tooltip) > .t-popup__content {
+  padding: 5px;
+}
+
+.t-dropdown__menu,
+.t-dropdown__submenu {
+  gap: 2px;
+  padding: 5px;
+}
+
+.t-dropdown__item,
+.t-select-option {
+  border-radius: 7px;
+  color: var(--text);
+  cursor: default;
+  font: inherit;
+  font-size: 12.5px;
+  min-height: 30px;
+}
+
+.t-dropdown__item {
+  padding: 0 8px;
+}
+
+.t-dropdown__item--theme-default:hover,
+.t-dropdown__item--theme-default.t-dropdown__item--suffix:hover,
+.t-select-option:not(.t-is-disabled):not(.t-is-selected):hover,
+.t-select-option.t-select-option__hover:not(.t-is-disabled).t-select-option.t-select-option__hover:not(.t-is-selected),
+.t-select-option.t-select-option--hover:not(.t-is-disabled).t-select-option.t-select-option--hover:not(.t-is-selected) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.t-dropdown__item--theme-default:active,
+.t-select-option:not(.t-is-disabled):active {
+  background: var(--surface-active);
+}
+
+.t-dropdown__item--theme-default.t-dropdown__item--active,
+.t-select-option.t-is-selected:not(.t-is-disabled),
+.t-is-selected.t-select-option__hover {
+  background: var(--surface-active);
+  color: var(--text);
+}
+
+.t-select__dropdown-inner .t-select__list,
+.t-select__dropdown-inner .t-tree {
+  padding: 5px;
+}
+
+.t-select-option.t-size-l,
+.t-select-option {
+  height: 30px;
+  padding: 0 8px;
+}
+
+.t-select-option + .t-select-option {
+  margin-top: 2px;
+}
+
+.t-dropdown__item--disabled,
+.t-select-option.t-is-disabled {
+  color: var(--text-disabled);
+  opacity: 1;
+}
+
+.spin {
+  animation: seekforge-spin 1s linear infinite;
+  display: inline-block;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes seekforge-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
