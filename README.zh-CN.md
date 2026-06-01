@@ -72,6 +72,15 @@ pnpm --filter @ore-code/desktop tauri:build
 pnpm build:desktop:windows
 ```
 
+## macOS 预发布版安装
+
+首个 macOS 预发布包未签名、未公证。macOS 拦截应用时，可以用下面任一方式首次打开：
+
+- 按住 Control 点击或右键点击 `Ore Code.app`，选择**打开**，然后在确认弹窗里再次选择**打开**。
+- 如果仍然被拦截，打开**系统设置 > 隐私与安全性**，找到 Ore Code 的拦截提示，选择**仍要打开**。
+
+只安装本仓库 GitHub Releases 中发布的构建产物。
+
 ## 验证
 
 开发时优先运行聚焦的包级检查：

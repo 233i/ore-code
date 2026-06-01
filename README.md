@@ -72,6 +72,15 @@ pnpm --filter @ore-code/desktop tauri:build
 pnpm build:desktop:windows
 ```
 
+## macOS Pre-Release Install
+
+The first macOS pre-release builds are unsigned and not notarized. When macOS blocks the app, open it once with either of these flows:
+
+- Control-click or right-click `Ore Code.app`, choose **Open**, then choose **Open** again in the confirmation dialog.
+- If macOS still blocks it, open **System Settings > Privacy & Security**, find the Ore Code warning, and choose **Open Anyway**.
+
+Only install builds downloaded from this repository's GitHub releases.
+
 ## Verification
 
 Use the focused package checks while developing:

@@ -75,6 +75,7 @@ Use this guide before opening a GitHub issue. Ore Code is pre-release software, 
 ## Packaging Problems
 
 - Build macOS artifacts on macOS and Windows artifacts on Windows.
+- Current macOS pre-release artifacts are unsigned and not notarized. If macOS blocks the app, Control-click or right-click `Ore Code.app`, choose **Open**, and confirm **Open** again. If needed, use **System Settings > Privacy & Security > Open Anyway**.
 - Do not treat a macOS-only build as proof that Windows packaging works.
 - For Windows installer reports, include Windows version, build command, artifact name, and smoke-test result.
 
