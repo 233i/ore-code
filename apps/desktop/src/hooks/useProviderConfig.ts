@@ -9,7 +9,7 @@ import {
   type DeepSeekModelMode,
   type DeepSeekThinkingLevel,
   type LlmClient
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 import {
   DEFAULT_DEEPSEEK_BASE_URL,
   DEFAULT_DEEPSEEK_MODEL,

@@ -1,4 +1,4 @@
-import type { GitToolHost } from "@seekforge/tools";
+import type { GitToolHost } from "@ore-code/tools";
 import { isTauriRuntime } from "./fileHost";
 import { createTauriGitHost } from "./tauriGitHost";
 

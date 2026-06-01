@@ -114,7 +114,7 @@ test("keeps user messages right aligned in the transcript", async ({ page }) => 
 test("reviews and restores a single turn file change", async ({ page }) => {
   await page.goto("/");
 
-  await submitPrompt(page, "写入 @seekforge-smoke-one.txt");
+  await submitPrompt(page, "写入 @ore-code-smoke-one.txt");
   await approveIfVisible(page);
 
   const transcript = page.getByLabel("Transcript");

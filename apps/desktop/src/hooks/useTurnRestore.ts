@@ -1,5 +1,5 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import type { TrackedFileChange } from "../features/changes/changeLedger";
 import type { ChangeGroup } from "../features/changes/changeGroups";
 import { createTurnSnapshotStore } from "../services/turnSnapshotStore";

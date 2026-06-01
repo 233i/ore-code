@@ -1,6 +1,6 @@
-# SeekForge Skill System
+# Ore Code Skill System
 
-SeekForge 当前只支持用户级 Skill。Skill 是一份可复用的工作流说明，不是插件代码，也不会执行任意脚本。
+Ore Code 当前只支持用户级 Skill。Skill 是一份可复用的工作流说明，不是插件代码，也不会执行任意脚本。
 
 Skill 放在用户目录：
 
@@ -27,7 +27,7 @@ description: 按成熟 coding agent 的标准审查当前任务。
 /reviewer 请审查当前文件变更
 ```
 
-SeekForge 会把 `SKILL.md` 内容注入到本轮 prompt，再交给当前 provider 和 agent loop 执行。所有真实文件读写、shell 和 git 操作仍然走现有工具与审批系统。
+Ore Code 会把 `SKILL.md` 内容注入到本轮 prompt，再交给当前 provider 和 agent loop 执行。所有真实文件读写、shell 和 git 操作仍然走现有工具与审批系统。
 
 下一阶段可以做：
 

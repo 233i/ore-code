@@ -1,4 +1,4 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 
 export const DEEPSEEK_V4_PRO_MODEL = "deepseek-v4-pro";
 export const DEEPSEEK_V4_FLASH_MODEL = "deepseek-v4-flash";

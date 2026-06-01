@@ -1,4 +1,4 @@
-import type { ToolResult } from "@seekforge/protocol";
+import type { ToolResult } from "@ore-code/protocol";
 
 export function serializeToolResultForModel(result: ToolResult): string {
   const failure = toolResultFailure(result);

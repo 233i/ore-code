@@ -1,4 +1,4 @@
-import type { RuntimeEvent, ToolCall, ToolResult } from "@seekforge/protocol";
+import type { RuntimeEvent, ToolCall, ToolResult } from "@ore-code/protocol";
 
 export type ProjectDeltaEvent = Extract<RuntimeEvent, { type: "project_delta" }>;
 export type ProjectDeltaEventBody = Omit<ProjectDeltaEvent, "id" | "seq" | "threadId" | "turnId" | "createdAt">;

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { ChevronDownIcon, FolderIcon, PlayCircleIcon } from "tdesign-icons-react";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import type {
   PersistedTranscriptActivitySummary,
   PersistedTranscriptContextHint,
@@ -475,7 +475,7 @@ function TranscriptEmptyState({
             <strong>查看工作区</strong>
             <small>总结项目结构和关键模块</small>
           </button>
-          <button type="button" disabled={isRunning || !hasWorkspace} onClick={() => onRunStarter("运行 pnpm --filter @seekforge/desktop test")}>
+          <button type="button" disabled={isRunning || !hasWorkspace} onClick={() => onRunStarter("运行 pnpm --filter @ore-code/desktop test")}>
             <span><PlayCircleIcon size="18px" /></span>
             <strong>运行测试</strong>
             <small>检查当前桌面端状态</small>

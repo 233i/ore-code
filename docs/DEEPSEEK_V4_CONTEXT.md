@@ -1,6 +1,6 @@
 # DeepSeek V4 Context Strategy
 
-This document describes how SeekForge treats DeepSeek V4 Pro and Flash as large-context coding models. It is the public design reference for context capacity, history retention, tool output routing, reasoning replay, and prefix-cache stability.
+This document describes how Ore Code treats DeepSeek V4 Pro and Flash as large-context coding models. It is the public design reference for context capacity, history retention, tool output routing, reasoning replay, and prefix-cache stability.
 
 ## Goals
 
@@ -12,7 +12,7 @@ This document describes how SeekForge treats DeepSeek V4 Pro and Flash as large-
 
 ## Model Budgets
 
-SeekForge derives request budgets from the selected model:
+Ore Code derives request budgets from the selected model:
 
 | Model family | Context window | Output reservation | Safety headroom | Input budget |
 | --- | ---: | ---: | ---: | ---: |
@@ -59,7 +59,7 @@ Runtime history should be model-aware:
 
 ## Tool Output Routing
 
-Tool output is useful evidence, but raw output can pollute long-context prompts. SeekForge routes tool results by type:
+Tool output is useful evidence, but raw output can pollute long-context prompts. Ore Code routes tool results by type:
 
 - Shell output uses a low inline limit and should summarize large logs.
 - Search, grep, web, and MCP results use medium inline limits because their snippets often guide the next action.
@@ -70,7 +70,7 @@ The goal is to keep evidence available without letting one verbose command domin
 
 ## Reasoning Replay
 
-DeepSeek thinking with tool calls requires assistant tool-call history to replay matching reasoning content. SeekForge preserves or reconstructs this shape:
+DeepSeek thinking with tool calls requires assistant tool-call history to replay matching reasoning content. Ore Code preserves or reconstructs this shape:
 
 - Assistant messages with tool calls keep `toolCalls` plus relevant `reasoningContent`.
 - Following tool messages keep matching `tool_call_id` results.
@@ -81,7 +81,7 @@ This is a correctness rule, not a UI feature. It prevents DeepSeek thinking sess
 
 ## Cache-Aware Prompt Order
 
-SeekForge treats prefix cache as a request-shaping constraint:
+Ore Code treats prefix cache as a request-shaping constraint:
 
 1. Fixed core system prompt and workflow rules.
 2. Stable tool prefix, sorted by tool name.
@@ -116,7 +116,7 @@ The context UI should separate current-request pressure from historical usage:
 
 ## Verification
 
-Context behavior is protected by tests in `@seekforge/agent-core` and desktop UI tests:
+Context behavior is protected by tests in `@ore-code/agent-core` and desktop UI tests:
 
 - Model metadata tests cover DeepSeek V4 Pro, Flash, legacy models, suffix parsing, fallback windows, and input budget math.
 - Capacity tests cover 1M budgets, output reservation, headroom, tool schemas, tool calls, reasoning content, and prefix hash layers.

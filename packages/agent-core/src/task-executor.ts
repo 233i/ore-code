@@ -1,5 +1,5 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
-import type { ToolContext, ToolRegistry } from "@seekforge/tools";
+import type { RuntimeEvent } from "@ore-code/protocol";
+import type { ToolContext, ToolRegistry } from "@ore-code/tools";
 import { AgentEngine, type ArtifactSink } from "./engine";
 import type { LlmClient } from "./llm";
 import { createDurableTaskSystemPrompt } from "./prompts";

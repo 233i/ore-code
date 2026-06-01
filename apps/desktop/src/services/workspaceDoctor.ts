@@ -1,4 +1,4 @@
-import type { FileToolHost, ProcessToolHost, ShellToolHost } from "@seekforge/tools";
+import type { FileToolHost, ProcessToolHost, ShellToolHost } from "@ore-code/tools";
 import type { ProviderSecretStatus } from "./providerSecrets";
 
 export type DoctorStatus = "pass" | "warn" | "fail" | "info";
@@ -265,7 +265,7 @@ function checkConfig(sources: NonNullable<EnvironmentDoctorInput["configSources"
   if (errors.length > 0) {
     return {
       id: "config",
-      label: "SeekForge config",
+      label: "Ore Code config",
       status: "fail",
       detail: errors.map((source) => `${source.scope}: ${source.error ?? source.path}`).join("; "),
       category: "core",
@@ -278,7 +278,7 @@ function checkConfig(sources: NonNullable<EnvironmentDoctorInput["configSources"
   if (loaded.length > 0) {
     return {
       id: "config",
-      label: "SeekForge config",
+      label: "Ore Code config",
       status: "pass",
       detail: loaded.map((source) => `${source.scope}: ${source.path}`).join("; "),
       category: "core",
@@ -289,7 +289,7 @@ function checkConfig(sources: NonNullable<EnvironmentDoctorInput["configSources"
 
   return {
     id: "config",
-    label: "SeekForge config",
+    label: "Ore Code config",
     status: "info",
     detail: "未发现 ~/.deepseek/config.toml 或项目 .deepseek/config.toml，使用应用设置。",
     category: "core",
@@ -373,7 +373,7 @@ function checkCoreEnvironment(paths?: EnvironmentPaths): DoctorCheck[] {
     return [
       {
         id: "core:bootstrap",
-        label: "SeekForge core directories",
+        label: "Ore Code core directories",
         status: "info",
         detail: "当前运行环境未提供本机目录信息；桌面端启动时会创建默认目录。",
         category: "core",
@@ -387,7 +387,7 @@ function checkCoreEnvironment(paths?: EnvironmentPaths): DoctorCheck[] {
   if (paths.userHomePath) {
     checks.push({
       id: "core:user-config",
-      label: "SeekForge user config",
+      label: "Ore Code user config",
       status: "pass",
       detail: `用户目录 (${paths.userHomePath}) 下的 .deepseek/config.toml、.seekforge/mcp.json 和 skills 目录会在启动时确保存在。`,
       category: "core",
@@ -398,7 +398,7 @@ function checkCoreEnvironment(paths?: EnvironmentPaths): DoctorCheck[] {
   if (paths.appDataPath) {
     checks.push({
       id: "core:app-data",
-      label: "SeekForge app data",
+      label: "Ore Code app data",
       status: "pass",
       detail: `${paths.appDataPath} 已由桌面端用于会话、产物、索引和缓存数据。`,
       category: "core",

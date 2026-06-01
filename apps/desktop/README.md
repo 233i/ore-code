@@ -1,6 +1,6 @@
-# SeekForge Desktop
+# Ore Code Desktop
 
-This package contains the SeekForge Tauri desktop application.
+This package contains the Ore Code Tauri desktop application.
 
 ## Stack
 
@@ -14,38 +14,38 @@ This package contains the SeekForge Tauri desktop application.
 From the repository root:
 
 ```bash
-pnpm --filter @seekforge/desktop tauri dev
+pnpm --filter @ore-code/desktop tauri dev
 ```
 
 Frontend-only development:
 
 ```bash
-pnpm --filter @seekforge/desktop dev
+pnpm --filter @ore-code/desktop dev
 ```
 
 ## Checks
 
 ```bash
-pnpm --filter @seekforge/desktop typecheck
-pnpm --filter @seekforge/desktop test
-pnpm --filter @seekforge/desktop lint
+pnpm --filter @ore-code/desktop typecheck
+pnpm --filter @ore-code/desktop test
+pnpm --filter @ore-code/desktop lint
 cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
 ```
 
 ## Build
 
 ```bash
-pnpm --filter @seekforge/desktop tauri:build
+pnpm --filter @ore-code/desktop tauri:build
 ```
 
 Windows NSIS bundle:
 
 ```bash
-pnpm --filter @seekforge/desktop tauri:build:win
+pnpm --filter @ore-code/desktop tauri:build:win
 ```
 
 ## Runtime Data
 
-The app stores user-level data outside the repository, including SeekForge skills and MCP configuration under `~/.seekforge/`.
+The app stores user-level data outside the repository, including Ore Code skills and MCP configuration under `~/.seekforge/`.
 
 Project-local `.seekforge/` data is ignored by Git.

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { executeRegisteredTool, type ToolContext, type ToolRegistry, type ToolSpec } from "@seekforge/tools";
+import { executeRegisteredTool, type ToolContext, type ToolRegistry, type ToolSpec } from "@ore-code/tools";
 import { toJSONSchema } from "zod";
-import type { ArtifactMetadata, ToolResult } from "@seekforge/protocol";
+import type { ArtifactMetadata, ToolResult } from "@ore-code/protocol";
 import type { LlmClient, LlmMessage, LlmToolDefinition, ModelUsage } from "./llm";
 import { serializeToolResultForModel } from "./tool-result-message";
 

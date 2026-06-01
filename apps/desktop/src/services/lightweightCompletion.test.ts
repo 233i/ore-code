@@ -5,7 +5,7 @@ import {
   generateLightweightCommitMessage,
   generateLightweightReviewComment
 } from "./lightweightCompletion";
-import type { LlmClient, ModelStreamChunk } from "@seekforge/agent-core";
+import type { LlmClient, ModelStreamChunk } from "@ore-code/agent-core";
 
 describe("lightweightCompletion", () => {
   it("builds a bounded review prefix completion request", () => {

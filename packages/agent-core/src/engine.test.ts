@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createArtifactTools, EchoTool, ShellProbeTool, ToolRegistry } from "@seekforge/tools";
+import { createArtifactTools, EchoTool, ShellProbeTool, ToolRegistry } from "@ore-code/tools";
 import { AgentEngine, ToolProfileEscalationError, type ArtifactSink } from "./engine";
 import { createInteractionRequestTool } from "./interaction-tool";
 import { MockLlmClient, type LlmClient, type LlmWarmupInput, type ModelStreamChunk } from "./llm";
 import { buildRuntimeContext, runtimeEventsToLlmMessages } from "./runtime-history";
-import type { ArtifactMetadata, ArtifactRecord, RuntimeEvent, ToolCall } from "@seekforge/protocol";
+import type { ArtifactMetadata, ArtifactRecord, RuntimeEvent, ToolCall } from "@ore-code/protocol";
 import { z } from "zod";
 
 function makeToolCall(overrides: Partial<ToolCall> = {}): ToolCall {
@@ -211,7 +211,7 @@ describe("AgentEngine tool execution", () => {
               message: "检测到多个项目。",
               recommendedOptionId: "seekforge",
               options: [
-                { id: "seekforge", label: "SeekForge", value: "/repo/SeekForge" }
+                { id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" }
               ]
             }),
             "</interaction_request>"
@@ -237,7 +237,7 @@ describe("AgentEngine tool execution", () => {
       title: "选择项目",
       message: "检测到多个项目。",
       recommendedOptionId: "seekforge",
-      options: [{ id: "seekforge", label: "SeekForge", value: "/repo/SeekForge" }]
+      options: [{ id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" }]
     });
   });
 
@@ -342,7 +342,7 @@ describe("AgentEngine tool execution", () => {
   it("passes an optional system prompt to the model provider", async () => {
     const llm = new CapturingLlmClient();
     const engine = new AgentEngine(llm, {
-      systemPrompt: "You are SeekForge.",
+      systemPrompt: "You are Ore Code.",
       tools: {
         registry: makeRegistry(),
         context: { workspacePath: "/workspace", mode: "agent", trustedWorkspace: false }
@@ -352,7 +352,7 @@ describe("AgentEngine tool execution", () => {
     await collect(engine.startTurn({ threadId: "thread-1", turnId: "turn-1", text: "run echo" }));
 
     expect(llm.input?.messages).toEqual([
-      { role: "system", content: "You are SeekForge." },
+      { role: "system", content: "You are Ore Code." },
       { role: "user", content: "run echo" }
     ]);
   });
@@ -1202,7 +1202,7 @@ describe("runtimeEventsToLlmMessages", () => {
         message: "检测到多个项目。",
         recommendedOptionId: "seekforge",
         options: [
-          { id: "seekforge", label: "SeekForge", value: "/repo/SeekForge" },
+          { id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" },
           { id: "custom", label: "其他" }
         ]
       }),
@@ -1221,13 +1221,13 @@ describe("runtimeEventsToLlmMessages", () => {
         content: [
           "[interaction_requested:request-1] 选择项目",
           "检测到多个项目。",
-          "- seekforge: SeekForge (recommended) = /repo/SeekForge",
+          "- seekforge: Ore Code (recommended) = /repo/Ore Code",
           "- custom: 其他"
         ].join("\n")
       },
       {
         role: "user",
-        content: "[interaction_decided:request-1] User selected seekforge: /repo/SeekForge"
+        content: "[interaction_decided:request-1] User selected seekforge: /repo/Ore Code"
       }
     ]);
   });

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type { ShellRunOutput, ShellToolHost } from "@seekforge/tools";
+import type { ShellRunOutput, ShellToolHost } from "@ore-code/tools";
 import type { ShellJobHost, ShellJobRecord } from "./shellHost";
 
 type ShellRunOutputEvent = {

@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { NoteRecord, NoteStore } from "@seekforge/agent-core";
+import type { NoteRecord, NoteStore } from "@ore-code/agent-core";
 import { isTauriRuntime } from "./fileHost";
 
 const BROWSER_NOTES_KEY = "seekforge.notes";

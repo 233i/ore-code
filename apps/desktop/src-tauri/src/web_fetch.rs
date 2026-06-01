@@ -34,7 +34,7 @@ pub(crate) async fn fetch_url_with_http_client(
     let client = reqwest::Client::builder()
         .redirect(reqwest::redirect::Policy::limited(10))
         .timeout(Duration::from_millis(timeout_ms.clamp(1_000, 60_000)))
-        .user_agent("SeekForge/0.1")
+        .user_agent("Ore Code/0.1")
         .build()
         .map_err(|error| error.to_string())?;
     let response = client

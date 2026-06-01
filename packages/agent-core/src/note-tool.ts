@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ToolSpec } from "@seekforge/tools";
+import type { ToolSpec } from "@ore-code/tools";
 import { createLazyContextEventBody } from "./lazy-context";
 
 const NOTE_KINDS = ["preference", "decision", "blocker", "architecture"] as const;

@@ -129,14 +129,14 @@ describe("getToolHumanSummary", () => {
         ok: true,
         output: {
           target: "agent-core",
-          command: "pnpm --filter @seekforge/agent-core test",
+          command: "pnpm --filter @ore-code/agent-core test",
           passed: true,
           exitCode: 0,
           durationMs: 120,
           timedOut: false
         }
       }
-    })).toBe("测试通过：pnpm --filter @seekforge/agent-core test（120ms）");
+    })).toBe("测试通过：pnpm --filter @ore-code/agent-core test（120ms）");
   });
 
   it("summarizes subagent role, model, and concurrency without dumping payloads", () => {

@@ -1,8 +1,8 @@
 {
-  "name": "@seekforge/protocol",
+  "name": "@ore-code/protocol",
   "private": true,
   "version": "0.1.0",
-  "description": "SeekForge runtime event schemas and shared protocol types",
+  "description": "Ore Code runtime event schemas and shared protocol types",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",

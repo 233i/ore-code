@@ -1,5 +1,5 @@
 import { Button, Popup } from "tdesign-react";
-import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@seekforge/agent-core";
+import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@ore-code/agent-core";
 import { CheckIcon, ChevronDownIcon, ShieldErrorIcon } from "tdesign-icons-react";
 import { deepSeekModelModeLabel, deepSeekModelOptions } from "./deepSeekModelOptions";
 import { deepSeekThinkingOptions, deepSeekThinkingLabel } from "./deepSeekThinkingOptions";
@@ -21,19 +21,19 @@ const permissionOptions: PermissionOption[] = [
   {
     preset: "default",
     label: "默认权限",
-    title: "SeekForge 会在工作区内运行低风险工具",
+    title: "Ore Code 会在工作区内运行低风险工具",
     description: "需要写文件、运行高风险命令或修改状态时，会先请求你审批。"
   },
   {
     preset: "autoReview",
     label: "自动审查",
-    title: "SeekForge 会自动审查低风险请求",
+    title: "Ore Code 会自动审查低风险请求",
     description: "只读和低风险命令自动通过；写入和高风险操作仍会弹出审批。"
   },
   {
     preset: "fullAccess",
     label: "完全访问权限",
-    title: "SeekForge 对当前工作区拥有完全访问权限",
+    title: "Ore Code 对当前工作区拥有完全访问权限",
     description: "它可以直接编辑文件和执行命令，不再弹出审批或做风险拦截。"
   }
 ];

@@ -82,8 +82,8 @@ describe("coding prompts", () => {
 
   it("includes workflow, verification, RLM, and subagent contract sections", () => {
     const prompt = createCodingSystemPrompt({ workspacePath: "/workspace", mode: "agent" });
-    expect(prompt).toContain("SeekForge runtime identity:");
-    expect(prompt).toContain("App: SeekForge Desktop.");
+    expect(prompt).toContain("Ore Code runtime identity:");
+    expect(prompt).toContain("App: Ore Code Desktop.");
     expect(prompt).toContain("Runtime OS:");
     expect(prompt).toContain("Instruction priority:");
     expect(prompt).toContain("For non-trivial tasks, decompose before acting");
@@ -92,7 +92,7 @@ describe("coding prompts", () => {
     expect(prompt).toContain("Use structured_review for code review");
     expect(prompt).toContain("Use validate_data after editing JSON, TOML, or YAML files");
     expect(prompt).toContain("Use code_execution for deterministic statistics");
-    expect(prompt).toContain("Use install_skill when the user asks to install, create, or save a SeekForge skill");
+    expect(prompt).toContain("Use install_skill when the user asks to install, create, or save an Ore Code skill");
     expect(prompt).toContain("Use tool_search when you are unsure which tool");
     expect(prompt).toContain("Use MCP through the stable gateway tools");
     expect(prompt).toContain("Use note_list to inspect durable memory indexes");
@@ -118,7 +118,7 @@ describe("coding prompts", () => {
       "Search file names with file_search, not find/where/Get-ChildItem.",
       "Inspect Git status, diffs, history, blame, and branches with git_status, git_diff, git_log, git_show, git_blame, and git_branch, not raw git commands.",
       "Run test validation with run_tests before shelling out",
-      "Install SeekForge skills with install_skill"
+      "Install Ore Code skills with install_skill"
     ]) {
       expect(prompt).toContain(text);
       expect(legacyPrompt).toContain(text);
@@ -189,7 +189,7 @@ describe("coding prompts", () => {
     expect(prompt).toContain("Search file contents with grep_files");
     expect(prompt).toContain("Inspect Git status, diffs, history");
     expect(prompt).not.toContain("Run test validation with run_tests");
-    expect(prompt).not.toContain("Install SeekForge skills with install_skill");
+    expect(prompt).not.toContain("Install Ore Code skills with install_skill");
     expect(prompt).not.toContain("Use MCP through the stable gateway tools");
     expect(prompt).not.toContain("Use lsp_hover");
     expect(prompt).not.toContain("Sub-agent output contract:");

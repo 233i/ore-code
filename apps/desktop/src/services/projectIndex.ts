@@ -1,5 +1,5 @@
-import type { FileToolHost } from "@seekforge/tools";
-import type { RuntimeEvent, ToolCall } from "@seekforge/protocol";
+import type { FileToolHost } from "@ore-code/tools";
+import type { RuntimeEvent, ToolCall } from "@ore-code/protocol";
 import type { TrackedFileChange } from "../features/changes/changeLedger";
 
 const MAX_QUERY_TERMS = 8;

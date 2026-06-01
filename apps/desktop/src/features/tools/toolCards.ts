@@ -1,4 +1,4 @@
-import type { RuntimeEvent, ToolCall, ToolResult } from "@seekforge/protocol";
+import type { RuntimeEvent, ToolCall, ToolResult } from "@ore-code/protocol";
 
 export type ToolCardStatus = "requested" | "approval" | "running" | "completed" | "failed";
 

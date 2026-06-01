@@ -1,4 +1,4 @@
-import type { ShellRunOutput, ShellToolHost } from "@seekforge/tools";
+import type { ShellRunOutput, ShellToolHost } from "@ore-code/tools";
 import { isTauriRuntime } from "./fileHost";
 import { createTauriShellHost, createTauriShellJobHost } from "./tauriShellHost";
 

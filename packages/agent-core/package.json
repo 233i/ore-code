@@ -1,8 +1,8 @@
 {
-  "name": "@seekforge/agent-core",
+  "name": "@ore-code/agent-core",
   "private": true,
   "version": "0.1.0",
-  "description": "SeekForge agent engine, prompts, runtime context, and model adapters",
+  "description": "Ore Code agent engine, prompts, runtime context, and model adapters",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -20,8 +20,8 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@seekforge/protocol": "workspace:*",
-    "@seekforge/tools": "workspace:*",
+    "@ore-code/protocol": "workspace:*",
+    "@ore-code/tools": "workspace:*",
     "zod": "^4.1.12"
   },
   "devDependencies": {

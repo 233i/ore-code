@@ -4,7 +4,7 @@ import {
   parseDeepSeekThinkingLevel,
   type DeepSeekModelMode,
   type DeepSeekThinkingLevel
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 import { parse as parseToml, type TomlTable } from "smol-toml";
 import { z } from "zod";
 import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "./appSettings";

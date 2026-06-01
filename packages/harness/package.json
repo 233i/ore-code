@@ -1,8 +1,8 @@
 {
-  "name": "@seekforge/harness",
+  "name": "@ore-code/harness",
   "private": true,
   "version": "0.1.0",
-  "description": "SeekForge deterministic scenario replay and harness tests",
+  "description": "Ore Code deterministic scenario replay and harness tests",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -16,14 +16,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "pnpm --filter @seekforge/protocol build && pnpm --filter @seekforge/tools build && pnpm --filter @seekforge/agent-core build && vitest run src",
+    "test": "pnpm --filter @ore-code/protocol build && pnpm --filter @ore-code/tools build && pnpm --filter @ore-code/agent-core build && vitest run src",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@seekforge/agent-core": "workspace:*",
-    "@seekforge/protocol": "workspace:*",
-    "@seekforge/state": "workspace:*",
-    "@seekforge/tools": "workspace:*"
+    "@ore-code/agent-core": "workspace:*",
+    "@ore-code/protocol": "workspace:*",
+    "@ore-code/state": "workspace:*",
+    "@ore-code/tools": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.8.3",

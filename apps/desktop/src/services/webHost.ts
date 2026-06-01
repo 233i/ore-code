@@ -8,7 +8,7 @@ import {
   type WebFetchOutput,
   type WebSearchOutput,
   type WebToolHost
-} from "@seekforge/tools";
+} from "@ore-code/tools";
 import { isTauriRuntime } from "./fileHost";
 
 type TauriWebFetchOutput = {

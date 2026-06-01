@@ -1,9 +1,9 @@
 {
-  "name": "@seekforge/desktop",
+  "name": "@ore-code/desktop",
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
-  "description": "SeekForge Tauri desktop application",
+  "description": "Ore Code Tauri desktop application",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,10 +18,10 @@
     "tauri:build:win": "tauri build --bundles nsis"
   },
   "dependencies": {
-    "@seekforge/agent-core": "workspace:*",
-    "@seekforge/protocol": "workspace:*",
-    "@seekforge/state": "workspace:*",
-    "@seekforge/tools": "workspace:*",
+    "@ore-code/agent-core": "workspace:*",
+    "@ore-code/protocol": "workspace:*",
+    "@ore-code/state": "workspace:*",
+    "@ore-code/tools": "workspace:*",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-opener": "^2",

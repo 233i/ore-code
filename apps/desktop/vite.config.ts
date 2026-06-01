@@ -10,10 +10,10 @@ export default defineConfig(async () => ({
   plugins: [react()],
   resolve: {
     alias: {
-      "@seekforge/agent-core": fileURLToPath(new URL("../../packages/agent-core/src/index.ts", import.meta.url)),
-      "@seekforge/protocol": fileURLToPath(new URL("../../packages/protocol/src/index.ts", import.meta.url)),
-      "@seekforge/state": fileURLToPath(new URL("../../packages/state/src/index.ts", import.meta.url)),
-      "@seekforge/tools": fileURLToPath(new URL("../../packages/tools/src/index.ts", import.meta.url))
+      "@ore-code/agent-core": fileURLToPath(new URL("../../packages/agent-core/src/index.ts", import.meta.url)),
+      "@ore-code/protocol": fileURLToPath(new URL("../../packages/protocol/src/index.ts", import.meta.url)),
+      "@ore-code/state": fileURLToPath(new URL("../../packages/state/src/index.ts", import.meta.url)),
+      "@ore-code/tools": fileURLToPath(new URL("../../packages/tools/src/index.ts", import.meta.url))
     }
   },
 
@@ -23,7 +23,7 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
   build: {
-    // SeekForge is packaged into a local Tauri desktop bundle. The default 500 kB
+    // Ore Code is packaged into a local Tauri desktop bundle. The default 500 kB
     // browser-first warning is too low for the desktop shell plus tool UI.
     chunkSizeWarningLimit: 1600
   },

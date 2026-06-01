@@ -1,6 +1,6 @@
 # Roadmap
 
-SeekForge is in pre-release development. This roadmap describes intended direction, not a promise of dates or final scope.
+Ore Code is in pre-release development. This roadmap describes intended direction, not a promise of dates or final scope.
 
 ## Current Status
 

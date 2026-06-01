@@ -5,8 +5,8 @@ import {
   type LlmClient,
   type LlmTurnInput,
   type ModelStreamChunk
-} from "@seekforge/agent-core";
-import type { RuntimeEvent } from "@seekforge/protocol";
+} from "@ore-code/agent-core";
+import type { RuntimeEvent } from "@ore-code/protocol";
 
 export interface HarnessScenario {
   name: string;

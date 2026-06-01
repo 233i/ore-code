@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import { listSessions, loadSessionTranscriptChunk, loadSessionTranscriptTail, renameSession, saveSessionEvents } from "./sessionStore";
 
 describe("sessionStore browser fallback", () => {

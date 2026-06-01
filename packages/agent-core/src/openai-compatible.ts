@@ -578,7 +578,7 @@ function formatProviderError(response: StreamResponse, body: string, config: Ope
   }
 
   if (/reasoning_content|tool_calls?|tool_call_id|messages/i.test(body)) {
-    return `${base}\nDeepSeek thinking mode requires assistant tool-call history to replay reasoning_content and matching tool messages. Try reloading the thread after the latest SeekForge reasoning ledger migration, or start a new thread if the saved history predates reasoning replay.`;
+    return `${base}\nDeepSeek thinking mode requires assistant tool-call history to replay reasoning_content and matching tool messages. Try reloading the thread after the latest Ore Code reasoning ledger migration, or start a new thread if the saved history predates reasoning replay.`;
   }
 
   return base;

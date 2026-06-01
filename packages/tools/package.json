@@ -1,8 +1,8 @@
 {
-  "name": "@seekforge/tools",
+  "name": "@ore-code/tools",
   "private": true,
   "version": "0.1.0",
-  "description": "SeekForge tool schemas, approval policy, and tool helpers",
+  "description": "Ore Code tool schemas, approval policy, and tool helpers",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -20,7 +20,7 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@seekforge/protocol": "workspace:*",
+    "@ore-code/protocol": "workspace:*",
     "smol-toml": "^1.6.1",
     "zod": "^4.1.12"
   },

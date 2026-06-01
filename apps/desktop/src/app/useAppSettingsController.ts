@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@seekforge/agent-core";
+import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@ore-code/agent-core";
 import type { ResolvedSeekForgeConfig } from "../services/seekforgeConfig";
 import { loadAppSettings, saveAppSettings, type ThemePreference } from "../services/appSettings";
 import { resolveUiLocale, type UiLocalePreference } from "../services/uiLocale";

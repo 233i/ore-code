@@ -1,4 +1,4 @@
-import type { ArtifactMetadata, ArtifactRecord } from "@seekforge/protocol";
+import type { ArtifactMetadata, ArtifactRecord } from "@ore-code/protocol";
 
 export interface ArtifactWriteInput {
   type: ArtifactMetadata["type"];

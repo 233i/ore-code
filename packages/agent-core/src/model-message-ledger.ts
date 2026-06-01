@@ -1,4 +1,4 @@
-import type { RuntimeEvent, ToolCall, ToolResult } from "@seekforge/protocol";
+import type { RuntimeEvent, ToolCall, ToolResult } from "@ore-code/protocol";
 import type { LlmMessage } from "./llm";
 import { formatLazyContextForModel } from "./lazy-context";
 import { formatProjectDeltaForModel } from "./project-delta";

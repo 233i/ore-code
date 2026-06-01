@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Button, Dialog, Input, Select, Tag, Textarea } from "tdesign-react";
 import { AddIcon, CloseIcon, PlayCircleIcon, RefreshIcon } from "tdesign-icons-react";
-import type { AutomationRecord, DurableTaskSnapshot } from "@seekforge/agent-core";
+import type { AutomationRecord, DurableTaskSnapshot } from "@ore-code/agent-core";
 
 type AutomationWorkspaceProps = {
   automations: AutomationRecord[];
@@ -160,7 +160,7 @@ export function AutomationWorkspace({
             {automations.length === 0 ? (
               <div className="automation-empty">
                 <strong>还没有计划任务</strong>
-                <p>创建后，SeekForge 会在应用运行时按计划执行。</p>
+                <p>创建后，Ore Code 会在应用运行时按计划执行。</p>
                 <Button className="automation-create-button" icon={<AddIcon size="16px" />} theme="primary" type="button" onClick={() => setShowCreateDialog(true)}>
                   新建自动化
                 </Button>
@@ -212,7 +212,7 @@ export function AutomationWorkspace({
             <span>任务内容</span>
             <Textarea
               autosize={{ minRows: 4, maxRows: 8 }}
-              placeholder="每次运行时要让 SeekForge 做什么"
+              placeholder="每次运行时要让 Ore Code 做什么"
               value={prompt}
               onChange={(value) => setPrompt(String(value))}
             />

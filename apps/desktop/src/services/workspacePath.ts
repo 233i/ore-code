@@ -4,7 +4,7 @@ export function formatWorkspacePathForDisplay(path: string) {
 
 export function workspaceProjectName(workspacePath: string) {
   if (!workspacePath || workspacePath === ".") {
-    return "SeekForge";
+    return "Ore Code";
   }
 
   return workspacePathBasename(workspacePath) || formatWorkspacePathForDisplay(workspacePath);

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { createLazyContextEventBody } from "@seekforge/agent-core";
-import type { ToolSpec } from "@seekforge/tools";
+import { createLazyContextEventBody } from "@ore-code/agent-core";
+import type { ToolSpec } from "@ore-code/tools";
 import { isTauriRuntime } from "./fileHost";
 import {
   buildMcpGatewayCatalog,

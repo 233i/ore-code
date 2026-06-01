@@ -7,7 +7,7 @@ import {
   DurableTaskManager,
   MockLlmClient,
   type LlmClient
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 import type { createRuntimeArtifactStore } from "../services/artifactStore";
 import { loadSeekForgeInstructions, type SeekForgeInstructions } from "../services/seekforgeInstructions";
 import type { ProviderConfig } from "../services/seekforgeConfig";

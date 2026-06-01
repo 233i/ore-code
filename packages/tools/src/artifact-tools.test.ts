@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ArtifactRecord } from "@seekforge/protocol";
+import type { ArtifactRecord } from "@ore-code/protocol";
 import { executeRegisteredTool } from "./executor";
 import { createArtifactTools, type ArtifactToolHost } from "./artifact-tools";
 import { ToolRegistry } from "./registry";

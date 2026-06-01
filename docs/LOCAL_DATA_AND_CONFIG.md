@@ -1,6 +1,6 @@
 # Local Data and Configuration
 
-SeekForge stores runtime data outside the repository. Keep these paths out of Git, release artifacts, issue screenshots, and logs unless a maintainer explicitly asks for a redacted excerpt.
+Ore Code stores runtime data outside the repository. Keep these paths out of Git, release artifacts, issue screenshots, and logs unless a maintainer explicitly asks for a redacted excerpt.
 
 ## User-Level Data
 
@@ -51,4 +51,4 @@ Before attaching logs or screenshots to GitHub:
 - Remove private project source code unless the issue requires a minimal reproduction.
 - Remove private local paths when they are not relevant.
 - Summarize large tool output instead of pasting full logs.
-- Mention the OS and SeekForge version or commit.
+- Mention the OS and Ore Code version or commit.

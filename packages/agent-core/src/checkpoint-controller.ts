@@ -1,4 +1,4 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import { estimateInputTokens, estimateTokensFromChars } from "./capacity";
 import type { LlmMessage, LlmToolDefinition } from "./llm";
 import { applyReasoningRetention } from "./reasoning-retention";

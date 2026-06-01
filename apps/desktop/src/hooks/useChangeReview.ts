@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MutableRefObject } from "react";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import {
   buildVisibleTurnChanges,
   latestTrackedChangeForPath,
@@ -21,8 +21,8 @@ import {
 } from "../services/lightweightCompletion";
 import { detectPreferredLanguage } from "../services/preferredLanguage";
 import { createTurnSnapshotStore } from "../services/turnSnapshotStore";
-import type { LlmClient } from "@seekforge/agent-core";
-import type { GitStatusHostOutput } from "@seekforge/tools";
+import type { LlmClient } from "@ore-code/agent-core";
+import type { GitStatusHostOutput } from "@ore-code/tools";
 
 type SnapshotRestoredEventInput = {
   failures: string[];

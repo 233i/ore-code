@@ -1,4 +1,4 @@
-import type { ApprovalDecision, ToolResult } from "@seekforge/protocol";
+import type { ApprovalDecision, ToolResult } from "@ore-code/protocol";
 import { evaluateApproval, isApproved } from "./approval-policy";
 import type { ToolRegistry } from "./registry";
 import type { ToolContext } from "./spec";

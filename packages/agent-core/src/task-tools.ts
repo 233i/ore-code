@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ShellToolHost, ToolSpec } from "@seekforge/tools";
+import type { ShellToolHost, ToolSpec } from "@ore-code/tools";
 
 type TaskStatus = "queued" | "running" | "completed" | "failed" | "canceled";
 type ChecklistStatus = "pending" | "in_progress" | "completed" | "blocked";

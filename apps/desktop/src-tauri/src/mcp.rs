@@ -1262,7 +1262,7 @@ fn discover_mcp_runtime(
             "protocolVersion": MCP_PROTOCOL_VERSION,
             "capabilities": {},
             "clientInfo": {
-                "name": "SeekForge",
+                "name": "Ore Code",
                 "version": "0.1.0"
             }
         }),

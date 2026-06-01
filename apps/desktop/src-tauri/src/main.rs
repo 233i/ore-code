@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    seekforge_desktop_lib::run()
+    ore_code_desktop_lib::run()
 }

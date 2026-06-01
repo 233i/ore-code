@@ -13,7 +13,7 @@ describe("parsePlanInteractionRequest", () => {
         message: "检测到多个项目。",
         recommendedOptionId: "a",
         options: [
-          { id: "a", label: "SeekForge", value: "/repo/SeekForge" },
+          { id: "a", label: "Ore Code", value: "/repo/Ore Code" },
           { id: "b", label: "PureSFTP", description: "另一个项目" }
         ]
       }),
@@ -24,7 +24,7 @@ describe("parsePlanInteractionRequest", () => {
       message: "检测到多个项目。",
       recommendedOptionId: "a",
       options: [
-        { id: "a", label: "SeekForge", value: "/repo/SeekForge" },
+        { id: "a", label: "Ore Code", value: "/repo/Ore Code" },
         { id: "b", label: "PureSFTP", description: "另一个项目" }
       ]
     });
@@ -43,7 +43,7 @@ describe("parsePlanInteractionRequest", () => {
         title: "选择项目",
         message: "检测到多个项目。",
         recommendedOptionId: "missing",
-        options: [{ id: "a", label: "SeekForge" }]
+        options: [{ id: "a", label: "Ore Code" }]
       }),
       "</interaction_request>"
     ].join("\n"))?.recommendedOptionId).toBeUndefined();

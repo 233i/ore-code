@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ToolCall } from "@seekforge/protocol";
+import type { ToolCall } from "@ore-code/protocol";
 import {
   autoReviewDecisionForCall,
   modeFromPermissionPreset,

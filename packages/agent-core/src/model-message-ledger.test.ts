@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import { buildRuntimeContextFromMessages } from "./runtime-history";
 import { ModelMessageLedger, modelMessagesFromEvents } from "./model-message-ledger";
 

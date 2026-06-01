@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ToolRegistry } from "@seekforge/tools";
+import { ToolRegistry } from "@ore-code/tools";
 import { MockLlmClient } from "./llm";
 import { DurableTaskExecutor } from "./task-executor";
 import { DurableTaskManager } from "./task-tools";

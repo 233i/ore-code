@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { RuntimeEvent } from "@seekforge/protocol";
-import type { ToolContext, ToolRegistry, ToolSpec } from "@seekforge/tools";
+import type { RuntimeEvent } from "@ore-code/protocol";
+import type { ToolContext, ToolRegistry, ToolSpec } from "@ore-code/tools";
 import { AgentEngine, type ArtifactSink } from "./engine";
 import type { LlmClient } from "./llm";
 import { createSubagentRoleSystemPrompt } from "./prompts";

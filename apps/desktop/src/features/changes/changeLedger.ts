@@ -1,5 +1,5 @@
-import type { FileToolHost } from "@seekforge/tools";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { FileToolHost } from "@ore-code/tools";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import type { ChangeFileStat } from "./changeSummary";
 
 export interface TrackedFileChange {

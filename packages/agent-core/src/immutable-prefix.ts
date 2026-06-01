@@ -1,4 +1,4 @@
-import type { ToolSpec } from "@seekforge/tools";
+import type { ToolSpec } from "@ore-code/tools";
 import { toJSONSchema } from "zod";
 import type { LlmToolDefinition } from "./llm";
 import { sortToolDefinitions } from "./request-assembler";

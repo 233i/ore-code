@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MockLlmClient, type LlmClient } from "@seekforge/agent-core";
+import { MockLlmClient, type LlmClient } from "@ore-code/agent-core";
 import {
   classifyDeepSeekTurnWithFlash,
   classifyDeepSeekTurnWithFlashCached,

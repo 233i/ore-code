@@ -1,5 +1,5 @@
-import type { ApprovalDecision, ArtifactMetadata, RuntimeEvent, ToolCall, ToolResult } from "@seekforge/protocol";
-import { evaluateApproval, executeRegisteredTool, isApproved, type ToolContext, type ToolRegistry } from "@seekforge/tools";
+import type { ApprovalDecision, ArtifactMetadata, RuntimeEvent, ToolCall, ToolResult } from "@ore-code/protocol";
+import { evaluateApproval, executeRegisteredTool, isApproved, type ToolContext, type ToolRegistry } from "@ore-code/tools";
 import { buildCapacityReport, estimateInputTokens, estimateTokensFromChars, estimateUsageCostDetails, type CacheWarmupStatus, type CapacityOptions } from "./capacity";
 import { coherenceFromCapacity } from "./coherence";
 import { toolSpecsToLlmDefinitions, type ImmutablePrefixSnapshot } from "./immutable-prefix";

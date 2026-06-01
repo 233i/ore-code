@@ -1,4 +1,4 @@
-import type { FileToolHost } from "@seekforge/tools";
+import type { FileToolHost } from "@ore-code/tools";
 import type { SlashCommand } from "../ui/slashCommands";
 
 export interface SkillRecord {
@@ -206,7 +206,7 @@ export function suggestSkillsForPrompt(prompt: string, records: SkillRecord[], m
 
 function renderSkillPrompt(skill: SkillRecord, argsToken: string) {
   return [
-    `请使用已加载的 SeekForge Skill 完成用户任务。`,
+    `请使用已加载的 Ore Code Skill 完成用户任务。`,
     "",
     `# Skill: ${skill.name}`,
     `ID：/${skill.id}`,
@@ -241,7 +241,7 @@ function renderSkillLazyContext(skill: SkillRecord): NonNullable<SlashCommand["l
     source: "skill",
     sourceId: skill.id,
     title: `Skill /${skill.id}: ${skill.name}`,
-    summary: skill.description || skillExcerpt(skill.content) || `SeekForge skill ${skill.id}`,
+    summary: skill.description || skillExcerpt(skill.content) || `Ore Code skill ${skill.id}`,
     content: [
       `# Skill: ${skill.name}`,
       `ID: /${skill.id}`,

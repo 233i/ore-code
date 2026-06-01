@@ -1,6 +1,6 @@
 # Known Limitations
 
-SeekForge is pre-release software. This document lists current limitations that should be visible before a public GitHub launch.
+Ore Code is pre-release software. This document lists current limitations that should be visible before a public GitHub launch.
 
 ## Platform Support
 

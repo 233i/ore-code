@@ -1,8 +1,8 @@
-# SeekForge
+# Ore Code
 
 [English](./README.md)
 
-SeekForge 是一个面向 DeepSeek 的桌面端 AI 编码工作台，基于 Tauri、React、TypeScript 和 Rust 构建。它专注于长上下文编码工作流、结构化工具调用、本地项目上下文、MCP 集成、技能、自动化，以及 macOS 和 Windows 的跨平台桌面体验。
+Ore Code 是一个面向 DeepSeek 的桌面端 AI 编码工作台，基于 Tauri、React、TypeScript 和 Rust 构建。它专注于长上下文编码工作流、结构化工具调用、本地项目上下文、MCP 集成、技能、自动化，以及 macOS 和 Windows 的跨平台桌面体验。
 
 > 状态：预发布。当前仓库源码基于 MIT License 发布。
 
@@ -17,7 +17,7 @@ SeekForge 是一个面向 DeepSeek 的桌面端 AI 编码工作台，基于 Taur
 
 ## 截图
 
-![SeekForge home screen](./docs/assets/seekforge-home.png)
+![Ore Code home screen](./docs/assets/ore-code-home.png)
 
 ## 仓库结构
 
@@ -56,7 +56,7 @@ pnpm dev
 直接运行桌面包：
 
 ```bash
-pnpm --filter @seekforge/desktop tauri dev
+pnpm --filter @ore-code/desktop tauri dev
 ```
 
 构建所有 TypeScript 包：
@@ -68,7 +68,7 @@ pnpm build
 构建桌面安装包：
 
 ```bash
-pnpm --filter @seekforge/desktop tauri:build
+pnpm --filter @ore-code/desktop tauri:build
 pnpm build:desktop:windows
 ```
 
@@ -77,9 +77,9 @@ pnpm build:desktop:windows
 开发时优先运行聚焦的包级检查：
 
 ```bash
-pnpm --filter @seekforge/desktop typecheck
-pnpm --filter @seekforge/desktop test
-pnpm --filter @seekforge/desktop lint
+pnpm --filter @ore-code/desktop typecheck
+pnpm --filter @ore-code/desktop test
+pnpm --filter @ore-code/desktop lint
 ```
 
 在提交较大改动前运行更完整的本地检查：
@@ -90,7 +90,7 @@ pnpm ci:local
 
 ## 配置和本地数据
 
-SeekForge 会在仓库外创建和读取本地运行时数据，包括：
+Ore Code 会在仓库外创建和读取本地运行时数据，包括：
 
 - `~/.seekforge/skills`
 - `~/.seekforge/mcp.json`
@@ -134,4 +134,4 @@ SeekForge 会在仓库外创建和读取本地运行时数据，包括：
 
 ## 许可证
 
-SeekForge 基于 [MIT License](./LICENSE) 发布。
+Ore Code 基于 [MIT License](./LICENSE) 发布。

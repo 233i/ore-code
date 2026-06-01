@@ -1,4 +1,4 @@
-import type { ArtifactRecord } from "@seekforge/protocol";
+import type { ArtifactRecord } from "@ore-code/protocol";
 import { z } from "zod";
 import type { ToolSpec } from "./spec";
 

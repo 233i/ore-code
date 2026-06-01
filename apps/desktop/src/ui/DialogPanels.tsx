@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Dialog, Input, Tag, Textarea } from "tdesign-react";
 import { AddIcon, CloseIcon, FolderIcon, SearchIcon } from "tdesign-icons-react";
-import type { ApprovalDecision, InteractionDecision, RuntimeEvent, ToolCall } from "@seekforge/protocol";
-import type { CommandRiskAssessment, CommandRiskLevel } from "@seekforge/tools";
+import type { ApprovalDecision, InteractionDecision, RuntimeEvent, ToolCall } from "@ore-code/protocol";
+import type { CommandRiskAssessment, CommandRiskLevel } from "@ore-code/tools";
 import type { SessionSummary } from "../services/sessionStore";
 import { formatWorkspacePathForDisplay, normalizeWorkspacePath, workspaceProjectName } from "../services/workspacePath";
 

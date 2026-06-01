@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ToolSpec } from "@seekforge/tools";
+import type { ToolSpec } from "@ore-code/tools";
 import type { DurableTaskManager } from "./task-tools";
 
 type AutomationStatus = "active" | "paused";

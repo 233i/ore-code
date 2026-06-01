@@ -5,7 +5,7 @@ import type {
   ListDirOutput,
   ReadFileOutput,
   WriteFileOutput
-} from "@seekforge/tools";
+} from "@ore-code/tools";
 import { createTauriFileHost } from "./tauriFileHost";
 
 export function createRuntimeFileHost(): FileToolHost {

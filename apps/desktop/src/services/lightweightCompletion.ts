@@ -1,4 +1,4 @@
-import type { LlmClient, LlmPrefixCompletionInput, ModelUsage } from "@seekforge/agent-core";
+import type { LlmClient, LlmPrefixCompletionInput, ModelUsage } from "@ore-code/agent-core";
 import type { PreferredLanguage } from "./preferredLanguage";
 
 const REVIEW_MAX_DIFF_CHARS = 20_000;

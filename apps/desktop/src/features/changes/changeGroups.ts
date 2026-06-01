@@ -1,4 +1,4 @@
-import type { GitStatusHostOutput } from "@seekforge/tools";
+import type { GitStatusHostOutput } from "@ore-code/tools";
 import { parseUnifiedDiffStats, type ChangeFileStat } from "./changeSummary";
 
 export type ChangeGroup = "turn" | "unstaged" | "staged";

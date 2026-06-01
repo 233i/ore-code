@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ToolSpec } from "@seekforge/tools";
+import type { ToolSpec } from "@ore-code/tools";
 import { invoke } from "@tauri-apps/api/core";
 import type { SkillPathResult } from "./skillStore";
 import { validateSkillContent, validateSkillId } from "./skillRegistry";
@@ -22,7 +22,7 @@ export function createInstallSkillTool(installer: SkillInstaller = installSkillG
   return {
     name: "install_skill",
     description: [
-      "Install a SeekForge skill into the global user skill directory (~/.seekforge/skills).",
+      "Install an Ore Code skill into the global user skill directory (~/.seekforge/skills).",
       "Use this instead of write_file, apply_patch, or shell commands when the user asks to install or create a skill.",
       "Never install skills into the selected workspace .seekforge/skills directory."
     ].join(" "),

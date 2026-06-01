@@ -10,9 +10,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { ConfigProvider, Dialog } from "tdesign-react";
 import tdesignEnUS from "tdesign-react/es/locale/en_US";
 import tdesignZhCN from "tdesign-react/es/locale/zh_CN";
-import type { NoteRecord, ResolvedDeepSeekTurnModel } from "@seekforge/agent-core";
-import type { ArtifactMetadata, ArtifactRecord } from "@seekforge/protocol";
-import type { RuntimeEvent, ToolCall } from "@seekforge/protocol";
+import type { NoteRecord, ResolvedDeepSeekTurnModel } from "@ore-code/agent-core";
+import type { ArtifactMetadata, ArtifactRecord } from "@ore-code/protocol";
+import type { RuntimeEvent, ToolCall } from "@ore-code/protocol";
 import { AppSettingsOverlay } from "./app/AppSettingsOverlay";
 import { AppSidebar } from "./app/AppSidebar";
 import { AppTopbar } from "./app/AppTopbar";
@@ -1004,7 +1004,7 @@ function App() {
 
   async function runDoctor(): Promise<{ checks: DoctorCheck[]; workspaceSignals: WorkspaceSignals | null }> {
     setDoctorRunning(true);
-    setDoctorMessage("正在检查 SeekForge 运行环境、工具链和 provider...");
+    setDoctorMessage("正在检查 Ore Code 运行环境、工具链和 provider...");
 
     try {
       const doctorContext = await collectDoctorContext();

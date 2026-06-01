@@ -29,16 +29,16 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@seekforge/agent-core':
+      '@ore-code/agent-core':
         specifier: workspace:*
         version: link:../../packages/agent-core
-      '@seekforge/protocol':
+      '@ore-code/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
-      '@seekforge/state':
+      '@ore-code/state':
         specifier: workspace:*
         version: link:../../packages/state
-      '@seekforge/tools':
+      '@ore-code/tools':
         specifier: workspace:*
         version: link:../../packages/tools
       '@tauri-apps/api':
@@ -108,10 +108,10 @@ importers:
 
   packages/agent-core:
     dependencies:
-      '@seekforge/protocol':
+      '@ore-code/protocol':
         specifier: workspace:*
         version: link:../protocol
-      '@seekforge/tools':
+      '@ore-code/tools':
         specifier: workspace:*
         version: link:../tools
       zod:
@@ -127,16 +127,16 @@ importers:
 
   packages/harness:
     dependencies:
-      '@seekforge/agent-core':
+      '@ore-code/agent-core':
         specifier: workspace:*
         version: link:../agent-core
-      '@seekforge/protocol':
+      '@ore-code/protocol':
         specifier: workspace:*
         version: link:../protocol
-      '@seekforge/state':
+      '@ore-code/state':
         specifier: workspace:*
         version: link:../state
-      '@seekforge/tools':
+      '@ore-code/tools':
         specifier: workspace:*
         version: link:../tools
     devDependencies:
@@ -162,7 +162,7 @@ importers:
 
   packages/state:
     dependencies:
-      '@seekforge/protocol':
+      '@ore-code/protocol':
         specifier: workspace:*
         version: link:../protocol
     devDependencies:
@@ -175,7 +175,7 @@ importers:
 
   packages/tools:
     dependencies:
-      '@seekforge/protocol':
+      '@ore-code/protocol':
         specifier: workspace:*
         version: link:../protocol
       smol-toml:

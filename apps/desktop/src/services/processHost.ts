@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { defaultSandboxPolicy, type ProcessRunOutput, type ProcessToolHost } from "@seekforge/tools";
+import { defaultSandboxPolicy, type ProcessRunOutput, type ProcessToolHost } from "@ore-code/tools";
 import { isTauriRuntime } from "./fileHost";
 
 export function createRuntimeProcessHost(): ProcessToolHost {

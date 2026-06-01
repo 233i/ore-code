@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "SeekForge",
+  "productName": "Ore Code",
   "version": "0.1.0",
   "identifier": "com.seekforge.desktop",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "SeekForge",
+        "title": "Ore Code",
         "width": 1280,
         "height": 820,
         "minWidth": 1024,

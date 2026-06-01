@@ -165,7 +165,7 @@ pub fn run() {
             snapshots::side_snapshot_restore
         ])
         .run(tauri::generate_context!())
-        .expect("error while running SeekForge");
+        .expect("error while running Ore Code");
 }
 
 #[cfg(test)]

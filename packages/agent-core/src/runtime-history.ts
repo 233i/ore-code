@@ -1,4 +1,4 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import {
   createContextCheckpoint,
   type ContextCheckpointEventBody,

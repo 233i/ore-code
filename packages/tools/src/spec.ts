@@ -1,4 +1,4 @@
-import type { ApprovalRequirement, RuntimeEvent, ToolCapability, ToolResult } from "@seekforge/protocol";
+import type { ApprovalRequirement, RuntimeEvent, ToolCapability, ToolResult } from "@ore-code/protocol";
 import type { ZodSchema } from "zod";
 
 export type ToolRuntimeEvent = RuntimeEvent extends infer Event

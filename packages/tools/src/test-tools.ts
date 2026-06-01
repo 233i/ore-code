@@ -50,10 +50,10 @@ type RunTestsProcessCommand = {
 const TARGET_PROCESS_COMMANDS: Record<RunTestsTarget, RunTestsProcessCommand> = {
   auto: { program: "pnpm", args: ["test"] },
   root: { program: "pnpm", args: ["test"] },
-  desktop: { program: "pnpm", args: ["--filter", "@seekforge/desktop", "test"] },
-  "agent-core": { program: "pnpm", args: ["--filter", "@seekforge/agent-core", "test"] },
-  tools: { program: "pnpm", args: ["--filter", "@seekforge/tools", "test"] },
-  protocol: { program: "pnpm", args: ["--filter", "@seekforge/protocol", "test"] },
+  desktop: { program: "pnpm", args: ["--filter", "@ore-code/desktop", "test"] },
+  "agent-core": { program: "pnpm", args: ["--filter", "@ore-code/agent-core", "test"] },
+  tools: { program: "pnpm", args: ["--filter", "@ore-code/tools", "test"] },
+  protocol: { program: "pnpm", args: ["--filter", "@ore-code/protocol", "test"] },
   harness: { program: "pnpm", args: ["test:harness"] },
   tauri: { program: "cargo", args: ["test", "--manifest-path", "apps/desktop/src-tauri/Cargo.toml"] }
 };
@@ -74,7 +74,7 @@ export function createRunTestsTool(
         target: {
           type: "string",
           enum: RUN_TEST_TARGETS,
-          description: "Known SeekForge test target. Use auto/root for the whole workspace."
+          description: "Known Ore Code test target. Use auto/root for the whole workspace."
         },
         command: {
           type: "string",

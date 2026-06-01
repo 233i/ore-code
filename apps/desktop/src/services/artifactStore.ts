@@ -1,11 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
-import { MemoryArtifactStore, type ArtifactWriteInput } from "@seekforge/state";
+import { MemoryArtifactStore, type ArtifactWriteInput } from "@ore-code/state";
 import {
   ArtifactMetadataSchema,
   ArtifactRecordSchema,
   type ArtifactMetadata,
   type ArtifactRecord
-} from "@seekforge/protocol";
+} from "@ore-code/protocol";
 import { isTauriRuntime } from "./fileHost";
 
 export interface ArtifactStore {

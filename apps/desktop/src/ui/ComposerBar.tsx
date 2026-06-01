@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Tag, Textarea, Tooltip } from "tdesign-react";
-import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@seekforge/agent-core";
+import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@ore-code/agent-core";
 import {
   AiTerminalIcon,
   ArrowUpIcon,

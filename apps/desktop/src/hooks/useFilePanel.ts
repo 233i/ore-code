@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ListDirOutput } from "@seekforge/tools";
+import type { ListDirOutput } from "@ore-code/tools";
 import { createRuntimeFileHost } from "../services/fileHost";
 
 export type FilePanelEntry = ListDirOutput["entries"][number];

@@ -1,4 +1,4 @@
-import type { RuntimeEvent, ToolCall, ToolResult } from "@seekforge/protocol";
+import type { RuntimeEvent, ToolCall, ToolResult } from "@ore-code/protocol";
 
 const OUTPUT_TAIL_CHARS = 2_000;
 

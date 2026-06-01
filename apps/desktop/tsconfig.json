@@ -15,10 +15,10 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@seekforge/agent-core": ["../../packages/agent-core/src/index.ts"],
-      "@seekforge/protocol": ["../../packages/protocol/src/index.ts"],
-      "@seekforge/state": ["../../packages/state/src/index.ts"],
-      "@seekforge/tools": ["../../packages/tools/src/index.ts"]
+      "@ore-code/agent-core": ["../../packages/agent-core/src/index.ts"],
+      "@ore-code/protocol": ["../../packages/protocol/src/index.ts"],
+      "@ore-code/state": ["../../packages/state/src/index.ts"],
+      "@ore-code/tools": ["../../packages/tools/src/index.ts"]
     },
 
     /* Linting */

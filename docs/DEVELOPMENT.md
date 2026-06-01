@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide is the day-to-day contributor entry point for SeekForge development.
+This guide is the day-to-day contributor entry point for Ore Code development.
 
 ## Local Setup
 
@@ -9,13 +9,13 @@ Use Node.js 22 for local development when possible; `.node-version` matches CI. 
 ```bash
 corepack enable
 pnpm install
-pnpm --filter @seekforge/desktop tauri dev
+pnpm --filter @ore-code/desktop tauri dev
 ```
 
 Frontend-only development:
 
 ```bash
-pnpm --filter @seekforge/desktop dev
+pnpm --filter @ore-code/desktop dev
 ```
 
 ## Workspace Packages
@@ -39,9 +39,9 @@ pnpm -r --sort lint
 Focused desktop checks:
 
 ```bash
-pnpm --filter @seekforge/desktop typecheck
-pnpm --filter @seekforge/desktop test
-pnpm --filter @seekforge/desktop lint
+pnpm --filter @ore-code/desktop typecheck
+pnpm --filter @ore-code/desktop test
+pnpm --filter @ore-code/desktop lint
 ```
 
 Rust boundary checks:
@@ -62,11 +62,11 @@ cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
 ## Useful Test Targets
 
 ```bash
-pnpm --filter @seekforge/protocol test typecheck lint
-pnpm --filter @seekforge/tools test typecheck lint
-pnpm --filter @seekforge/agent-core test typecheck lint
-pnpm --filter @seekforge/state test typecheck lint
-pnpm --filter @seekforge/harness test typecheck lint
+pnpm --filter @ore-code/protocol test typecheck lint
+pnpm --filter @ore-code/tools test typecheck lint
+pnpm --filter @ore-code/agent-core test typecheck lint
+pnpm --filter @ore-code/state test typecheck lint
+pnpm --filter @ore-code/harness test typecheck lint
 ```
 
 ## Manual Desktop Smoke Test

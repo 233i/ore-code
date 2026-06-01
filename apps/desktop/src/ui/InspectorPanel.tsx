@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button, Dialog, Input, Tag } from "tdesign-react";
 import { AiIcon, AiTerminalIcon, ArrowLeftIcon, ArrowRightUpIcon, CopyIcon, EditIcon, RefreshIcon, RollbackIcon } from "tdesign-icons-react";
-import type { DurableTaskSnapshot } from "@seekforge/agent-core";
-import type { ArtifactMetadata, ArtifactRecord, RuntimeEvent } from "@seekforge/protocol";
+import type { DurableTaskSnapshot } from "@ore-code/agent-core";
+import type { ArtifactMetadata, ArtifactRecord, RuntimeEvent } from "@ore-code/protocol";
 import { changeGroupLabel, type ChangeGroup, type ChangeReviewGroup, type ChangeReviewItem } from "../features/changes/changeGroups";
 import type { ShellJobState } from "../features/jobs/shellJobs";
 import type { SkillRecord, SkillScanError } from "../services/skillRegistry";

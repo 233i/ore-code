@@ -1,4 +1,4 @@
-import type { DeepSeekModelMode, DeepSeekThinkingLevel, NoteRecord } from "@seekforge/agent-core";
+import type { DeepSeekModelMode, DeepSeekThinkingLevel, NoteRecord } from "@ore-code/agent-core";
 import type { ResolvedSeekForgeConfig, ProviderConfig } from "../services/seekforgeConfig";
 import { isTauriRuntime } from "../services/fileHost";
 import type { McpToolSnapshot } from "../services/mcpHost";

@@ -1,17 +1,17 @@
 # Package Boundaries and Compatibility
 
-SeekForge is still pre-release, but contributors should treat package exports, runtime events, tool schemas, settings, and persisted data as compatibility-sensitive. This keeps local sessions, replay fixtures, desktop UI, and future releases understandable as the codebase evolves.
+Ore Code is still pre-release, but contributors should treat package exports, runtime events, tool schemas, settings, and persisted data as compatibility-sensitive. This keeps local sessions, replay fixtures, desktop UI, and future releases understandable as the codebase evolves.
 
 ## Workspace Packages
 
 | Package | Responsibility | Compatibility-sensitive surface |
 | --- | --- | --- |
-| `@seekforge/protocol` | Runtime event schemas and shared protocol types. | Event names, payload schemas, parsing behavior, backward-readable persisted events. |
-| `@seekforge/tools` | Tool specs, approval policy, risk classification, and tool helpers. | Tool names, input/output schemas, risk levels, artifact behavior, approval semantics. |
-| `@seekforge/agent-core` | Agent engine, prompt assembly, model adapters, runtime context, subagents, and task flow. | Public exports, model message ledger behavior, prompt section ordering, context construction, runtime event emission. |
-| `@seekforge/state` | JSONL session store, artifact store, and event storage helpers. | File layout, JSONL event shape, session index behavior, migration expectations. |
-| `@seekforge/harness` | Scenario replay and test harness helpers. | Scenario file format, replay assumptions, mock provider behavior. |
-| `@seekforge/desktop` | Tauri desktop app and OS boundary wiring. | Tauri commands, local data paths, settings shape, UI expectations, process/file/Git/MCP host behavior. |
+| `@ore-code/protocol` | Runtime event schemas and shared protocol types. | Event names, payload schemas, parsing behavior, backward-readable persisted events. |
+| `@ore-code/tools` | Tool specs, approval policy, risk classification, and tool helpers. | Tool names, input/output schemas, risk levels, artifact behavior, approval semantics. |
+| `@ore-code/agent-core` | Agent engine, prompt assembly, model adapters, runtime context, subagents, and task flow. | Public exports, model message ledger behavior, prompt section ordering, context construction, runtime event emission. |
+| `@ore-code/state` | JSONL session store, artifact store, and event storage helpers. | File layout, JSONL event shape, session index behavior, migration expectations. |
+| `@ore-code/harness` | Scenario replay and test harness helpers. | Scenario file format, replay assumptions, mock provider behavior. |
+| `@ore-code/desktop` | Tauri desktop app and OS boundary wiring. | Tauri commands, local data paths, settings shape, UI expectations, process/file/Git/MCP host behavior. |
 
 The packages are currently private workspace packages. The compatibility rules still matter because runtime data can outlive a single code change.
 
@@ -33,7 +33,7 @@ Adding optional fields is usually safer than renaming or deleting fields. Removi
 
 Runtime events should be append-only from a reader's perspective:
 
-- New event types should be added in `@seekforge/protocol` first.
+- New event types should be added in `@ore-code/protocol` first.
 - Existing events should remain readable by current state and desktop code.
 - Older sessions should not fail to load when a new optional event field is missing.
 - Event payload changes should have targeted tests in protocol, state, agent-core, or desktop code depending on where the event is consumed.
@@ -89,9 +89,9 @@ Pull requests that touch compatibility-sensitive areas should fill out the compa
 
 Match verification to the changed surface:
 
-- Protocol changes: `pnpm --filter @seekforge/protocol test typecheck lint`.
-- Tool schema or risk changes: `pnpm --filter @seekforge/tools test typecheck lint`.
-- Agent runtime changes: `pnpm --filter @seekforge/agent-core test typecheck lint`.
-- Desktop settings, storage, path, process, MCP, or UI wiring: `pnpm --filter @seekforge/desktop test typecheck lint`.
+- Protocol changes: `pnpm --filter @ore-code/protocol test typecheck lint`.
+- Tool schema or risk changes: `pnpm --filter @ore-code/tools test typecheck lint`.
+- Agent runtime changes: `pnpm --filter @ore-code/agent-core test typecheck lint`.
+- Desktop settings, storage, path, process, MCP, or UI wiring: `pnpm --filter @ore-code/desktop test typecheck lint`.
 
 For cross-package or persisted-data changes, run the focused package checks plus `pnpm ci:local` before publishing.

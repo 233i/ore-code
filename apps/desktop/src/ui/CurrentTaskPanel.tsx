@@ -1,6 +1,6 @@
 import { Tag } from "tdesign-react";
-import type { DurableTaskSnapshot } from "@seekforge/agent-core";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { DurableTaskSnapshot } from "@ore-code/agent-core";
+import type { RuntimeEvent } from "@ore-code/protocol";
 
 type SubagentCompletedEvent = Extract<RuntimeEvent, { type: "subagent_completed" }>;
 

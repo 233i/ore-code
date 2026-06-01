@@ -1,10 +1,10 @@
 # FAQ
 
-This page answers common questions for people evaluating or contributing to SeekForge.
+This page answers common questions for people evaluating or contributing to Ore Code.
 
-## Is SeekForge Open Source Yet?
+## Is Ore Code Open Source Yet?
 
-Yes. SeekForge is released under the MIT License. See the root [LICENSE](../LICENSE) file for the full license text.
+Yes. Ore Code is released under the MIT License. See the root [LICENSE](../LICENSE) file for the full license text.
 
 ## Which Platforms Are Supported?
 
@@ -18,7 +18,7 @@ See [Known Limitations](./KNOWN_LIMITATIONS.md).
 
 ## What Does DeepSeek-First Mean?
 
-SeekForge is designed around DeepSeek coding workflows: long context, model-aware capacity budgets, structured tools, prompt/cache stability, and DeepSeek-compatible provider configuration.
+Ore Code is designed around DeepSeek coding workflows: long context, model-aware capacity budgets, structured tools, prompt/cache stability, and DeepSeek-compatible provider configuration.
 
 Other OpenAI-compatible providers may work where configuration supports them, but the primary optimization target is DeepSeek.
 
@@ -28,9 +28,9 @@ Yes, real model use requires a compatible provider configuration and API key. Th
 
 Local DeepSeek-style configuration can also live in `~/.deepseek/config.toml`. Do not commit API keys or provider secrets to the repository.
 
-## Where Does SeekForge Store Local Data?
+## Where Does Ore Code Store Local Data?
 
-SeekForge uses user-level and project-level runtime data:
+Ore Code uses user-level and project-level runtime data:
 
 - `~/.seekforge/skills`
 - `~/.seekforge/mcp.json`
@@ -39,15 +39,15 @@ SeekForge uses user-level and project-level runtime data:
 
 Project-local `.seekforge/` data is ignored by Git. See [Local Data and Configuration](./LOCAL_DATA_AND_CONFIG.md) for reset and privacy guidance.
 
-## Does SeekForge Install Dependencies Automatically?
+## Does Ore Code Install Dependencies Automatically?
 
-SeekForge may detect missing tools or project dependency signals, but it should not silently install system tools or project dependencies.
+Ore Code may detect missing tools or project dependency signals, but it should not silently install system tools or project dependencies.
 
 System-level installs, project dependency installs, and commands that may access the network should be shown to the user and confirmed before execution.
 
 ## Is Tool Execution Sandboxed?
 
-SeekForge has tool approval and command-risk controls, but early releases should not claim full sandbox isolation. Optional sandbox execution is planned with quiet defaults and boundary prompts.
+Ore Code has tool approval and command-risk controls, but early releases should not claim full sandbox isolation. Optional sandbox execution is planned with quiet defaults and boundary prompts.
 
 Use [Known Limitations](./KNOWN_LIMITATIONS.md) and [Security](../SECURITY.md) as the current source of truth for safety boundaries.
 
@@ -74,9 +74,9 @@ pnpm ci:local
 For focused desktop changes, run:
 
 ```bash
-pnpm --filter @seekforge/desktop typecheck
-pnpm --filter @seekforge/desktop test
-pnpm --filter @seekforge/desktop lint
+pnpm --filter @ore-code/desktop typecheck
+pnpm --filter @ore-code/desktop test
+pnpm --filter @ore-code/desktop lint
 git diff --check
 ```
 

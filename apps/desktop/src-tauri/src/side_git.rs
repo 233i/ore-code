@@ -55,12 +55,12 @@ pub(crate) fn create_side_git_snapshot_at(
     }
     ensure_git_success(
         repo_dir,
-        &["config", "user.name", "SeekForge Side Git"],
+        &["config", "user.name", "Ore Code Side Git"],
         "configure side-git user",
     )?;
     ensure_git_success(
         repo_dir,
-        &["config", "user.email", "side-git@seekforge.local"],
+        &["config", "user.email", "side-git@ore-code.local"],
         "configure side-git email",
     )?;
 

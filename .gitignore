@@ -38,7 +38,7 @@ pnpm-debug.log*
 !.env.example
 *.local
 
-# Local SeekForge runtime data
+# Local Ore Code runtime data
 .seekforge/
 
 # OS files

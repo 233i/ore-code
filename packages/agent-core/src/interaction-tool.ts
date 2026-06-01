@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { InteractionDecision } from "@seekforge/protocol";
-import type { ToolSpec } from "@seekforge/tools";
+import type { InteractionDecision } from "@ore-code/protocol";
+import type { ToolSpec } from "@ore-code/tools";
 
 export const RequestUserInputSchema = z.object({
   title: z.string().trim().min(1).max(24),

@@ -16,7 +16,7 @@ import {
   type LlmClient,
   type RuntimeOperatingSystem,
   type SubagentRuntimeAgent
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 import {
   createArtifactTools,
   createCodeExecutionTool,
@@ -36,7 +36,7 @@ import {
   type ProcessToolHost,
   type ShellToolHost,
   type ToolSpec
-} from "@seekforge/tools";
+} from "@ore-code/tools";
 import { DEFAULT_DEEPSEEK_BASE_URL } from "../services/appSettings";
 import type { createRuntimeArtifactStore } from "../services/artifactStore";
 import type { SeekForgeInstructions } from "../services/seekforgeInstructions";

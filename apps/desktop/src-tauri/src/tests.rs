@@ -552,7 +552,7 @@ fn bootstrap_creates_user_environment_without_project_files() {
     assert!(config.contains("api_key_env = \"DEEPSEEK_API_KEY\""));
 
     let instructions = fs::read_to_string(home.join(".seekforge").join("instructions.md")).unwrap();
-    assert!(instructions.contains("# SeekForge User Instructions"));
+    assert!(instructions.contains("# Ore Code User Instructions"));
 
     let mcp: serde_json::Value =
         serde_json::from_str(&fs::read_to_string(home.join(".seekforge").join("mcp.json")).unwrap())
@@ -1803,7 +1803,7 @@ fn init_git_repo(root: &Path) {
 
 fn configure_git_identity(root: &Path) {
     run_git_test_command(root, &["config", "user.email", "seekforge@example.test"]);
-    run_git_test_command(root, &["config", "user.name", "SeekForge Test"]);
+    run_git_test_command(root, &["config", "user.name", "Ore Code Test"]);
 }
 
 fn run_git_test_command(root: &Path, args: &[&str]) {

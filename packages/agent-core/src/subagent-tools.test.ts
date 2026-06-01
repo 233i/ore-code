@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EchoTool, ToolRegistry } from "@seekforge/tools";
+import { EchoTool, ToolRegistry } from "@ore-code/tools";
 import { createSubagentTools, SubagentManager } from "./subagent-tools";
 import { createCodingSystemPrompt } from "./prompts";
 import type { LlmClient, LlmTurnInput, ModelStreamChunk } from "./llm";

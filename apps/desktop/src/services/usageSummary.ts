@@ -1,5 +1,5 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
-import { diffRequestSegments, type RequestSegmentDiffReason } from "@seekforge/agent-core";
+import type { RuntimeEvent } from "@ore-code/protocol";
+import { diffRequestSegments, type RequestSegmentDiffReason } from "@ore-code/agent-core";
 
 export type UsageSummary = {
   totalTokens: number;

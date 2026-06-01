@@ -4,11 +4,11 @@ $ErrorActionPreference = "Stop"
 Set-Location (Join-Path $PSScriptRoot "..")
 
 pnpm install --frozen-lockfile
-pnpm --filter @seekforge/desktop typecheck
-pnpm --filter @seekforge/desktop test
-pnpm --filter @seekforge/desktop lint
+pnpm --filter @ore-code/desktop typecheck
+pnpm --filter @ore-code/desktop test
+pnpm --filter @ore-code/desktop lint
 cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
-pnpm --filter @seekforge/desktop tauri:build:win
+pnpm --filter @ore-code/desktop tauri:build:win
 
 Write-Host ""
 Write-Host "Windows installer artifacts:"

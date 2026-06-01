@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ToolRegistry, type ToolSpec } from "@seekforge/tools";
+import { ToolRegistry, type ToolSpec } from "@ore-code/tools";
 import { toolNamesFromPromptHintSource, toolPromptHintLines } from "./toolPromptHints";
 
 describe("tool prompt hints", () => {
@@ -28,7 +28,7 @@ describe("tool prompt hints", () => {
     const lines = toolPromptHintLines().join("\n");
 
     expect(lines).toContain("Run test validation with run_tests before shelling out");
-    expect(lines).toContain("Install SeekForge skills with install_skill");
+    expect(lines).toContain("Install Ore Code skills with install_skill");
     expect(lines).toContain("Use MCP through the stable gateway tools");
     expect(lines).toContain("Use lsp_hover, lsp_definition, lsp_references, and lsp_document_symbols");
   });

@@ -1,4 +1,4 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 
 export type PreferredLanguage = "zh" | "en" | "ja" | "ko";
 

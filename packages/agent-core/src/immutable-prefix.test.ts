@@ -6,7 +6,7 @@ import {
   shouldReuseImmutablePrefixSnapshot,
   toolSpecsToLlmDefinitions
 } from "./immutable-prefix";
-import type { ToolSpec } from "@seekforge/tools";
+import type { ToolSpec } from "@ore-code/tools";
 
 const readTool: ToolSpec = {
   name: "read_file",

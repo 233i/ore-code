@@ -1,4 +1,4 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import type { buildCapacityReport } from "./capacity";
 
 export type CoherenceState = Extract<RuntimeEvent, { type: "coherence_state" }>["state"];

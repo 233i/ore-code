@@ -1,4 +1,4 @@
-import { DEEPSEEK_MODEL_MODES, type DeepSeekModelMode } from "@seekforge/agent-core";
+import { DEEPSEEK_MODEL_MODES, type DeepSeekModelMode } from "@ore-code/agent-core";
 
 export const deepSeekModelOptions: Array<{
   description: string;

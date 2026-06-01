@@ -1,8 +1,8 @@
-# SeekForge
+# Ore Code
 
 [简体中文](./README.zh-CN.md)
 
-SeekForge is a DeepSeek-first desktop coding agent workbench built with Tauri, React, TypeScript, and Rust. It focuses on long-context coding workflows, structured tool execution, local project context, MCP integrations, skills, automation, and cross-platform desktop behavior for macOS and Windows.
+Ore Code is a DeepSeek-first desktop coding agent workbench built with Tauri, React, TypeScript, and Rust. It focuses on long-context coding workflows, structured tool execution, local project context, MCP integrations, skills, automation, and cross-platform desktop behavior for macOS and Windows.
 
 > Status: pre-release. This repository is source-available under the MIT License.
 
@@ -17,7 +17,7 @@ SeekForge is a DeepSeek-first desktop coding agent workbench built with Tauri, R
 
 ## Screenshot
 
-![SeekForge home screen](./docs/assets/seekforge-home.png)
+![Ore Code home screen](./docs/assets/ore-code-home.png)
 
 ## Repository Layout
 
@@ -56,7 +56,7 @@ pnpm dev
 Run the desktop package directly:
 
 ```bash
-pnpm --filter @seekforge/desktop tauri dev
+pnpm --filter @ore-code/desktop tauri dev
 ```
 
 Build all TypeScript packages:
@@ -68,7 +68,7 @@ pnpm build
 Build desktop installers:
 
 ```bash
-pnpm --filter @seekforge/desktop tauri:build
+pnpm --filter @ore-code/desktop tauri:build
 pnpm build:desktop:windows
 ```
 
@@ -77,9 +77,9 @@ pnpm build:desktop:windows
 Use the focused package checks while developing:
 
 ```bash
-pnpm --filter @seekforge/desktop typecheck
-pnpm --filter @seekforge/desktop test
-pnpm --filter @seekforge/desktop lint
+pnpm --filter @ore-code/desktop typecheck
+pnpm --filter @ore-code/desktop test
+pnpm --filter @ore-code/desktop lint
 ```
 
 Run broader local checks before opening a larger pull request:
@@ -90,7 +90,7 @@ pnpm ci:local
 
 ## Configuration and Local Data
 
-SeekForge creates and reads local runtime data outside the repository, including:
+Ore Code creates and reads local runtime data outside the repository, including:
 
 - `~/.seekforge/skills`
 - `~/.seekforge/mcp.json`
@@ -134,4 +134,4 @@ See [CHANGELOG.md](./CHANGELOG.md).
 
 ## License
 
-SeekForge is released under the [MIT License](./LICENSE).
+Ore Code is released under the [MIT License](./LICENSE).

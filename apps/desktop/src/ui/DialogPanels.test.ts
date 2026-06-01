@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import {
   buildInteractionDecision,
   CUSTOM_INTERACTION_OPTION_LABEL
@@ -14,7 +14,7 @@ describe("InteractionDialog helpers", () => {
       customText: "",
       selectedOptionId: "seekforge"
     })).toEqual({
-      decision: { type: "option", optionId: "seekforge", value: "/repo/SeekForge" }
+      decision: { type: "option", optionId: "seekforge", value: "/repo/Ore Code" }
     });
   });
 
@@ -50,7 +50,7 @@ function interactionRequest(): Extract<RuntimeEvent, { type: "interaction_reques
     message: "请选择项目。",
     recommendedOptionId: "seekforge",
     options: [
-      { id: "seekforge", label: "SeekForge", value: "/repo/SeekForge" }
+      { id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" }
     ]
   };
 }

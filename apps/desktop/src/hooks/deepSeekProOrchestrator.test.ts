@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MockLlmClient, type LlmClient, type LlmTurnInput, type ModelStreamChunk } from "@seekforge/agent-core";
-import { ToolRegistry } from "@seekforge/tools";
+import { MockLlmClient, type LlmClient, type LlmTurnInput, type ModelStreamChunk } from "@ore-code/agent-core";
+import { ToolRegistry } from "@ore-code/tools";
 import {
   formatDeepSeekProOrchestrationContext,
   parseDeepSeekExplorationPlan,

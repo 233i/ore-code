@@ -6,7 +6,7 @@ describe("runProviderSmokeTest", () => {
   it("collects streamed provider output", async () => {
     const result = await runProviderSmokeTest(
       new MockLlmClient([
-        { type: "assistant_delta", text: "SeekForge " },
+        { type: "assistant_delta", text: "Ore Code " },
         { type: "assistant_delta", text: "provider check OK" },
         { type: "done", finishReason: "stop" }
       ])
@@ -14,7 +14,7 @@ describe("runProviderSmokeTest", () => {
 
     expect(result).toMatchObject({
       ok: true,
-      text: "SeekForge provider check OK",
+      text: "Ore Code provider check OK",
       finishReason: "stop"
     });
     expect(result.durationMs).toBeGreaterThanOrEqual(0);

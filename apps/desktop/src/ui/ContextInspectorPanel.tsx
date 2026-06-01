@@ -297,7 +297,7 @@ function buildContextSummary(usageSummary: UsageSummary) {
     .join("\n") ?? "- No cache prefix layers.";
 
   return [
-    "# SeekForge Context Summary",
+    "# Ore Code Context Summary",
     `Model: ${capacity.model ?? "unknown"}`,
     `Status: ${capacity.status}`,
     `Input: ${capacity.estimatedInputTokens}/${capacity.maxInputTokens}`,

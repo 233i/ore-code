@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { FileToolHost, ProcessRunOutput, ProcessToolHost, ShellRunOutput, ShellToolHost } from "@seekforge/tools";
+import type { FileToolHost, ProcessRunOutput, ProcessToolHost, ShellRunOutput, ShellToolHost } from "@ore-code/tools";
 import { detectWorkspaceSignals, runEnvironmentDoctor, summarizeDoctor } from "./workspaceDoctor";
 
 describe("runEnvironmentDoctor", () => {
-  it("reports a healthy SeekForge runtime environment", async () => {
+  it("reports a healthy Ore Code runtime environment", async () => {
     const checks = await runEnvironmentDoctor({
       workspacePath: "/workspace",
       provider: "deepseek",
@@ -21,7 +21,7 @@ describe("runEnvironmentDoctor", () => {
         "echo seekforge-shell-ok": ok("seekforge-shell-ok\n")
       }),
       environmentPaths: {
-        appDataPath: "/Users/test/Library/Application Support/SeekForge",
+        appDataPath: "/Users/test/Library/Application Support/Ore Code",
         userHomePath: "/Users/test"
       },
       workspaceSignals: {

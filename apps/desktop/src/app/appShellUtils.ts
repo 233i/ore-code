@@ -1,5 +1,5 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
-import type { CommandRiskLevel } from "@seekforge/tools";
+import type { RuntimeEvent } from "@ore-code/protocol";
+import type { CommandRiskLevel } from "@ore-code/tools";
 import type { ProjectIndexRefreshResult } from "../services/projectIndex";
 import type { UiLocale } from "../services/uiLocale";
 import { formatShortDateTime } from "../ui/InspectorPanel";

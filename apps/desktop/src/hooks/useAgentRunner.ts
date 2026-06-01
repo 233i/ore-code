@@ -23,13 +23,13 @@ import {
   type DeepSeekModelMode,
   type DeepSeekTurnClassifierResult,
   type ResolvedDeepSeekTurnModel
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 import {
   assessCommandRisk,
   resolveRunTestsCommand,
   type CommandRiskAssessment
-} from "@seekforge/tools";
-import type { ApprovalDecision, InteractionDecision, RuntimeEvent, ToolCall } from "@seekforge/protocol";
+} from "@ore-code/tools";
+import type { ApprovalDecision, InteractionDecision, RuntimeEvent, ToolCall } from "@ore-code/protocol";
 import {
   createChangeTrackingFileHost,
   type TrackedFileChange

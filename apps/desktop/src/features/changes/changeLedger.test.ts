@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { FileToolHost } from "@seekforge/tools";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { FileToolHost } from "@ore-code/tools";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import {
   buildTrackedChangeFileStats,
   buildVisibleTurnChanges,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ProcessRunOutput, ProcessToolHost } from "@seekforge/tools";
+import type { ProcessRunOutput, ProcessToolHost } from "@ore-code/tools";
 import {
   buildEnvironmentInstallPlan,
   runEnvironmentInstallPlan,

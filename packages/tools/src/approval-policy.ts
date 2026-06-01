@@ -1,4 +1,4 @@
-import type { ApprovalDecision, ToolCall } from "@seekforge/protocol";
+import type { ApprovalDecision, ToolCall } from "@ore-code/protocol";
 import { assessCommandRisk } from "./command-risk";
 import { resolveRunTestsCommand } from "./test-tools";
 import type { ToolContext, ToolSpec } from "./spec";

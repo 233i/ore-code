@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FileToolHost, ShellToolHost } from "@seekforge/tools";
+import type { FileToolHost, ShellToolHost } from "@ore-code/tools";
 import { createRuntimeArtifactStore } from "../services/artifactStore";
 import { createDesktopToolRegistry, isDesktopToolAllowedForProfile } from "./createDesktopToolRegistry";
 

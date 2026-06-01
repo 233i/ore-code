@@ -1,4 +1,4 @@
-import type { ModelStreamChunk } from "@seekforge/agent-core";
+import type { ModelStreamChunk } from "@ore-code/agent-core";
 
 export function planMockTurn(prompt: string): ModelStreamChunk[] {
   const trimmedPrompt = prompt.trim();
@@ -769,5 +769,5 @@ function extractSearchQuery(prompt: string): string {
 
 function buildWriteContent(prompt: string): string {
   // mock 写入固定附带原始输入，便于 harness 回放时确认来源。
-  return `SeekForge write probe\n\nPrompt: ${prompt || "empty prompt"}\n`;
+  return `Ore Code write probe\n\nPrompt: ${prompt || "empty prompt"}\n`;
 }

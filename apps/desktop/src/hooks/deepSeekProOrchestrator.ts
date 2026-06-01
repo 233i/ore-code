@@ -6,9 +6,9 @@ import {
   type ModelStreamChunk,
   type RlmArtifactSink,
   type RlmQueryResult
-} from "@seekforge/agent-core";
-import type { RuntimeEvent } from "@seekforge/protocol";
-import type { ToolContext, ToolRegistry } from "@seekforge/tools";
+} from "@ore-code/agent-core";
+import type { RuntimeEvent } from "@ore-code/protocol";
+import type { ToolContext, ToolRegistry } from "@ore-code/tools";
 
 const MAX_EXPLORATION_PROMPTS = 4;
 const MAX_PROMPT_CHARS = 1_200;

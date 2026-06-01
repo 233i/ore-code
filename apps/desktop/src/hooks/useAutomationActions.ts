@@ -4,7 +4,7 @@ import type {
   AutomationRecord,
   DurableTaskManager,
   DurableTaskSnapshot
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 
 export function useAutomationActions(input: {
   automationManager: MutableRefObject<AutomationManager>;

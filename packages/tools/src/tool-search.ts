@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ToolCapability, ApprovalRequirement } from "@seekforge/protocol";
+import type { ToolCapability, ApprovalRequirement } from "@ore-code/protocol";
 import type { ToolRegistry } from "./registry";
 import type { ToolSpec } from "./spec";
 

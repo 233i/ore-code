@@ -1,10 +1,10 @@
 # Privacy and Data Handling
 
-SeekForge is a local desktop coding agent workbench. This document explains the intended data boundaries for the pre-release version.
+Ore Code is a local desktop coding agent workbench. This document explains the intended data boundaries for the pre-release version.
 
 ## Local Data
 
-SeekForge stores local runtime data on the user's machine, including:
+Ore Code stores local runtime data on the user's machine, including:
 
 - App settings.
 - Session and transcript data.
@@ -36,7 +36,7 @@ Users should avoid sending private code or data to a provider they do not trust.
 
 ## Tools and External Processes
 
-SeekForge can run local tools such as Git, shell/process commands, tests, diagnostics, code execution, and MCP servers when the user permits them. These tools may read local files or contact networks depending on their command and configuration.
+Ore Code can run local tools such as Git, shell/process commands, tests, diagnostics, code execution, and MCP servers when the user permits them. These tools may read local files or contact networks depending on their command and configuration.
 
 The approval and permission system is intended to make higher-risk actions visible, but users should review commands before approving them.
 
@@ -46,7 +46,7 @@ MCP servers are external processes or remote integrations configured by the user
 
 ## Crash Reports and Telemetry
 
-SeekForge does not currently define a hosted telemetry pipeline in this repository. If telemetry or crash reporting is added later, this document should be updated before public release.
+Ore Code does not currently define a hosted telemetry pipeline in this repository. If telemetry or crash reporting is added later, this document should be updated before public release.
 
 ## Reporting Privacy Issues
 

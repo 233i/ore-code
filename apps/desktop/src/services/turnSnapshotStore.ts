@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { SnapshotRecordSchema, type SnapshotRecord } from "@seekforge/protocol";
-import type { FileToolHost } from "@seekforge/tools";
+import { SnapshotRecordSchema, type SnapshotRecord } from "@ore-code/protocol";
+import type { FileToolHost } from "@ore-code/tools";
 import type { TrackedFileChange } from "../features/changes/changeLedger";
 import { createRuntimeFileHost, isTauriRuntime } from "./fileHost";
 

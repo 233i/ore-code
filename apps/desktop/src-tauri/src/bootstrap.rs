@@ -10,9 +10,9 @@ api_key_env = "DEEPSEEK_API_KEY"
 
 const DEFAULT_MCP_CONFIG: &str = "{\n  \"servers\": {}\n}\n";
 
-const DEFAULT_SEEKFORGE_INSTRUCTIONS: &str = r#"# SeekForge User Instructions
+const DEFAULT_SEEKFORGE_INSTRUCTIONS: &str = r#"# Ore Code User Instructions
 
-Add personal, cross-project SeekForge preferences here. These instructions are loaded into each model turn after built-in safety/workflow rules and after the latest user message.
+Add personal, cross-project Ore Code preferences here. These instructions are loaded into each model turn after built-in safety/workflow rules and after the latest user message.
 
 Examples:
 - Prefer concise Chinese summaries.

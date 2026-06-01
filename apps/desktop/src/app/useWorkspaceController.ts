@@ -49,7 +49,7 @@ export function useWorkspaceController({
       return;
     }
 
-    const selected = await open({ directory: true, multiple: false, title: "选择 SeekForge 工作区" });
+    const selected = await open({ directory: true, multiple: false, title: "选择 Ore Code 工作区" });
     if (typeof selected === "string") {
       await applyWorkspacePath(selected);
     }

@@ -1,4 +1,4 @@
-import type { ToolCall } from "@seekforge/protocol";
+import type { ToolCall } from "@ore-code/protocol";
 
 const IDENTICAL_CALL_BLOCK_THRESHOLD = 3;
 const FAILURE_WARN_THRESHOLD = 3;

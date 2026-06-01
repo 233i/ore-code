@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import type { ToolCardState } from "../features/tools/toolCards";
 import { deriveTranscriptItems } from "./Transcript";
 

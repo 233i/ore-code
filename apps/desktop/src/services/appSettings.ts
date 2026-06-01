@@ -4,7 +4,7 @@ import {
   DEEPSEEK_THINKING_LEVELS,
   normalizeDeepSeekModelMode,
   normalizeDeepSeekThinkingLevel
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 import { z } from "zod";
 import { isTauriRuntime } from "./fileHost";
 import { normalizeUiLocalePreference, type UiLocalePreference } from "./uiLocale";

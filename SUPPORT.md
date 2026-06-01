@@ -1,6 +1,6 @@
 # Support
 
-SeekForge is pre-release software. Please use GitHub issues for reproducible bugs, focused feature requests, documentation problems, performance reports, and setup questions.
+Ore Code is pre-release software. Please use GitHub issues for reproducible bugs, focused feature requests, documentation problems, performance reports, and setup questions.
 
 ## Before Opening an Issue
 
@@ -25,7 +25,7 @@ SeekForge is pre-release software. Please use GitHub issues for reproducible bug
 Include what is relevant:
 
 - OS and version.
-- SeekForge version or commit.
+- Ore Code version or commit.
 - Install or launch method, such as DMG, Windows installer, `pnpm dev`, source build, or GitHub Actions artifact.
 - Minimal reproduction link, redacted fixture, or smallest project shape that reproduces the issue.
 - Model/provider being used.

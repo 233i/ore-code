@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DurableTaskSnapshot } from "@seekforge/agent-core";
+import type { DurableTaskSnapshot } from "@ore-code/agent-core";
 import { currentChecklistItem, latestTaskGate, selectCurrentTask, taskChecklistProgress } from "./CurrentTaskPanel";
 
 describe("CurrentTaskPanel helpers", () => {

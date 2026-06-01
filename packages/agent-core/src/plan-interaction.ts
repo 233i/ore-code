@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { InteractionOption } from "@seekforge/protocol";
+import type { InteractionOption } from "@ore-code/protocol";
 
 export type ParsedInteractionRequest = {
   requestId?: string;

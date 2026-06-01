@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { AutomationState, DurableTaskState } from "@seekforge/agent-core";
+import type { AutomationState, DurableTaskState } from "@ore-code/agent-core";
 import { isTauriRuntime } from "./fileHost";
 
 const DURABLE_TASK_STORAGE_KEY = "seekforge.durableTasks.v1";

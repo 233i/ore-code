@@ -1,4 +1,4 @@
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import { deriveToolCards, type ToolCardState } from "../tools/toolCards";
 import {
   getToolDisplayName,

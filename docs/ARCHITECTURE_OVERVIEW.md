@@ -1,6 +1,6 @@
 # Architecture Overview
 
-SeekForge is a desktop coding agent workbench built around a TypeScript agent runtime, a React/Tauri desktop shell, and a small Rust OS boundary. This overview is the public architecture map for contributors who need to understand where changes belong before editing code.
+Ore Code is a desktop coding agent workbench built around a TypeScript agent runtime, a React/Tauri desktop shell, and a small Rust OS boundary. This overview is the public architecture map for contributors who need to understand where changes belong before editing code.
 
 For compatibility rules, use [Package Boundaries and Compatibility](./API_AND_COMPATIBILITY.md). For local setup and commands, use [Development Guide](./DEVELOPMENT.md).
 
@@ -31,12 +31,12 @@ The UI should not call model APIs directly. It also should not run shell or proc
 
 | Package | Responsibility |
 | --- | --- |
-| `@seekforge/protocol` | Runtime event schemas and shared protocol types. |
-| `@seekforge/tools` | Tool specs, approval policy, command risk classification, and structured tool helpers. |
-| `@seekforge/agent-core` | Agent engine, prompt assembly, model adapters, runtime context, subagents, model message ledger, and task flow. |
-| `@seekforge/state` | JSONL session storage, artifact storage, event storage, and in-memory test stores. |
-| `@seekforge/harness` | Scenario replay, mock model flows, and harness tests. |
-| `@seekforge/desktop` | Tauri desktop app, React UI, settings, local services, and OS boundary wiring. |
+| `@ore-code/protocol` | Runtime event schemas and shared protocol types. |
+| `@ore-code/tools` | Tool specs, approval policy, command risk classification, and structured tool helpers. |
+| `@ore-code/agent-core` | Agent engine, prompt assembly, model adapters, runtime context, subagents, model message ledger, and task flow. |
+| `@ore-code/state` | JSONL session storage, artifact storage, event storage, and in-memory test stores. |
+| `@ore-code/harness` | Scenario replay, mock model flows, and harness tests. |
+| `@ore-code/desktop` | Tauri desktop app, React UI, settings, local services, and OS boundary wiring. |
 
 Packages are private pre-release workspace packages, but their boundaries are still important because session files, artifacts, settings, and replay fixtures can outlive a single code change.
 
@@ -46,7 +46,7 @@ The agent runtime writes observable work as runtime events. Desktop state, trans
 
 Runtime events should be append-readable:
 
-- New event types start in `@seekforge/protocol`.
+- New event types start in `@ore-code/protocol`.
 - Existing event payloads should remain readable by newer code.
 - Optional fields are preferred over renamed or removed fields.
 - Persisted sessions should fail clearly only when a migration or reset path is documented.
@@ -64,7 +64,7 @@ Important boundaries:
 
 ## Model Context and DeepSeek
 
-SeekForge is DeepSeek-first. The agent runtime manages model-aware context budgets, prompt section ordering, immutable prefix expectations, project context injection, tool result routing, and history compression.
+Ore Code is DeepSeek-first. The agent runtime manages model-aware context budgets, prompt section ordering, immutable prefix expectations, project context injection, tool result routing, and history compression.
 
 Design rules:
 
@@ -92,7 +92,7 @@ Windows and macOS behavior must stay explicit. Preserve Windows `.cmd` executabl
 
 ## Persistence and Local Data
 
-SeekForge stores user runtime data outside the repository by default:
+Ore Code stores user runtime data outside the repository by default:
 
 - User-level skills: `~/.seekforge/skills`
 - User-level MCP config: `~/.seekforge/mcp.json`
@@ -124,7 +124,7 @@ Broad local validation uses `pnpm ci:local`; focused changes should run the rele
 
 ## Cross-Platform Expectations
 
-SeekForge targets macOS and Windows first. Contributors should assume path, process, shell, packaging, and line-ending behavior can differ across those platforms.
+Ore Code targets macOS and Windows first. Contributors should assume path, process, shell, packaging, and line-ending behavior can differ across those platforms.
 
 Prefer:
 

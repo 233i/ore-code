@@ -5,7 +5,7 @@ import type {
   GitStatusHostOutput,
   GitTextHostOutput,
   GitToolHost
-} from "@seekforge/tools";
+} from "@ore-code/tools";
 
 export function createTauriGitHost(): GitToolHost {
   return {

@@ -3,7 +3,7 @@ import { projectIndexStatusFromRefreshResult, shouldRefreshProjectIndexForEvent 
 import type { ProjectIndexStatus } from "./appTypes";
 import { createRuntimeFileHost } from "../services/fileHost";
 import { refreshProjectIndex } from "../services/projectIndex";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 
 export function useProjectIndexController({
   events,

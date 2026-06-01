@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createRlmQueryTool, type RlmQueryHost } from "./rlm-tools";
 import type { LlmClient, LlmTurnInput, ModelStreamChunk } from "./llm";
-import { ToolRegistry } from "@seekforge/tools";
+import { ToolRegistry } from "@ore-code/tools";
 import { z } from "zod";
 
 describe("createRlmQueryTool", () => {

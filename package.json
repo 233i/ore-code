@@ -1,5 +1,5 @@
 {
-  "name": "seekforge",
+  "name": "ore-code",
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
@@ -11,12 +11,12 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @seekforge/desktop tauri dev",
+    "dev": "pnpm --filter @ore-code/desktop tauri dev",
     "build": "pnpm -r --sort build",
-    "build:desktop:windows": "pnpm --filter @seekforge/desktop tauri:build:win",
+    "build:desktop:windows": "pnpm --filter @ore-code/desktop tauri:build:win",
     "typecheck": "pnpm build && pnpm -r --sort typecheck",
     "test": "pnpm build && pnpm -r --sort test",
-    "test:harness": "pnpm --filter @seekforge/protocol build && pnpm --filter @seekforge/tools build && pnpm --filter @seekforge/agent-core build && pnpm --filter @seekforge/harness test",
+    "test:harness": "pnpm --filter @ore-code/protocol build && pnpm --filter @ore-code/tools build && pnpm --filter @ore-code/agent-core build && pnpm --filter @ore-code/harness test",
     "smoke:shell-jobs": "bash scripts/smoke-shell-jobs.sh",
     "ci:local": "pnpm typecheck && pnpm test && pnpm lint && cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml",
     "lint": "pnpm -r --sort lint"

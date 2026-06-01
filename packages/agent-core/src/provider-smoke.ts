@@ -22,7 +22,7 @@ export async function runProviderSmokeTest(client: LlmClient): Promise<ProviderS
       },
       {
         role: "user",
-        content: "Reply exactly with: SeekForge provider check OK"
+        content: "Reply exactly with: Ore Code provider check OK"
       }
     ]
   })) {

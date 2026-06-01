@@ -3,7 +3,7 @@ import {
   type DeepSeekTurnClassifierResult,
   type LlmClient,
   type ModelStreamChunk
-} from "@seekforge/agent-core";
+} from "@ore-code/agent-core";
 
 type ClassifierClientFactory = (
   reason: string,

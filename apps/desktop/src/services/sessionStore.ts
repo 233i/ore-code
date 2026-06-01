@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { eventsFromJsonl, eventsToJsonl, summarizeSession, type SessionSummary } from "@seekforge/state";
-import { parseRuntimeEvent, type RuntimeEvent } from "@seekforge/protocol";
+import { eventsFromJsonl, eventsToJsonl, summarizeSession, type SessionSummary } from "@ore-code/state";
+import { parseRuntimeEvent, type RuntimeEvent } from "@ore-code/protocol";
 import {
   buildTranscriptChunkBundle,
   type TranscriptChunkBundle,

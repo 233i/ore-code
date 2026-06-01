@@ -3,7 +3,7 @@ import {
   processCommandString,
   type ProcessRunOutput,
   type ProcessToolHost
-} from "@seekforge/tools";
+} from "@ore-code/tools";
 import type { DoctorCategory, DoctorCheck, WorkspaceSignals } from "./workspaceDoctor";
 
 export type EnvironmentInstallPlatform = "windows" | "macos" | "linux" | "unknown";

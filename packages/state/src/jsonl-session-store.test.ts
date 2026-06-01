@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import { eventsFromJsonl, eventsToJsonl, summarizeSession } from "./jsonl-session-store";
 
 describe("jsonl session store", () => {

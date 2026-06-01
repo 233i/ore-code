@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRuntimeContext } from "@seekforge/agent-core";
+import { buildRuntimeContext } from "@ore-code/agent-core";
 import {
   createFileTools,
   createGitTools,
@@ -23,10 +23,10 @@ import {
   type ShellRunOutput,
   type ShellToolHost,
   type WriteFileOutput
-} from "@seekforge/tools";
-import { eventsFromJsonl, eventsToJsonl } from "@seekforge/state";
-import type { RuntimeEvent } from "@seekforge/protocol";
-import { OpenAiCompatibleLlmClient, type FetchInit, type StreamResponse } from "@seekforge/agent-core";
+} from "@ore-code/tools";
+import { eventsFromJsonl, eventsToJsonl } from "@ore-code/state";
+import type { RuntimeEvent } from "@ore-code/protocol";
+import { OpenAiCompatibleLlmClient, type FetchInit, type StreamResponse } from "@ore-code/agent-core";
 import { replayEvents } from "./replay";
 import { runScenario, ScriptedLlmClient } from "./scenario";
 

@@ -1,4 +1,4 @@
-import { parseRuntimeEvent, type RuntimeEvent } from "@seekforge/protocol";
+import { parseRuntimeEvent, type RuntimeEvent } from "@ore-code/protocol";
 
 export interface ReplaySnapshot {
   events: RuntimeEvent[];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RuntimeEvent } from "@seekforge/protocol";
+import type { RuntimeEvent } from "@ore-code/protocol";
 import { assembleRequest, diffRequestSegments } from "./request-assembler";
 import { buildProjectDeltaEventBody, formatProjectDeltaForModel } from "./project-delta";
 import { buildRuntimeContext } from "./runtime-history";

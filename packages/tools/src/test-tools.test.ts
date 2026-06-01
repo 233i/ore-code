@@ -16,7 +16,7 @@ describe("run_tests tool", () => {
   it("resolves built-in targets to test commands", () => {
     expect(resolveRunTestsCommand({ target: "desktop" })).toEqual({
       target: "desktop",
-      command: "pnpm --filter @seekforge/desktop test",
+      command: "pnpm --filter @ore-code/desktop test",
       custom: false
     });
     expect(resolveRunTestsCommand({ target: "tauri" })).toEqual({
@@ -37,7 +37,7 @@ describe("run_tests tool", () => {
 
     expect(calls).toEqual([{
       workspacePath: "/workspace",
-      command: "pnpm --filter @seekforge/agent-core test",
+      command: "pnpm --filter @ore-code/agent-core test",
       sandboxPolicy: expect.objectContaining({ enabled: true, envMode: "inherit-safe" }),
       timeoutMs: 30_000
     }]);
@@ -45,7 +45,7 @@ describe("run_tests tool", () => {
     if (result.type === "completed") {
       expect(result.result.output).toMatchObject({
         target: "agent-core",
-        command: "pnpm --filter @seekforge/agent-core test",
+        command: "pnpm --filter @ore-code/agent-core test",
         passed: true,
         summary: "Tests passed for agent-core in 12ms."
       });
@@ -67,7 +67,7 @@ describe("run_tests tool", () => {
     expect(processCalls).toEqual([{
       workspacePath: "/workspace",
       program: "pnpm",
-      args: ["--filter", "@seekforge/desktop", "test"],
+      args: ["--filter", "@ore-code/desktop", "test"],
       sandboxPolicy: expect.objectContaining({ enabled: true, envMode: "inherit-safe" }),
       timeoutMs: 30_000
     }]);
@@ -78,14 +78,14 @@ describe("run_tests tool", () => {
     const result = await executeRegisteredTool(
       registryWithRunTests(makeHost(calls)),
       "run_tests",
-      { target: "desktop", command: "pnpm --filter @seekforge/desktop test -- --runInBand", timeoutMs: 60_000 },
+      { target: "desktop", command: "pnpm --filter @ore-code/desktop test -- --runInBand", timeoutMs: 60_000 },
       context
     );
 
     expect(result.type).toBe("completed");
     expect(calls).toEqual([{
       workspacePath: "/workspace",
-      command: "pnpm --filter @seekforge/desktop test -- --runInBand",
+      command: "pnpm --filter @ore-code/desktop test -- --runInBand",
       timeoutMs: 60_000
     }]);
   });

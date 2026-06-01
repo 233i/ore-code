@@ -27,7 +27,7 @@ export const settingsSections = [
   { id: "automation", icon: DashboardIcon, label: "自动化", labelKey: "settings.section.automation" },
   { id: "data", icon: HistoryIcon, label: "会话与产物", labelKey: "settings.section.data" },
   { id: "harness", icon: PlayCircleIcon, label: "Harness 验收", labelKey: "settings.section.harness" },
-  { id: "about", icon: CodeIcon, label: "关于 SeekForge", labelKey: "settings.section.about" }
+  { id: "about", icon: CodeIcon, label: "关于 Ore Code", labelKey: "settings.section.about" }
 ] as const;
 
 export type SettingsSection = (typeof settingsSections)[number]["id"];
@@ -102,7 +102,7 @@ export function settingsSectionMeta(section: SettingsSection, t?: TranslateFunct
       return {
         kicker: metaText("settings.meta.doctor.kicker", "环境可用性", t),
         title: metaText("settings.section.doctor", "环境检测", t),
-        description: metaText("settings.meta.doctor.description", "检查 SeekForge 可用的 shell、Git CLI、Node/npm、可选工具链和 provider 配置。", t)
+        description: metaText("settings.meta.doctor.description", "检查 Ore Code 可用的 shell、Git CLI、Node/npm、可选工具链和 provider 配置。", t)
       };
     case "tools":
       return {
@@ -137,7 +137,7 @@ export function settingsSectionMeta(section: SettingsSection, t?: TranslateFunct
     case "about":
       return {
         kicker: metaText("settings.meta.about.kicker", "应用信息", t),
-        title: metaText("settings.section.about", "关于 SeekForge", t),
+        title: metaText("settings.section.about", "关于 Ore Code", t),
         description: metaText("settings.meta.about.description", "查看桌面端运行环境、版本、技术栈和当前 provider。", t)
       };
   }

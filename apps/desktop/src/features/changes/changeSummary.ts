@@ -1,5 +1,5 @@
-import type { GitStatusHostOutput } from "@seekforge/tools";
-import type { RuntimeEvent, ToolCall } from "@seekforge/protocol";
+import type { GitStatusHostOutput } from "@ore-code/tools";
+import type { RuntimeEvent, ToolCall } from "@ore-code/protocol";
 
 export interface ChangeFileStat {
   path: string;

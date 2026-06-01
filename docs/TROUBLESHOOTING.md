@@ -1,15 +1,15 @@
 # Troubleshooting
 
-Use this guide before opening a GitHub issue. SeekForge is pre-release software, so many failures are caused by local toolchain, provider, MCP, or workspace configuration rather than a single app bug.
+Use this guide before opening a GitHub issue. Ore Code is pre-release software, so many failures are caused by local toolchain, provider, MCP, or workspace configuration rather than a single app bug.
 
 ## Quick Checks
 
 1. Confirm the current repository state:
 
    ```bash
-   pnpm --filter @seekforge/desktop typecheck
-   pnpm --filter @seekforge/desktop test
-   pnpm --filter @seekforge/desktop lint
+   pnpm --filter @ore-code/desktop typecheck
+   pnpm --filter @ore-code/desktop test
+   pnpm --filter @ore-code/desktop lint
    ```
 
 2. Confirm local runtime paths:
@@ -53,7 +53,7 @@ Use this guide before opening a GitHub issue. SeekForge is pre-release software,
 ## MCP Problems
 
 - Confirm `~/.seekforge/mcp.json` exists and contains the expected server entry.
-- Confirm the server command works outside SeekForge, especially `npx`-launched servers.
+- Confirm the server command works outside Ore Code, especially `npx`-launched servers.
 - Slow MCP startup can delay tool availability. Reconnect one server at a time when debugging.
 - If a tool schema or argument error appears, include the server name, tool name, redacted input JSON, and error text.
 - Do not paste MCP tokens or private environment variables into public issues.
@@ -83,7 +83,7 @@ Use this guide before opening a GitHub issue. SeekForge is pre-release software,
 Include:
 
 - OS and version.
-- SeekForge version or commit.
+- Ore Code version or commit.
 - Workspace type and size.
 - Provider and model name, without API keys.
 - Relevant tool, MCP, or skill names.

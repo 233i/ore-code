@@ -1,5 +1,5 @@
 import { Button, Dialog, Input, Select, Tag } from "tdesign-react";
-import type { AutomationRecord, DeepSeekModelMode, DeepSeekThinkingLevel, DurableTaskSnapshot, NoteRecord } from "@seekforge/agent-core";
+import type { AutomationRecord, DeepSeekModelMode, DeepSeekThinkingLevel, DurableTaskSnapshot, NoteRecord } from "@ore-code/agent-core";
 import type { ThemePreference } from "../services/appSettings";
 import type { UiLocalePreference } from "../services/uiLocale";
 import type { ProviderConfig, ResolvedSeekForgeConfig } from "../services/seekforgeConfig";
@@ -348,7 +348,7 @@ export function PermissionsSettingsSection({
       <h1>权限审批</h1>
       <section className="settings-section">
         <h2>Agent 模式</h2>
-        <p>SeekForge 的高风险能力围绕工具审批设计，尤其是 shell 命令和文件写入。</p>
+        <p>Ore Code 的高风险能力围绕工具审批设计，尤其是 shell 命令和文件写入。</p>
         <div className="settings-table">
           <div className="settings-row">
             <div>
@@ -510,8 +510,8 @@ export function DoctorSettingsSection({
     <>
       <h1>环境检测</h1>
       <section className="settings-section">
-        <h2>SeekForge 运行环境</h2>
-        <p>检查 SeekForge 可用的 shell、Git CLI、Node/npm、可选工具链和 provider 配置，不判断当前目录是否为项目仓库。</p>
+        <h2>Ore Code 运行环境</h2>
+        <p>检查 Ore Code 可用的 shell、Git CLI、Node/npm、可选工具链和 provider 配置，不判断当前目录是否为项目仓库。</p>
         <div className="settings-table">
           <div className="settings-row compact-actions">
             <div>
@@ -706,7 +706,7 @@ export function McpSettingsSection({
       <h1>MCP</h1>
       <section className="settings-section">
         <h2>服务器与外部工具</h2>
-        <p>MCP 用于把外部工具、资源和 prompt 接入 SeekForge。这里提供配置状态和安全操作入口。</p>
+        <p>MCP 用于把外部工具、资源和 prompt 接入 Ore Code。这里提供配置状态和安全操作入口。</p>
         <div className="settings-table">
           <div className="settings-row compact-actions">
             <div>
@@ -779,7 +779,7 @@ export function AutomationSettingsSection({
       <h1>自动化</h1>
       <section className="settings-section">
         <h2>后台任务与调度</h2>
-        <p>自动化当前是应用内调度；SeekForge 运行时会处理到期项和 durable task executor。</p>
+        <p>自动化当前是应用内调度；Ore Code 运行时会处理到期项和 durable task executor。</p>
         <div className="settings-table">
           <div className="settings-row compact-actions">
             <div>
@@ -968,7 +968,7 @@ export type AboutSettingsSectionProps = {
 export function AboutSettingsSection({ providerText, runtimeText }: AboutSettingsSectionProps) {
   return (
     <>
-      <h1>关于 SeekForge</h1>
+      <h1>关于 Ore Code</h1>
       <section className="settings-section">
         <h2>桌面端</h2>
         <div className="settings-table">

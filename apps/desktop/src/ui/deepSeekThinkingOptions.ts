@@ -1,4 +1,4 @@
-import { DEEPSEEK_THINKING_LEVELS, type DeepSeekThinkingLevel } from "@seekforge/agent-core";
+import { DEEPSEEK_THINKING_LEVELS, type DeepSeekThinkingLevel } from "@ore-code/agent-core";
 
 export const deepSeekThinkingOptions: Array<{
   description: string;

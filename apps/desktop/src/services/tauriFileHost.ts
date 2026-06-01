@@ -6,7 +6,7 @@ import type {
   ListDirOutput,
   ReadFileOutput,
   WriteFileOutput
-} from "@seekforge/tools";
+} from "@ore-code/tools";
 
 interface TauriFsEntry {
   name: string;

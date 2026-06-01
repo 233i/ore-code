@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FileToolHost } from "@seekforge/tools";
+import type { FileToolHost } from "@ore-code/tools";
 import { buildProjectIndexContext, createMemoryProjectIndexStore, refreshProjectIndex } from "./projectIndex";
 
 describe("projectIndex", () => {

@@ -1,4 +1,4 @@
-import type { FileToolHost } from "@seekforge/tools";
+import type { FileToolHost } from "@ore-code/tools";
 import { invoke } from "@tauri-apps/api/core";
 import { isTauriRuntime } from "./fileHost";
 
@@ -88,7 +88,7 @@ function truncateInstructions(content: string) {
   if (content.length <= MAX_INSTRUCTIONS_CHARS) {
     return content;
   }
-  return `${content.slice(0, MAX_INSTRUCTIONS_CHARS)}\n\n[SeekForge instructions truncated at ${MAX_INSTRUCTIONS_CHARS} characters.]`;
+  return `${content.slice(0, MAX_INSTRUCTIONS_CHARS)}\n\n[Ore Code instructions truncated at ${MAX_INSTRUCTIONS_CHARS} characters.]`;
 }
 
 function isMissingFile(message: string) {

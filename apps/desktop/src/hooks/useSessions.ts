@@ -1,5 +1,5 @@
 import { startTransition, useState, type Dispatch, type MouseEvent, type MutableRefObject, type SetStateAction } from "react";
-import type { RuntimeEvent, ToolCall } from "@seekforge/protocol";
+import type { RuntimeEvent, ToolCall } from "@ore-code/protocol";
 import {
   latestTurnTrackedChangesFromEvents,
   type TrackedFileChange

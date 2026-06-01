@@ -1,5 +1,5 @@
-import type { ApprovalDecision, ToolCall } from "@seekforge/protocol";
-import { assessCommandRisk } from "@seekforge/tools";
+import type { ApprovalDecision, ToolCall } from "@ore-code/protocol";
+import { assessCommandRisk } from "@ore-code/tools";
 
 export type AppMode = "plan" | "agent" | "yolo";
 export type PermissionPreset = "default" | "autoReview" | "fullAccess";

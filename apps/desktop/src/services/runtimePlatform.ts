@@ -1,4 +1,4 @@
-import type { RuntimeOperatingSystem } from "@seekforge/agent-core";
+import type { RuntimeOperatingSystem } from "@ore-code/agent-core";
 
 export function detectRuntimeOperatingSystem(): RuntimeOperatingSystem {
   if (typeof navigator === "undefined") {

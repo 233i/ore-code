@@ -1,4 +1,4 @@
-import type { ToolCall } from "@seekforge/protocol";
+import type { ToolCall } from "@ore-code/protocol";
 
 export type ModelStreamChunk =
   | { type: "assistant_delta"; text: string }

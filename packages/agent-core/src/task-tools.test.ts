@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createTaskTools, DurableTaskManager, type DurableTaskState } from "./task-tools";
-import type { ShellToolHost } from "@seekforge/tools";
+import type { ShellToolHost } from "@ore-code/tools";
 
 const context = {
   workspacePath: "/workspace",

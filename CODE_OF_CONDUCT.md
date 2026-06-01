@@ -1,6 +1,6 @@
 # Code of Conduct
 
-SeekForge aims to be a practical and respectful engineering project.
+Ore Code aims to be a practical and respectful engineering project.
 
 ## Expected Behavior
 
