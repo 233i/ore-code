@@ -99,6 +99,7 @@ export type UsageSummary = {
     reasoningReplayTokens?: number;
     reasoningRetention?: Extract<RuntimeEvent, { type: "context_capacity" }>["reasoningRetention"];
     checkpoint?: Extract<RuntimeEvent, { type: "context_capacity" }>["checkpoint"];
+    briefing?: Extract<RuntimeEvent, { type: "context_capacity" }>["briefing"];
     prefixHash?: string;
     cachePrefix?: Extract<RuntimeEvent, { type: "context_capacity" }>["cachePrefix"];
     cacheWarmupStatus?: Extract<RuntimeEvent, { type: "context_capacity" }>["cacheWarmupStatus"];
@@ -264,6 +265,7 @@ export function deriveUsageSummary(events: RuntimeEvent[]): UsageSummary {
         reasoningReplayTokens: latestCapacity.reasoningReplayTokens,
         reasoningRetention: latestCapacity.reasoningRetention,
         checkpoint: latestCapacity.checkpoint,
+        briefing: latestCapacity.briefing,
         prefixHash: latestCapacity.prefixHash,
         cachePrefix: latestCapacity.cachePrefix,
         cacheWarmupStatus: latestCapacity.cacheWarmupStatus,

@@ -202,6 +202,21 @@ export const RuntimeEventSchema = z.discriminatedUnion("type", [
       cacheBreak: z.boolean(),
       message: z.string().min(1)
     }).optional(),
+    briefing: z.object({
+      status: z.enum(["none", "applied"]),
+      reason: z.enum(["cycle", "hard"]).optional(),
+      inputTokensBefore: z.number().int().nonnegative(),
+      inputTokensAfter: z.number().int().nonnegative().optional(),
+      maxInputTokens: z.number().int().nonnegative(),
+      thresholdTokens: z.number().int().nonnegative(),
+      messagesBefore: z.number().int().nonnegative(),
+      messagesAfter: z.number().int().nonnegative().optional(),
+      foldedMessages: z.number().int().nonnegative().optional(),
+      retainedMessages: z.number().int().nonnegative().optional(),
+      briefingChars: z.number().int().nonnegative().optional(),
+      cacheBreak: z.boolean(),
+      message: z.string().min(1)
+    }).optional(),
     prefixHash: z.string().min(1).optional(),
     cachePrefix: z.object({
       prefixHash: z.string().min(1),

@@ -50,6 +50,7 @@ export interface CapacityReport {
   reasoningReplayTokens: number;
   reasoningRetention?: ReasoningRetentionReport;
   checkpoint?: ContextCheckpointReport;
+  briefing?: ContextBriefingReport;
   prefixHash: string;
   cachePrefix: CachePrefixReport;
   cacheWarmupStatus?: CacheWarmupStatus;
@@ -75,6 +76,22 @@ export interface CapacityOptions {
   maxInputTokens?: number;
   warningRatio?: number;
   criticalRatio?: number;
+}
+
+export interface ContextBriefingReport {
+  status: "none" | "applied";
+  reason?: "cycle" | "hard";
+  inputTokensBefore: number;
+  inputTokensAfter?: number;
+  maxInputTokens: number;
+  thresholdTokens: number;
+  messagesBefore: number;
+  messagesAfter?: number;
+  foldedMessages?: number;
+  retainedMessages?: number;
+  briefingChars?: number;
+  cacheBreak: boolean;
+  message: string;
 }
 
 const DEFAULT_WARNING_RATIO = 0.75;
@@ -116,6 +133,7 @@ export function buildCapacityReport(input: {
   reasoningReplayTokens?: number;
   reasoningRetention?: ReasoningRetentionReport;
   checkpoint?: ContextCheckpointReport;
+  briefing?: ContextBriefingReport;
 }, options: CapacityOptions = {}): CapacityReport {
   const contextWindow = contextWindowForModel(input.model);
   const maxOutputTokens = maxOutputTokensForModel(input.model);
@@ -149,15 +167,16 @@ export function buildCapacityReport(input: {
     reasoningReplayTokens: input.reasoningReplayTokens ?? reasoningReplayTokensFromMessages(input.messages),
     reasoningRetention: input.reasoningRetention,
     checkpoint: input.checkpoint,
+    briefing: input.briefing,
     prefixHash: cachePrefix.prefixHash,
     cachePrefix,
     seamLevel: seam.level,
     seamThresholdTokens: seam.threshold,
     hardLimitTokens: seam.hardLimitTokens,
     seamMessage: seam.message,
-    shouldCompressToolOutputs: seam.level === "l2" || seam.level === "l3" || seam.level === "cycle" || seam.level === "hard",
+    shouldCompressToolOutputs: shouldCompressToolOutputsAtSeam(seam.level),
     shouldCompressHistory: seam.level === "l3" || seam.level === "cycle" || seam.level === "hard",
-    shouldGenerateBriefing: seam.level === "cycle" || seam.level === "hard",
+    shouldGenerateBriefing: shouldGenerateBriefingAtSeam(seam.level),
     utilization,
     status,
     truncated: Boolean(input.truncated),
@@ -165,6 +184,38 @@ export function buildCapacityReport(input: {
     compressed: Boolean(input.compressed),
     summaryTokens: estimateTokensFromChars(input.summaryChars ?? 0)
   };
+}
+
+export function shouldPreCompressToolOutputs(input: {
+  model?: string;
+  messages: LlmMessage[];
+  tools?: LlmToolDefinition[];
+  systemPrompt?: string;
+}, options: CapacityOptions = {}): boolean {
+  const contextWindow = contextWindowForModel(input.model);
+  const maxInputTokens = options.maxInputTokens ?? inputBudgetForModel(input.model);
+  const estimatedInputTokens = estimateInputTokens(input.messages, input.tools, input.systemPrompt);
+  return shouldCompressToolOutputsAtSeam(contextSeamForTokens(estimatedInputTokens, maxInputTokens, contextWindow).level);
+}
+
+export function shouldGenerateContextBriefing(input: {
+  model?: string;
+  messages: LlmMessage[];
+  tools?: LlmToolDefinition[];
+  systemPrompt?: string;
+}, options: CapacityOptions = {}): boolean {
+  const contextWindow = contextWindowForModel(input.model);
+  const maxInputTokens = options.maxInputTokens ?? inputBudgetForModel(input.model);
+  const estimatedInputTokens = estimateInputTokens(input.messages, input.tools, input.systemPrompt);
+  return shouldGenerateBriefingAtSeam(contextSeamForTokens(estimatedInputTokens, maxInputTokens, contextWindow).level);
+}
+
+function shouldCompressToolOutputsAtSeam(level: ContextSeamLevel) {
+  return level === "l2" || level === "l3" || level === "cycle" || level === "hard";
+}
+
+function shouldGenerateBriefingAtSeam(level: ContextSeamLevel) {
+  return level === "cycle" || level === "hard";
 }
 
 function reasoningReplayTokensFromMessages(messages: LlmMessage[]) {

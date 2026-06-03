@@ -1,6 +1,14 @@
 import type { ApprovalDecision, ArtifactMetadata, RuntimeEvent, ToolCall, ToolResult } from "@ore-code/protocol";
 import { evaluateApproval, executeRegisteredTool, isApproved, type ToolContext, type ToolRegistry } from "@ore-code/tools";
-import { buildCapacityReport, estimateInputTokens, estimateTokensFromChars, estimateUsageCostDetails, type CacheWarmupStatus, type CapacityOptions } from "./capacity";
+import {
+  buildCapacityReport,
+  estimateInputTokens,
+  estimateTokensFromChars,
+  estimateUsageCostDetails,
+  type CacheWarmupStatus,
+  type CapacityOptions,
+  type ContextBriefingReport
+} from "./capacity";
 import { coherenceFromCapacity } from "./coherence";
 import { toolSpecsToLlmDefinitions, type ImmutablePrefixSnapshot } from "./immutable-prefix";
 import { RequestUserInputSchema } from "./interaction-tool";
@@ -25,6 +33,7 @@ export interface StartTurnInput {
   historyReasoningReplayTokens?: number;
   historyReasoningRetention?: ReasoningRetentionReport;
   historyCheckpoint?: ContextCheckpointReport;
+  historyBriefing?: ContextBriefingReport;
   seqStart?: number;
   signal?: AbortSignal;
 }
@@ -130,7 +139,8 @@ export class AgentEngine {
         summaryChars: input.historySummaryChars,
         reasoningReplayTokens: input.historyReasoningReplayTokens,
         reasoningRetention: input.historyReasoningRetention,
-        checkpoint: input.historyCheckpoint
+        checkpoint: input.historyCheckpoint,
+        briefing: input.historyBriefing
       }, this.options.capacity);
       const cacheWarmup = await this.warmupCachePrefix(input, initialCapacity, messages, modelTools);
       yield this.event(input, { type: "context_capacity", ...initialCapacity, ...cacheWarmup });

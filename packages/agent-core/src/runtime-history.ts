@@ -4,6 +4,9 @@ import {
   type ContextCheckpointEventBody,
   type ContextCheckpointReport
 } from "./checkpoint-controller";
+import { shouldPreCompressToolOutputs } from "./capacity";
+import { createContextBriefing } from "./context-briefing";
+import type { ContextBriefingReport } from "./capacity";
 import type { LlmMessage } from "./llm";
 import { inputBudgetForModel } from "./model-metadata";
 import { modelMessagesFromEvents } from "./model-message-ledger";
@@ -18,9 +21,12 @@ export interface RuntimeContextOptions {
   toolResultMaxChars?: number;
   compression?: "off" | "semantic";
   checkpoint?: "off" | "auto";
+  briefing?: "off" | "auto";
   checkpointCandidateRatio?: number;
   checkpointRequiredRatio?: number;
   checkpointRetainedTailTurns?: number;
+  briefingRetainedTailTurns?: number;
+  briefingMaxChars?: number;
   summaryMaxChars?: number;
   verbatimWindowTurns?: number;
 }
@@ -36,20 +42,29 @@ export interface RuntimeContext {
   reasoningRetention: ReasoningRetentionReport;
   checkpoint: ContextCheckpointReport;
   checkpointEvent?: ContextCheckpointEventBody;
+  briefing: ContextBriefingReport;
   workingSetPaths: string[];
   workingSetSummary: string;
 }
 
 const DEFAULT_SUMMARY_MAX_CHARS = 4_000;
 const DEFAULT_VERBATIM_WINDOW_TURNS = 16;
+const PRECOMPRESS_FULL_TOOL_RESULT_TURNS = 6;
+const PRECOMPRESS_TEXT_MAX_CHARS = 1_200;
+const PRECOMPRESS_SEARCH_TEXT_MAX_CHARS = 1_600;
+const PRECOMPRESS_HEAD_LINES = 8;
+const PRECOMPRESS_TAIL_LINES = 36;
+const PRECOMPRESS_IMPORTANT_LINE_LIMIT = 24;
+const PRECOMPRESS_MAX_ARRAY_ITEMS = 6;
 
 type NormalizedRuntimeContextOptions =
-  Omit<Required<RuntimeContextOptions>, "model" | "toolResultMaxChars" | "checkpointCandidateRatio" | "checkpointRequiredRatio" | "checkpointRetainedTailTurns"> & {
+  Omit<Required<RuntimeContextOptions>, "model" | "toolResultMaxChars" | "checkpointCandidateRatio" | "checkpointRequiredRatio" | "checkpointRetainedTailTurns" | "briefingRetainedTailTurns"> & {
     model?: string;
     toolResultMaxChars?: number;
     checkpointCandidateRatio?: number;
     checkpointRequiredRatio?: number;
     checkpointRetainedTailTurns?: number;
+    briefingRetainedTailTurns?: number;
   };
 
 export function buildRuntimeContext(events: RuntimeEvent[], options: RuntimeContextOptions = {}): RuntimeContext {
@@ -66,8 +81,19 @@ export function buildRuntimeContextFromMessages(messages: readonly LlmMessage[],
 }
 
 function buildRuntimeContextFromMessagesWithSettings(messages: readonly LlmMessage[], settings: NormalizedRuntimeContextOptions): RuntimeContext {
+  const retained = applyReasoningRetention([...messages], { model: settings.model });
+  const precompressedMessages = preCompressToolResultsForModelInput(retained.messages, settings);
+  const preBriefingWorkingSet = deriveWorkingSet(precompressedMessages);
+  const briefingResult = createContextBriefing(precompressedMessages, {
+    model: settings.model,
+    maxInputTokens: settings.maxInputTokens,
+    trigger: settings.briefing,
+    retainedTailTurns: settings.briefingRetainedTailTurns,
+    maxChars: settings.briefingMaxChars,
+    workingSetSummary: preBriefingWorkingSet.summary
+  });
   const checkpointResult = settings.checkpoint === "auto"
-    ? createContextCheckpoint(messages, {
+    ? createContextCheckpoint(briefingResult.messages, {
       model: settings.model,
       maxInputTokens: settings.maxInputTokens,
       candidateRatio: settings.checkpointCandidateRatio,
@@ -75,20 +101,20 @@ function buildRuntimeContextFromMessagesWithSettings(messages: readonly LlmMessa
       retainedTailTurns: settings.checkpointRetainedTailTurns,
       summaryMaxChars: settings.summaryMaxChars
     })
-    : createContextCheckpoint(messages, {
+    : createContextCheckpoint(briefingResult.messages, {
       model: settings.model,
       maxInputTokens: settings.maxInputTokens,
       disabled: true
     });
-  const retained = applyReasoningRetention(checkpointResult.messages, { model: settings.model });
-  const workingSet = deriveWorkingSet(retained.messages);
-  const context = limitMessages(retained.messages, settings, workingSet);
+  const workingSet = deriveWorkingSet(checkpointResult.messages);
+  const context = limitMessages(checkpointResult.messages, settings, workingSet);
   return {
     ...context,
     reasoningReplayTokens: estimateReasoningReplayTokens(context.messages),
     reasoningRetention: retained.report,
     checkpoint: checkpointResult.report,
     ...(checkpointResult.eventBody ? { checkpointEvent: checkpointResult.eventBody } : {}),
+    briefing: briefingResult.report,
     workingSetPaths: workingSet.paths,
     workingSetSummary: workingSet.summary
   };
@@ -98,8 +124,251 @@ export function runtimeEventsToLlmMessages(events: RuntimeEvent[], options: Runt
   return buildRuntimeContext(events, options).messages;
 }
 
+function preCompressToolResultsForModelInput(messages: LlmMessage[], settings: NormalizedRuntimeContextOptions): LlmMessage[] {
+  const shouldPreCompress = shouldPreCompressToolOutputs({
+    model: settings.model,
+    messages
+  }, { maxInputTokens: settings.maxInputTokens });
+
+  if (!shouldPreCompress) {
+    return messages;
+  }
+
+  return preCompressOldToolResults(messages, PRECOMPRESS_FULL_TOOL_RESULT_TURNS);
+}
+
+function preCompressOldToolResults(messages: LlmMessage[], fullToolResultTurns: number): LlmMessage[] {
+  const turnIndexes = messageTurnIndexes(messages);
+  const latestTurnIndex = turnIndexes.reduce((latest, turnIndex) => Math.max(latest, turnIndex), 0);
+  const firstFullToolResultTurn = Math.max(0, latestTurnIndex - fullToolResultTurns + 1);
+  let changed = false;
+
+  const compacted = messages.map((message, index) => {
+    if (message.role !== "tool" || turnIndexes[index] >= firstFullToolResultTurn) {
+      return message;
+    }
+
+    const content = compactToolMessageContent(message.content);
+    if (content === message.content || content.length >= message.content.length) {
+      return message;
+    }
+
+    changed = true;
+    return { ...message, content };
+  });
+
+  return changed ? compacted : messages;
+}
+
+function messageTurnIndexes(messages: LlmMessage[]): number[] {
+  let turnIndex = 0;
+  return messages.map((message) => {
+    if (message.role === "user") {
+      turnIndex += 1;
+    }
+    return turnIndex;
+  });
+}
+
+function compactToolMessageContent(content: string): string {
+  const parsed = parseJsonRecord(content);
+  if (!parsed) {
+    return compactPlainToolText(content);
+  }
+
+  const output = toRecord(parsed.output) ?? undefined;
+  const compacted: Record<string, unknown> = {
+    callId: typeof parsed.callId === "string" ? parsed.callId : undefined,
+    ok: typeof parsed.ok === "boolean" ? parsed.ok : undefined,
+    artifactId: typeof parsed.artifactId === "string" ? parsed.artifactId : undefined,
+    error: compactJsonLike(parsed.error),
+    modelStatus: parsed.modelStatus,
+    modelInstruction: parsed.modelInstruction,
+    output: compactToolOutput(output)
+  };
+
+  return JSON.stringify(stripUndefined(compacted));
+}
+
+function compactPlainToolText(content: string): string {
+  return JSON.stringify({
+    output: {
+      precompressed: true,
+      kind: "plain_text",
+      originalChars: content.length,
+      text: compactTextForPrecompress(content, PRECOMPRESS_SEARCH_TEXT_MAX_CHARS)
+    }
+  });
+}
+
+function compactToolOutput(output: Record<string, unknown> | undefined): Record<string, unknown> {
+  if (!output) {
+    return { precompressed: true, kind: "unknown" };
+  }
+
+  if (isShellLikeOutput(output)) {
+    return stripUndefined({
+      precompressed: true,
+      kind: "shell",
+      command: output.command,
+      cwd: output.cwd,
+      exitCode: output.exitCode,
+      timedOut: output.timedOut,
+      jobId: output.jobId,
+      stdoutChars: textLength(output.stdout),
+      stderrChars: textLength(output.stderr),
+      stdoutTruncated: output.stdoutTruncated,
+      stderrTruncated: output.stderrTruncated,
+      stdoutSummary: compactTextForPrecompress(asText(output.stdout), PRECOMPRESS_TEXT_MAX_CHARS),
+      stderrSummary: compactTextForPrecompress(asText(output.stderr), PRECOMPRESS_TEXT_MAX_CHARS)
+    });
+  }
+
+  if (isSearchLikeOutput(output)) {
+    return stripUndefined({
+      precompressed: true,
+      kind: "search",
+      outputKeys: Object.keys(output),
+      matches: compactArrayPreview(output.matches),
+      results: compactArrayPreview(output.results),
+      citations: compactArrayPreview(output.citations),
+      textChars: textLength(output.text),
+      contentChars: textLength(output.content),
+      textSummary: compactTextForPrecompress(asText(output.text), PRECOMPRESS_SEARCH_TEXT_MAX_CHARS),
+      contentSummary: compactTextForPrecompress(asText(output.content), PRECOMPRESS_SEARCH_TEXT_MAX_CHARS)
+    });
+  }
+
+  return stripUndefined({
+    precompressed: true,
+    kind: "generic",
+    outputKeys: Object.keys(output),
+    preview: compactJsonLike(output)
+  });
+}
+
+function isShellLikeOutput(output: Record<string, unknown>) {
+  return "stdout" in output || "stderr" in output || "command" in output || "jobId" in output || "exitCode" in output;
+}
+
+function isSearchLikeOutput(output: Record<string, unknown>) {
+  return "matches" in output || "results" in output || "citations" in output || "text" in output || "content" in output;
+}
+
+function compactTextForPrecompress(value: string, maxChars: number): string | undefined {
+  const normalized = value.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (normalized.length <= maxChars) {
+    return normalized;
+  }
+
+  const lines = normalized.split("\n");
+  const importantLines = lines
+    .filter((line) => /error|failed|failure|exception|traceback|fatal|panic|cannot|unable|denied|timeout|timed out|undefined reference|syntax error|tests? failed|warn(?:ing)?/i.test(line))
+    .slice(0, PRECOMPRESS_IMPORTANT_LINE_LIMIT);
+  const head = truncateText(lines.slice(0, PRECOMPRESS_HEAD_LINES).join("\n"), Math.floor(maxChars * 0.24));
+  const tail = trimLeadingText(lines.slice(-PRECOMPRESS_TAIL_LINES).join("\n"), Math.floor(maxChars * 0.34));
+  const important = truncateText(importantLines.map((line) => `! ${line}`).join("\n"), Math.floor(maxChars * 0.3));
+  const sections = [
+    "Summary:",
+    `- originalChars=${normalized.length}`,
+    `- originalLines=${lines.length}`,
+    important ? `Important lines:\n${important}` : "",
+    tail ? `Tail:\n${tail}` : "",
+    head ? `Head:\n${head}` : ""
+  ].filter(Boolean).join("\n");
+
+  return truncateText(sections, maxChars);
+}
+
+function trimLeadingText(value: string, maxChars: number): string {
+  if (value.length <= maxChars) {
+    return value;
+  }
+
+  if (maxChars <= 16) {
+    return value.slice(-maxChars);
+  }
+
+  const omitted = value.length - maxChars;
+  const prefix = `[trimmed ${omitted} leading chars]\n`;
+  return `${prefix}${value.slice(Math.max(0, value.length - maxChars + prefix.length))}`;
+}
+
+function compactArrayPreview(value: unknown): unknown {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  return {
+    count: value.length,
+    items: value.slice(0, PRECOMPRESS_MAX_ARRAY_ITEMS).map(compactJsonLike)
+  };
+}
+
+function compactJsonLike(value: unknown): unknown {
+  if (typeof value === "string") {
+    return value.length > PRECOMPRESS_SEARCH_TEXT_MAX_CHARS
+      ? compactTextForPrecompress(value, PRECOMPRESS_SEARCH_TEXT_MAX_CHARS)
+      : value;
+  }
+
+  if (Array.isArray(value)) {
+    return {
+      count: value.length,
+      items: value.slice(0, PRECOMPRESS_MAX_ARRAY_ITEMS).map(compactJsonLike)
+    };
+  }
+
+  const record = toRecord(value);
+  if (!record) {
+    return value;
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(record).slice(0, PRECOMPRESS_MAX_ARRAY_ITEMS * 2)) {
+    result[key] = compactJsonLike(child);
+  }
+  return stripUndefined(result);
+}
+
+function parseJsonRecord(value: string): Record<string, unknown> | null {
+  try {
+    return toRecord(JSON.parse(value));
+  } catch {
+    return null;
+  }
+}
+
+function toRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function stripUndefined(record: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(record).filter(([, value]) => value !== undefined));
+}
+
+function asText(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value === undefined || value === null) {
+    return "";
+  }
+  return JSON.stringify(value);
+}
+
+function textLength(value: unknown): number | undefined {
+  return typeof value === "string" ? value.length : undefined;
+}
+
 type WorkingSet = { paths: string[]; summary: string };
-type LimitedRuntimeContext = Omit<RuntimeContext, "reasoningRetention" | "checkpoint" | "checkpointEvent" | "workingSetPaths" | "workingSetSummary">;
+type LimitedRuntimeContext = Omit<RuntimeContext, "reasoningRetention" | "checkpoint" | "checkpointEvent" | "briefing" | "workingSetPaths" | "workingSetSummary">;
 type RecentRuntimeContext = Omit<LimitedRuntimeContext, "compressed" | "summaryChars" | "reasoningReplayTokens">;
 
 function limitMessages(messages: LlmMessage[], settings: NormalizedRuntimeContextOptions, workingSet: WorkingSet): LimitedRuntimeContext {
@@ -243,9 +512,12 @@ function normalizeOptions(options: RuntimeContextOptions): NormalizedRuntimeCont
       : Math.max(0, options.toolResultMaxChars),
     compression: options.compression ?? "off",
     checkpoint: options.checkpoint ?? "off",
+    briefing: options.briefing ?? "auto",
     checkpointCandidateRatio: options.checkpointCandidateRatio,
     checkpointRequiredRatio: options.checkpointRequiredRatio,
     checkpointRetainedTailTurns: options.checkpointRetainedTailTurns,
+    briefingRetainedTailTurns: options.briefingRetainedTailTurns,
+    briefingMaxChars: Math.max(512, options.briefingMaxChars ?? 6_000),
     summaryMaxChars: Math.max(256, options.summaryMaxChars ?? DEFAULT_SUMMARY_MAX_CHARS),
     verbatimWindowTurns: Math.max(0, options.verbatimWindowTurns ?? DEFAULT_VERBATIM_WINDOW_TURNS)
   };

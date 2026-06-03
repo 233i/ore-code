@@ -125,6 +125,21 @@ describe("RuntimeEventSchema interaction events", () => {
         summaryChars: 1_100,
         cacheBreak: true,
         message: "已创建 Context Checkpoint。"
+      },
+      briefing: {
+        status: "applied",
+        reason: "cycle",
+        inputTokensBefore: 800_000,
+        inputTokensAfter: 120_000,
+        maxInputTokens: 930_368,
+        thresholdTokens: 767_553,
+        messagesBefore: 120,
+        messagesAfter: 18,
+        foldedMessages: 102,
+        retainedMessages: 17,
+        briefingChars: 3_600,
+        cacheBreak: true,
+        message: "已生成 Context Briefing。"
       }
     }))).toMatchObject({
       type: "context_capacity",
@@ -137,6 +152,10 @@ describe("RuntimeEventSchema interaction events", () => {
         status: "applied",
         reason: "reasoning_retention",
         cacheBreak: true
+      },
+      briefing: {
+        status: "applied",
+        reason: "cycle"
       }
     });
 

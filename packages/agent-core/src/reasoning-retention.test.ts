@@ -87,7 +87,7 @@ describe("reasoning retention", () => {
     });
   });
 
-  it("uses context checkpoints to establish a stable reasoning-retention baseline", () => {
+  it("applies reasoning retention before checkpoint so runtime checkpoint remains a fallback", () => {
     const context = buildRuntimeContextFromMessages([
       { role: "user", content: "turn 1" },
       { role: "assistant", content: "old answer", reasoningContent: "old optional" },
@@ -103,14 +103,13 @@ describe("reasoning retention", () => {
     });
 
     expect(context.checkpoint).toMatchObject({
-      status: "applied",
-      reason: "reasoning_retention",
-      cacheBreak: true
+      status: "none",
+      cacheBreak: false
     });
-    expect(context.checkpointEvent?.checkpointMessages[1]).not.toHaveProperty("reasoningContent");
+    expect(context.checkpointEvent).toBeUndefined();
     expect(context.reasoningRetention).toMatchObject({
       enabled: true,
-      strippedMessages: 0,
+      strippedMessages: 1,
       healedMessages: 0
     });
     expect(context.messages[1]).not.toHaveProperty("reasoningContent");
