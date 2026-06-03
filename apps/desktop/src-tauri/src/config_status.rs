@@ -38,7 +38,7 @@ pub(crate) struct ConfigEnvStatus {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct SeekForgeConfigStatus {
+pub(crate) struct OreCodeConfigStatus {
     pub(crate) sources: Vec<ConfigSourceStatus>,
     pub(crate) env: Vec<ConfigEnvStatus>,
 }
@@ -125,31 +125,33 @@ pub(crate) fn app_settings_write(
 }
 
 #[tauri::command]
-pub(crate) fn seekforge_config_status(
+pub(crate) fn ore_code_config_status(
     app: tauri::AppHandle,
     workspace_path: String,
-) -> Result<SeekForgeConfigStatus, String> {
+) -> Result<OreCodeConfigStatus, String> {
     let home = app.path().home_dir().map_err(|error| error.to_string())?;
     let workspace = canonicalize_workspace_or_raw(&workspace_path);
     let sources = vec![
-        read_config_source("global", home.join(".deepseek").join("config.toml")),
-        read_config_source("project", workspace.join(".deepseek").join("config.toml")),
+        read_config_source("global", home.join(".ore-code").join("config.toml")),
+        read_config_source("project", workspace.join(".ore-code").join("config.toml")),
     ];
 
-    Ok(SeekForgeConfigStatus {
+    Ok(OreCodeConfigStatus {
         sources,
         env: config_env_statuses(&[
-            "SEEKFORGE_PROFILE",
-            "SEEKFORGE_PROVIDER",
-            "SEEKFORGE_MODEL",
-            "SEEKFORGE_BASE_URL",
+            "ORE_CODE_PROFILE",
+            "ORE_CODE_PROVIDER",
+            "ORE_CODE_MODEL",
+            "ORE_CODE_BASE_URL",
+            "ORE_CODE_DEEPSEEK_MODEL_MODE",
+            "ORE_CODE_DEEPSEEK_THINKING",
             "DEEPSEEK_API_KEY",
         ]),
     })
 }
 
 #[tauri::command]
-pub(crate) fn seekforge_config_env_secret_get(name: String) -> Result<ConfigEnvSecretValue, String> {
+pub(crate) fn ore_code_config_env_secret_get(name: String) -> Result<ConfigEnvSecretValue, String> {
     let normalized = validate_env_name(&name)?;
     let value = env::var(&normalized)
         .map_err(|_| format!("environment variable {normalized} is not set"))?;

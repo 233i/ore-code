@@ -7,8 +7,8 @@ describe("skillTools", () => {
     const tool = createInstallSkillTool(async (input) => {
       calls.push(input);
       return {
-        rootPath: `/Users/test/.seekforge/skills/${input.id}`,
-        skillPath: `/Users/test/.seekforge/skills/${input.id}/SKILL.md`
+        rootPath: `/Users/test/.ore-code/skills/${input.id}`,
+        skillPath: `/Users/test/.ore-code/skills/${input.id}/SKILL.md`
       };
     });
 
@@ -29,7 +29,7 @@ describe("skillTools", () => {
       ok: true,
       output: {
         installScope: "global",
-        skillPath: "/Users/test/.seekforge/skills/reviewer/SKILL.md"
+        skillPath: "/Users/test/.ore-code/skills/reviewer/SKILL.md"
       }
     });
     expect(calls).toEqual([

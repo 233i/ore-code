@@ -252,9 +252,9 @@ describe("coding prompts", () => {
     });
 
     expect(context).toContain("Loaded instructions:");
-    expect(context).toContain("<project_instructions source=\".seekforge/instructions.md\">");
+    expect(context).toContain("<project_instructions source=\".ore-code/instructions.md\">");
     expect(context).toContain("Always run tests before finalizing.");
-    expect(context).toContain("<user_global_instructions source=\"~/.seekforge/instructions.md\">");
+    expect(context).toContain("<user_global_instructions source=\"~/.ore-code/instructions.md\">");
     expect(context).toContain("Prefer concise answers.");
   });
 

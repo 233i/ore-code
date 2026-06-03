@@ -112,11 +112,11 @@ pnpm build:desktop:windows
 
 Ore Code keeps user-level runtime data outside the repository:
 
-- `~/.seekforge/skills`
-- `~/.seekforge/mcp.json`
-- `~/.deepseek/config.toml` for DeepSeek-compatible provider configuration
+- `~/.ore-code/skills`
+- `~/.ore-code/mcp.json`
+- `~/.ore-code/config.toml` for DeepSeek-compatible provider configuration
 
-Project-local runtime data under `.seekforge/` is ignored by Git. The `.seekforge` name is retained for compatibility with existing pre-release data.
+Project-local runtime data under `.ore-code/` is ignored by Git.
 
 ## Documentation
 

@@ -413,7 +413,7 @@ function extractPath(prompt: string): string {
   }
 
   if (isWriteIntent(prompt)) {
-    return "seekforge-harness-note.txt";
+    return "ore-code-harness-note.txt";
   }
 
   return ".";

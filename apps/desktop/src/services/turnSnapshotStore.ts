@@ -4,7 +4,7 @@ import type { FileToolHost } from "@ore-code/tools";
 import type { TrackedFileChange } from "../features/changes/changeLedger";
 import { createRuntimeFileHost, isTauriRuntime } from "./fileHost";
 
-const BROWSER_SNAPSHOT_PREFIX = "seekforge.turnSnapshots.";
+const BROWSER_SNAPSHOT_PREFIX = "ore-code.turnSnapshots.";
 
 export interface TurnSnapshotStore {
   saveTurnSnapshot(record: SnapshotRecord): Promise<SnapshotRecord>;

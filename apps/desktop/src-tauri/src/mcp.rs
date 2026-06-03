@@ -205,7 +205,7 @@ pub(crate) fn read_mcp_config_snapshot(app: &tauri::AppHandle) -> McpToolSnapsho
         Ok(path) => path,
         Err(error) => {
             return mcp_empty_config_snapshot(
-                "~/.seekforge/mcp.json".to_string(),
+                "~/.ore-code/mcp.json".to_string(),
                 false,
                 Some(error),
             );
@@ -881,7 +881,7 @@ pub(crate) fn mcp_config_file(app: &tauri::AppHandle) -> Result<PathBuf, String>
         .path()
         .home_dir()
         .map_err(|error| error.to_string())?
-        .join(".seekforge")
+        .join(".ore-code")
         .join("mcp.json"))
 }
 
@@ -953,7 +953,7 @@ pub(crate) fn load_mcp_snapshot(
         Ok(path) => path,
         Err(error) => {
             return McpToolSnapshot {
-                config_path: "~/.seekforge/mcp.json".to_string(),
+                config_path: "~/.ore-code/mcp.json".to_string(),
                 configured: false,
                 error: Some(error),
                 prompts: Vec::new(),

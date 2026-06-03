@@ -20,7 +20,7 @@ registry.register({
 } satisfies ToolSpec);
 
 const baseContext: ToolContext = {
-  workspacePath: "/tmp/seekforge",
+  workspacePath: "/tmp/ore-code",
   mode: "agent",
   trustedWorkspace: false
 };

@@ -1,8 +1,8 @@
 import { useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import type { ResizablePanel } from "./appTypes";
 
-const SIDEBAR_WIDTH_STORAGE_KEY = "seekforge.layout.sidebar-width";
-const INSPECTOR_WIDTH_STORAGE_KEY = "seekforge.layout.inspector-width";
+const SIDEBAR_WIDTH_STORAGE_KEY = "ore-code.layout.sidebar-width";
+const INSPECTOR_WIDTH_STORAGE_KEY = "ore-code.layout.inspector-width";
 const SIDEBAR_DEFAULT_WIDTH = 288;
 export const SIDEBAR_MIN_WIDTH = 220;
 export const SIDEBAR_MAX_WIDTH = 460;

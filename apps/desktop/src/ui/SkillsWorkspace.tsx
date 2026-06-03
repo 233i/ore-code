@@ -636,7 +636,7 @@ function McpSourcesView({
   if (!snapshot) {
     return (
       <div className="mcp-source-empty">
-        <Empty description="点击刷新读取 ~/.seekforge/mcp.json。" title="MCP 尚未加载" />
+        <Empty description="点击刷新读取 ~/.ore-code/mcp.json。" title="MCP 尚未加载" />
         <div className="mcp-source-actions">
           <Button type="button" variant="outline" onClick={onInit}>初始化 MCP</Button>
           <Button theme="primary" type="button" onClick={onRefresh}>刷新 MCP</Button>
@@ -718,7 +718,7 @@ function McpSourcesView({
       {!snapshot.configured || !snapshot.supported ? (
         <div className="mcp-source-empty">
           <Empty
-            description={snapshot.error || (snapshot.supported ? "创建 ~/.seekforge/mcp.json 后刷新。" : "浏览器预览不支持连接 MCP server。")}
+            description={snapshot.error || (snapshot.supported ? "创建 ~/.ore-code/mcp.json 后刷新。" : "浏览器预览不支持连接 MCP server。")}
             title={snapshot.supported ? "未配置 MCP" : "MCP 不可用"}
           />
         </div>

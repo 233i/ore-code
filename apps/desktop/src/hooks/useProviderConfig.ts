@@ -19,11 +19,11 @@ import {
 } from "../services/appSettings";
 import {
   getConfigEnvSecret,
-  loadSeekForgeConfig,
+  loadOreCodeConfig,
   resolveProvider,
   type ProviderConfig,
-  type ResolvedSeekForgeConfig
-} from "../services/seekforgeConfig";
+  type ResolvedOreCodeConfig
+} from "../services/oreCodeConfig";
 import {
   deleteProviderSecret,
   getProviderSecret,
@@ -51,7 +51,7 @@ export function useProviderConfig() {
   const [deepSeekModelMode, setDeepSeekModelMode] = useState<DeepSeekModelMode>(DEFAULT_DEEPSEEK_MODEL_MODE);
   const [deepSeekBaseUrl, setDeepSeekBaseUrl] = useState(DEFAULT_DEEPSEEK_BASE_URL);
   const [deepSeekThinkingLevel, setDeepSeekThinkingLevel] = useState<DeepSeekThinkingLevel>(DEFAULT_DEEPSEEK_THINKING_LEVEL);
-  const [seekForgeConfig, setSeekForgeConfig] = useState<ResolvedSeekForgeConfig | null>(null);
+  const [oreCodeConfig, setOreCodeConfig] = useState<ResolvedOreCodeConfig | null>(null);
   const [configMessage, setConfigMessage] = useState<string | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
   const [providerTestMessage, setProviderTestMessage] = useState<string | null>(null);
@@ -59,15 +59,15 @@ export function useProviderConfig() {
   const [secretMessage, setSecretMessage] = useState<string | null>(null);
 
   const providerOptions = useMemo(() => {
-    const configured = seekForgeConfig?.providers
+    const configured = oreCodeConfig?.providers
       .filter((item) => item.id !== "deepseek" && (DEVELOPER_HARNESS_ENABLED || item.id !== "mock"))
       .map((item) => ({ label: item.label, value: item.id })) ?? [];
     return uniqueProviderOptions([...baseProviderOptions, ...configured]);
-  }, [seekForgeConfig]);
+  }, [oreCodeConfig]);
 
   const selectedProviderConfig = useMemo(
-    () => resolveProvider(seekForgeConfig, provider),
-    [seekForgeConfig, provider]
+    () => resolveProvider(oreCodeConfig, provider),
+    [oreCodeConfig, provider]
   );
   const effectiveProviderConfig = useMemo(
     () => effectiveConfiguredProvider(provider, selectedProviderConfig, deepSeekModel, deepSeekBaseUrl),
@@ -86,9 +86,9 @@ export function useProviderConfig() {
     [deepSeekModelMode, effectiveProviderConfig]
   );
 
-  async function refreshSeekForgeConfig(path: string) {
-    const config = await loadSeekForgeConfig(path);
-    setSeekForgeConfig(config);
+  async function refreshOreCodeConfig(path: string) {
+    const config = await loadOreCodeConfig(path);
+    setOreCodeConfig(config);
     setConfigMessage(configSummary(config));
     return config;
   }
@@ -281,7 +281,7 @@ export function useProviderConfig() {
     setDeepSeekBaseUrl,
     deepSeekThinkingLevel,
     setDeepSeekThinkingLevel,
-    seekForgeConfig,
+    oreCodeConfig,
     configMessage,
     providerError,
     setProviderError,
@@ -295,7 +295,7 @@ export function useProviderConfig() {
     selectedProviderConfig,
     effectiveProviderConfig,
     modelLabel,
-    refreshSeekForgeConfig,
+    refreshOreCodeConfig,
     createLlmClient,
     createConfiguredProviderClient,
     resolveProviderApiKey,
@@ -371,7 +371,7 @@ export function configuredModelLabel(config: ProviderConfig | null, provider: st
   return providerLabel(provider);
 }
 
-export function configSummary(config: ResolvedSeekForgeConfig) {
+export function configSummary(config: ResolvedOreCodeConfig) {
   const loaded = config.sources.filter((source) => source.status === "loaded").length;
   const warning = config.warnings.length ? `，${config.warnings.length} 个警告` : "";
   return `profile ${config.activeProfile} · provider ${config.providerId} · ${loaded} 个配置文件已加载${warning}`;

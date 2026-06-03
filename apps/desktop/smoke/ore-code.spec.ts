@@ -41,7 +41,7 @@ test("keeps the chat layout full width by default", async ({ page }) => {
   expect(metrics.composer?.width).toBeGreaterThan(760);
   expect(metrics.composer?.width).toBeLessThan(920);
 
-  await page.screenshot({ fullPage: true, path: "test-results/seekforge-layout-main.png" });
+  await page.screenshot({ fullPage: true, path: "test-results/ore-code-layout-main.png" });
 });
 
 test("opens the inspector as an overlay drawer", async ({ page }) => {
@@ -82,9 +82,9 @@ test("creates a new conversation after choosing a workspace path", async ({ page
   await expect(page.getByLabel("新对话工作区路径")).toBeVisible();
   await expect(page.getByText("请先选择一个真实工作区")).toBeVisible();
 
-  await page.getByLabel("新对话工作区路径").fill("/tmp/seekforge-smoke-workspace");
+  await page.getByLabel("新对话工作区路径").fill("/tmp/ore-code-smoke-workspace");
   await page.getByRole("button", { name: /应用输入路径/ }).click();
-  await expect(page.getByText("浏览器预览：/tmp/seekforge-smoke-workspace")).toBeVisible();
+  await expect(page.getByText("浏览器预览：/tmp/ore-code-smoke-workspace")).toBeVisible();
   await page.getByRole("button", { name: "创建对话" }).click();
 
   await expect(page.getByLabel("新对话工作区路径")).toHaveCount(0);
@@ -121,12 +121,12 @@ test("reviews and restores a single turn file change", async ({ page }) => {
   await expect(transcript.getByText(/1 个文件已更改/)).toBeVisible();
   await page.getByRole("button", { name: "审核" }).click();
   await expect(page.getByText("审核文件更改")).toBeVisible();
-  await expect(page.getByRole("button", { name: /seekforge-smoke-one\.txt/ }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /ore-code-smoke-one\.txt/ }).first()).toBeVisible();
 
   await page.getByRole("button", { name: "复制 diff" }).click();
   await page.getByRole("button", { name: "撤销单文件" }).click();
 
-  await expect(page.getByText("已撤销 seekforge-smoke-one.txt")).toBeVisible();
+  await expect(page.getByText("已撤销 ore-code-smoke-one.txt")).toBeVisible();
   await expect(transcript.getByText(/1 个文件已更改/)).toHaveCount(0);
 });
 

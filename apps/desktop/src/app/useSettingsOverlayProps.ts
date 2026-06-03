@@ -1,5 +1,5 @@
 import type { DeepSeekModelMode, DeepSeekThinkingLevel, NoteRecord } from "@ore-code/agent-core";
-import type { ResolvedSeekForgeConfig, ProviderConfig } from "../services/seekforgeConfig";
+import type { ResolvedOreCodeConfig, ProviderConfig } from "../services/oreCodeConfig";
 import { isTauriRuntime } from "../services/fileHost";
 import type { McpToolSnapshot } from "../services/mcpHost";
 import type { UsageSummary } from "../services/usageSummary";
@@ -30,7 +30,7 @@ type UseSettingsOverlayPropsInput = {
   clearSessionApprovalCache: () => void;
   configMessage: string | null;
   currentWorkspaceDisplay: string;
-  seekForgeConfig: ResolvedSeekForgeConfig | null;
+  oreCodeConfig: ResolvedOreCodeConfig | null;
   deepSeekApiKey: string;
   deepSeekBaseUrl: string;
   deepSeekModel: string;
@@ -70,7 +70,7 @@ type UseSettingsOverlayPropsInput = {
   providerTestMessage: string | null;
   recentWorkspacePaths: string[];
   refreshAutomationWorkspace: () => void | Promise<void>;
-  refreshSeekForgeConfig: (workspacePath: string) => void | Promise<unknown>;
+  refreshOreCodeConfig: (workspacePath: string) => void | Promise<unknown>;
   refreshMcpTools: (force?: boolean) => unknown;
   removeDeepSeekApiKey: () => void | Promise<void>;
   runAgentTurn: (prompt: string) => void | Promise<void>;
@@ -230,7 +230,7 @@ export function useSettingsOverlayProps(input: UseSettingsOverlayPropsInput): Ap
     },
     providers: {
       configMessage: input.configMessage,
-      seekForgeConfig: input.seekForgeConfig,
+      oreCodeConfig: input.oreCodeConfig,
       deepSeekApiKey: input.deepSeekApiKey,
       deepSeekBaseUrl: input.deepSeekBaseUrl,
       deepSeekModel: input.deepSeekModel,
@@ -245,7 +245,7 @@ export function useSettingsOverlayProps(input: UseSettingsOverlayPropsInput): Ap
       onModelChange: input.setDeepSeekModel,
       onProviderChange: input.setProvider,
       onRefreshConfig: async () => {
-        await input.refreshSeekForgeConfig(input.workspacePath);
+        await input.refreshOreCodeConfig(input.workspacePath);
       },
       onRemoveApiKey: input.removeDeepSeekApiKey,
       onSaveApiKey: input.saveDeepSeekApiKey,

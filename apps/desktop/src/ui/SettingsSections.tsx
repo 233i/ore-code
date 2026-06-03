@@ -2,7 +2,7 @@ import { Button, Dialog, Input, Select, Tag } from "tdesign-react";
 import type { AutomationRecord, DeepSeekModelMode, DeepSeekThinkingLevel, DurableTaskSnapshot, NoteRecord } from "@ore-code/agent-core";
 import type { ThemePreference } from "../services/appSettings";
 import type { UiLocalePreference } from "../services/uiLocale";
-import type { ProviderConfig, ResolvedSeekForgeConfig } from "../services/seekforgeConfig";
+import type { ProviderConfig, ResolvedOreCodeConfig } from "../services/oreCodeConfig";
 import { mcpConnectionSummary, type McpToolSnapshot } from "../services/mcpHost";
 import { formatUsageInteger, type UsageSummary } from "../services/usageSummary";
 import type { DoctorCheck } from "../services/workspaceDoctor";
@@ -159,7 +159,7 @@ function localizedOptions<T extends { label: string; value: string }>(
 
 export type ProviderSettingsSectionProps = {
   configMessage: string | null;
-  seekForgeConfig: ResolvedSeekForgeConfig | null;
+  oreCodeConfig: ResolvedOreCodeConfig | null;
   deepSeekApiKey: string;
   deepSeekBaseUrl: string;
   deepSeekModel: string;
@@ -187,7 +187,7 @@ export type ProviderSettingsSectionProps = {
 
 export function ProviderSettingsSection({
   configMessage,
-  seekForgeConfig,
+  oreCodeConfig,
   deepSeekApiKey,
   deepSeekBaseUrl,
   deepSeekModel,
@@ -296,23 +296,23 @@ export function ProviderSettingsSection({
           <div className="settings-row compact-actions">
             <div>
               <strong>配置 overlay</strong>
-              <p>{configMessage ?? "读取 ~/.deepseek/config.toml 和项目 .deepseek/config.toml。"}</p>
+              <p>{configMessage ?? "读取 ~/.ore-code/config.toml 和项目 .ore-code/config.toml。"}</p>
             </div>
             <div className="settings-actions">
               <Button type="button" variant="outline" onClick={() => void onRefreshConfig()}>刷新配置</Button>
             </div>
           </div>
-          {seekForgeConfig ? (
+          {oreCodeConfig ? (
             <div className="config-source-list">
               <div>
                 <strong>Profile</strong>
-                <span>{seekForgeConfig.activeProfile}</span>
+                <span>{oreCodeConfig.activeProfile}</span>
               </div>
               <div>
                 <strong>Provider</strong>
                 <span>{effectiveProviderConfig?.label ?? provider}</span>
               </div>
-              {seekForgeConfig.sources.map((source) => (
+              {oreCodeConfig.sources.map((source) => (
                 <div key={`${source.scope}:${source.path}`}>
                   <strong>{source.scope}</strong>
                   <span>{source.status} · {source.path}</span>
@@ -723,7 +723,7 @@ export function McpSettingsSection({
           <div className="settings-row">
             <div>
               <strong>配置文件</strong>
-              <p>{snapshot?.configPath ?? "~/.seekforge/mcp.json"}</p>
+              <p>{snapshot?.configPath ?? "~/.ore-code/mcp.json"}</p>
             </div>
             <Button className="secondary-pill" type="button" variant="base" onClick={onOpenMcp}>打开 MCP 管理</Button>
           </div>

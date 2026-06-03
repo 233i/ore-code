@@ -222,7 +222,7 @@ function fakeHost(snapshot: McpToolSnapshot = emptyMcpSnapshot()): McpHost {
       return emptyMcpSnapshot();
     },
     async validateConfig() {
-      return { configPath: "~/.seekforge/mcp.json", errors: [], ok: true, servers: [] };
+      return { configPath: "~/.ore-code/mcp.json", errors: [], ok: true, servers: [] };
     }
   };
 }

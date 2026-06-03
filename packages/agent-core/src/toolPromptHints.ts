@@ -129,7 +129,7 @@ export function toolPromptHintLines(source?: ToolPromptHintSource): string[] {
   }
   if (has("install_skill")) {
     lines.push("Use install_skill when the user asks to install, create, or save an Ore Code skill; it writes only to the global user skill directory.");
-    lines.push("Install Ore Code skills with install_skill, not write_file/apply_patch/exec_shell, and never create workspace .seekforge/skills unless the user explicitly asks to edit project files.");
+    lines.push("Install Ore Code skills with install_skill, not write_file/apply_patch/exec_shell, and never create workspace .ore-code/skills unless the user explicitly asks to edit project files.");
   }
   if (has("tool_search")) {
     lines.push("Use tool_search when you are unsure which tool or MCP capability is available instead of guessing tool names.");

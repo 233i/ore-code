@@ -8,9 +8,9 @@ describe("RuntimeEventSchema interaction events", () => {
       requestId: "request-1",
       title: "选择项目",
       message: "请选择要操作的项目。",
-      recommendedOptionId: "seekforge",
+      recommendedOptionId: "ore-code",
       options: [
-        { id: "seekforge", label: "Ore Code", description: "当前项目", value: "/repo/Ore Code" }
+        { id: "ore-code", label: "Ore Code", description: "当前项目", value: "/repo/Ore Code" }
       ]
     }))).toMatchObject({
       type: "interaction_requested",

@@ -300,13 +300,13 @@ select:focus-visible {
 }
 
 .spin {
-  animation: seekforge-spin 1s linear infinite;
+  animation: ore-code-spin 1s linear infinite;
   display: inline-block;
   transform-box: fill-box;
   transform-origin: center;
 }
 
-@keyframes seekforge-spin {
+@keyframes ore-code-spin {
   to {
     transform: rotate(360deg);
   }

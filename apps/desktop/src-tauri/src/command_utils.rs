@@ -159,7 +159,7 @@ mod tests {
     #[test]
     fn executable_resolution_finds_cmd_shims_on_windows_path() {
         let root = std::env::temp_dir().join(format!(
-            "seekforge-command-utils-{}",
+            "ore-code-command-utils-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()

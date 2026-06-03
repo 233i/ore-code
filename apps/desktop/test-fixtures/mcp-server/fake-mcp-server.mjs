@@ -37,7 +37,7 @@ function handleRequest(request) {
     writeResponse(request.id, {
       protocolVersion: "2024-11-05",
       capabilities: { tools: {} },
-      serverInfo: { name: "seekforge-fake-mcp", version: "0.1.0" }
+      serverInfo: { name: "ore-code-fake-mcp", version: "0.1.0" }
     });
     return;
   }

@@ -39,7 +39,7 @@ pnpm-debug.log*
 *.local
 
 # Local Ore Code runtime data
-.seekforge/
+.ore-code/
 
 # OS files
 .DS_Store

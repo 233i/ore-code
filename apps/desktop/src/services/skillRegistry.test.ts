@@ -7,7 +7,7 @@ describe("skillRegistry", () => {
     const result = await scanUserSkills({
       disabledSkillIds: [],
       fileHost: makeSkillHost({
-        ".seekforge/skills/reviewer/SKILL.md": [
+        ".ore-code/skills/reviewer/SKILL.md": [
           "---",
           "name: Reviewer",
           "description: Review current changes",
@@ -47,7 +47,7 @@ describe("skillRegistry", () => {
     const result = await scanUserSkills({
       disabledSkillIds: ["reviewer"],
       fileHost: makeSkillHost({
-        ".seekforge/skills/reviewer/SKILL.md": "# Reviewer\nReview current changes."
+        ".ore-code/skills/reviewer/SKILL.md": "# Reviewer\nReview current changes."
       }),
       userHomePath: "/Users/test"
     });
@@ -60,14 +60,14 @@ describe("skillRegistry", () => {
     const result = await scanUserSkills({
       disabledSkillIds: [],
       fileHost: makeSkillHost({
-        ".seekforge/skills/good/SKILL.md": "# Good\nUseful skill."
+        ".ore-code/skills/good/SKILL.md": "# Good\nUseful skill."
       }, ["bad"]),
       userHomePath: "/Users/test"
     });
 
     expect(result.skills.map((skill) => skill.id)).toEqual(["good"]);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].path).toBe(".seekforge/skills/bad/SKILL.md");
+    expect(result.errors[0].path).toBe(".ore-code/skills/bad/SKILL.md");
   });
 
   it("treats a missing skills root as an empty skill catalog", async () => {
@@ -93,15 +93,15 @@ describe("skillRegistry", () => {
         ...makeSkillHost({}),
         async listDir(input) {
           calls.push({ workspacePath: input.workspacePath, path: input.path });
-          if (input.workspacePath === "/Users/test" && input.path === ".seekforge/skills") {
+          if (input.workspacePath === "/Users/test" && input.path === ".ore-code/skills") {
             return { entries: [] };
           }
-          if (input.workspacePath === "/Users/test/.seekforge/skills" && input.path === ".") {
+          if (input.workspacePath === "/Users/test/.ore-code/skills" && input.path === ".") {
             return {
               entries: [
                 {
                   name: "find-skills",
-                  path: "/Users/test/.seekforge/skills/find-skills",
+                  path: "/Users/test/.ore-code/skills/find-skills",
                   isDir: true
                 }
               ]
@@ -111,7 +111,7 @@ describe("skillRegistry", () => {
           return { entries: [] };
         },
         async readText(input) {
-          if (input.path !== "/Users/test/.seekforge/skills/find-skills/SKILL.md") {
+          if (input.path !== "/Users/test/.ore-code/skills/find-skills/SKILL.md") {
             throw new Error(`missing file: ${input.path}`);
           }
 
@@ -131,14 +131,14 @@ describe("skillRegistry", () => {
       userHomePath: "/Users/test"
     });
 
-    expect(calls).toContainEqual({ workspacePath: "/Users/test", path: ".seekforge/skills" });
-    expect(calls).toContainEqual({ workspacePath: "/Users/test/.seekforge/skills", path: "." });
+    expect(calls).toContainEqual({ workspacePath: "/Users/test", path: ".ore-code/skills" });
+    expect(calls).toContainEqual({ workspacePath: "/Users/test/.ore-code/skills", path: "." });
     expect(result.errors).toEqual([]);
     expect(result.skills).toHaveLength(1);
     expect(result.skills[0]).toMatchObject({
       id: "find-skills",
       name: "Find Skills",
-      rootPath: "/Users/test/.seekforge/skills/find-skills"
+      rootPath: "/Users/test/.ore-code/skills/find-skills"
     });
   });
 
@@ -150,15 +150,15 @@ describe("skillRegistry", () => {
         ...makeSkillHost({}),
         async listDir(input) {
           calls.push({ workspacePath: input.workspacePath, path: input.path });
-          if (input.workspacePath === "C:\\Users\\test" && input.path === ".seekforge\\skills") {
+          if (input.workspacePath === "C:\\Users\\test" && input.path === ".ore-code\\skills") {
             return { entries: [] };
           }
-          if (input.workspacePath === "C:\\Users\\test\\.seekforge\\skills" && input.path === ".") {
+          if (input.workspacePath === "C:\\Users\\test\\.ore-code\\skills" && input.path === ".") {
             return {
               entries: [
                 {
                   name: "find-skills",
-                  path: "C:\\Users\\test\\.seekforge\\skills\\find-skills",
+                  path: "C:\\Users\\test\\.ore-code\\skills\\find-skills",
                   isDir: true
                 }
               ]
@@ -168,7 +168,7 @@ describe("skillRegistry", () => {
           return { entries: [] };
         },
         async readText(input) {
-          if (input.path !== "C:\\Users\\test\\.seekforge\\skills\\find-skills\\SKILL.md") {
+          if (input.path !== "C:\\Users\\test\\.ore-code\\skills\\find-skills\\SKILL.md") {
             throw new Error(`missing file: ${input.path}`);
           }
 
@@ -181,19 +181,19 @@ describe("skillRegistry", () => {
       userHomePath: "C:\\Users\\test"
     });
 
-    expect(calls).toContainEqual({ workspacePath: "C:\\Users\\test", path: ".seekforge\\skills" });
-    expect(calls).toContainEqual({ workspacePath: "C:\\Users\\test\\.seekforge\\skills", path: "." });
+    expect(calls).toContainEqual({ workspacePath: "C:\\Users\\test", path: ".ore-code\\skills" });
+    expect(calls).toContainEqual({ workspacePath: "C:\\Users\\test\\.ore-code\\skills", path: "." });
     expect(result.errors).toEqual([]);
     expect(result.skills[0]).toMatchObject({
       id: "find-skills",
-      rootPath: "C:\\Users\\test\\.seekforge\\skills\\find-skills",
-      skillPath: "C:\\Users\\test\\.seekforge\\skills\\find-skills\\SKILL.md"
+      rootPath: "C:\\Users\\test\\.ore-code\\skills\\find-skills",
+      skillPath: "C:\\Users\\test\\.ore-code\\skills\\find-skills\\SKILL.md"
     });
   });
 
   it("formats the global skill root with platform separators", () => {
-    expect(userSkillRootPath("/Users/test")).toBe("/Users/test/.seekforge/skills");
-    expect(userSkillRootPath("C:\\Users\\test")).toBe("C:\\Users\\test\\.seekforge\\skills");
+    expect(userSkillRootPath("/Users/test")).toBe("/Users/test/.ore-code/skills");
+    expect(userSkillRootPath("C:\\Users\\test")).toBe("C:\\Users\\test\\.ore-code\\skills");
   });
 
   it("suggests skills by id, name, and description", () => {
@@ -230,8 +230,8 @@ function skill(input: Pick<SkillRecord, "id" | "name" | "description"> & { enabl
     content: "# Skill",
     resourceSummary: "无资源",
     resources: [],
-    rootPath: `.seekforge/skills/${input.id}`,
-    skillPath: `.seekforge/skills/${input.id}/SKILL.md`,
+    rootPath: `.ore-code/skills/${input.id}`,
+    skillPath: `.ore-code/skills/${input.id}/SKILL.md`,
     updatedAt: null,
     validationIssues: [],
     enabled: input.enabled ?? true,
@@ -249,15 +249,15 @@ function makeSkillHost(files: Record<string, string>, extraRoots: string[] = [])
       return { path: input.path, content: files[input.path] };
     },
     async listDir(input) {
-      if (input.path !== ".seekforge/skills") {
+      if (input.path !== ".ore-code/skills") {
         return { entries: [] };
       }
 
       const roots = new Set([
         ...Object.keys(files)
-          .filter((path) => path.startsWith(".seekforge/skills/"))
+          .filter((path) => path.startsWith(".ore-code/skills/"))
           .map((path) => path.split("/").slice(0, 3).join("/")),
-        ...extraRoots.map((root) => `.seekforge/skills/${root}`)
+        ...extraRoots.map((root) => `.ore-code/skills/${root}`)
       ]);
 
       return {

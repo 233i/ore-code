@@ -37,7 +37,7 @@ import {
 import type { createRuntimeArtifactStore } from "../services/artifactStore";
 import { createRuntimeFileHost } from "../services/fileHost";
 import type { McpToolSnapshot } from "../services/mcpHost";
-import { loadSeekForgeInstructions } from "../services/seekforgeInstructions";
+import { loadOreCodeInstructions } from "../services/oreCodeInstructions";
 import { buildProjectIndexContext, type ProjectIndexContext } from "../services/projectIndex";
 import { detectRuntimeOperatingSystem } from "../services/runtimePlatform";
 import { snapshotFromTrackedChanges } from "../services/turnSnapshotStore";
@@ -52,7 +52,7 @@ import {
 import { parseSlashCommand, type SlashCommand } from "../ui/slashCommands";
 import { renderSkillPromptFromCommand } from "../services/skillRegistry";
 import { fallbackDeepSeekProvider, type CreateLlmClientOptions, type Provider } from "./useProviderConfig";
-import type { ProviderConfig } from "../services/seekforgeConfig";
+import type { ProviderConfig } from "../services/oreCodeConfig";
 import type { ChangeGroup } from "../features/changes/changeGroups";
 import { createDesktopToolRegistry, isDesktopToolAllowedForProfile } from "./createDesktopToolRegistry";
 import {
@@ -346,7 +346,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       if (!llm || runController.signal.aborted) {
         return;
       }
-      const instructions = await loadSeekForgeInstructions({
+      const instructions = await loadOreCodeInstructions({
         fileHost,
         workspacePath: input.workspacePath
       });

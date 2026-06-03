@@ -23,7 +23,7 @@ import {
   type McpReadResourceInput
 } from "./mcpGatewayContract";
 
-const DEFAULT_MCP_CONFIG_PATH = "~/.seekforge/mcp.json";
+const DEFAULT_MCP_CONFIG_PATH = "~/.ore-code/mcp.json";
 
 export type McpServerTransport = "stdio" | "http";
 export type McpServerStatus = "connected" | "connecting" | "disabled" | "failed" | "unsupported" | "missing";

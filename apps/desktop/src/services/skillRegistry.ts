@@ -48,7 +48,7 @@ export interface SkillValidationIssue {
   severity: "error" | "warning";
 }
 
-export const USER_SKILL_ROOT_PATH = ".seekforge/skills";
+export const USER_SKILL_ROOT_PATH = ".ore-code/skills";
 const SKILL_FILE_NAME = "SKILL.md";
 const RESOURCE_PREVIEW_LIMIT = 4096;
 const RESOURCE_KINDS: Array<{ dir: string; kind: SkillResourceKind; label: string }> = [

@@ -2,8 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import type { AutomationState, DurableTaskState } from "@ore-code/agent-core";
 import { isTauriRuntime } from "./fileHost";
 
-const DURABLE_TASK_STORAGE_KEY = "seekforge.durableTasks.v1";
-const AUTOMATION_STORAGE_KEY = "seekforge.automations.v1";
+const DURABLE_TASK_STORAGE_KEY = "ore-code.durableTasks.v1";
+const AUTOMATION_STORAGE_KEY = "ore-code.automations.v1";
 
 export function createRuntimeDurableTaskStore() {
   if (isTauriRuntime()) {

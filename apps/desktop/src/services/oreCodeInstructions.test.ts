@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { FileToolHost } from "@ore-code/tools";
-import { loadSeekForgeInstructions } from "./seekforgeInstructions";
+import { loadOreCodeInstructions } from "./oreCodeInstructions";
 
-describe("seekforgeInstructions", () => {
+describe("oreCodeInstructions", () => {
   it("loads user and project instructions without treating missing files as errors", async () => {
     const host = makeHost({
-      "/Users/test::.seekforge/instructions.md": "Use Chinese for summaries.",
-      "/repo::.seekforge/instructions.md": "Run tests before final answers."
+      "/Users/test::.ore-code/instructions.md": "Use Chinese for summaries.",
+      "/repo::.ore-code/instructions.md": "Run tests before final answers."
     });
 
-    const result = await loadSeekForgeInstructions({
+    const result = await loadOreCodeInstructions({
       fileHost: host,
       userHomePath: "/Users/test",
       workspacePath: "/repo"
@@ -18,32 +18,32 @@ describe("seekforgeInstructions", () => {
     expect(result.userInstructions).toBe("Use Chinese for summaries.");
     expect(result.projectInstructions).toBe("Run tests before final answers.");
     expect(result.sources).toEqual([
-      { path: "~/.seekforge/instructions.md", scope: "user", status: "loaded", error: undefined },
-      { path: ".seekforge/instructions.md", scope: "project", status: "loaded", error: undefined }
+      { path: "~/.ore-code/instructions.md", scope: "user", status: "loaded", error: undefined },
+      { path: ".ore-code/instructions.md", scope: "project", status: "loaded", error: undefined }
     ]);
   });
 
   it("uses Windows path separators for Windows home and workspace paths", async () => {
     const seen: Array<{ workspacePath: string; path: string }> = [];
     const host = makeHost({
-      "C:\\Users\\test::.seekforge\\instructions.md": "User rules",
-      "D:\\work\\project::.seekforge\\instructions.md": "Project rules"
+      "C:\\Users\\test::.ore-code\\instructions.md": "User rules",
+      "D:\\work\\project::.ore-code\\instructions.md": "Project rules"
     }, seen);
-    const result = await loadSeekForgeInstructions({
+    const result = await loadOreCodeInstructions({
       fileHost: host,
       userHomePath: "C:\\Users\\test",
       workspacePath: "D:\\work\\project"
     });
 
-    expect(seen).toContainEqual({ workspacePath: "C:\\Users\\test", path: ".seekforge\\instructions.md" });
-    expect(seen).toContainEqual({ workspacePath: "D:\\work\\project", path: ".seekforge\\instructions.md" });
+    expect(seen).toContainEqual({ workspacePath: "C:\\Users\\test", path: ".ore-code\\instructions.md" });
+    expect(seen).toContainEqual({ workspacePath: "D:\\work\\project", path: ".ore-code\\instructions.md" });
     expect(result.userInstructions).toBe("User rules");
     expect(result.projectInstructions).toBe("Project rules");
   });
 
   it("skips instruction loading in browser preview without an explicit home path", async () => {
-    const result = await loadSeekForgeInstructions({
-      fileHost: makeHost({ "/repo::.seekforge/instructions.md": "Project rules" }),
+    const result = await loadOreCodeInstructions({
+      fileHost: makeHost({ "/repo::.ore-code/instructions.md": "Project rules" }),
       workspacePath: "/repo"
     });
 

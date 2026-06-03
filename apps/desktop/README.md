@@ -46,6 +46,6 @@ pnpm --filter @ore-code/desktop tauri:build:win
 
 ## Runtime Data
 
-The app stores user-level data outside the repository, including Ore Code skills and MCP configuration under `~/.seekforge/`.
+The app stores user-level data outside the repository, including Ore Code skills and MCP configuration under `~/.ore-code/`.
 
-Project-local `.seekforge/` data is ignored by Git.
+Project-local `.ore-code/` data is ignored by Git.

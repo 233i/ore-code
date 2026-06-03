@@ -135,7 +135,7 @@ export function summarizeDoctor(checks: DoctorCheck[]) {
 
 async function checkShell(shellHost: ShellToolHost, workspacePath: string): Promise<DoctorCheck> {
   try {
-    const result = await shellHost.run({ workspacePath, command: "echo seekforge-shell-ok", timeoutMs: 5_000 });
+    const result = await shellHost.run({ workspacePath, command: "echo ore-code-shell-ok", timeoutMs: 5_000 });
     if (result.exitCode !== 0) {
       return {
         id: "shell",
@@ -291,7 +291,7 @@ function checkConfig(sources: NonNullable<EnvironmentDoctorInput["configSources"
     id: "config",
     label: "Ore Code config",
     status: "info",
-    detail: "未发现 ~/.deepseek/config.toml 或项目 .deepseek/config.toml，使用应用设置。",
+    detail: "未发现 ~/.ore-code/config.toml 或项目 .ore-code/config.toml，使用应用设置。",
     category: "core",
     requiredLevel: "optional",
     repairable: false
@@ -389,7 +389,7 @@ function checkCoreEnvironment(paths?: EnvironmentPaths): DoctorCheck[] {
       id: "core:user-config",
       label: "Ore Code user config",
       status: "pass",
-      detail: `用户目录 (${paths.userHomePath}) 下的 .deepseek/config.toml、.seekforge/mcp.json 和 skills 目录会在启动时确保存在。`,
+      detail: `用户目录 (${paths.userHomePath}) 下的 .ore-code/config.toml、.ore-code/mcp.json 和 skills 目录会在启动时确保存在。`,
       category: "core",
       requiredLevel: "required",
       repairable: false

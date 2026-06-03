@@ -2,22 +2,22 @@ import type { FileToolHost } from "@ore-code/tools";
 import { invoke } from "@tauri-apps/api/core";
 import { isTauriRuntime } from "./fileHost";
 
-export const USER_INSTRUCTIONS_PATH = ".seekforge/instructions.md";
-export const PROJECT_INSTRUCTIONS_PATH = ".seekforge/instructions.md";
+export const USER_INSTRUCTIONS_PATH = ".ore-code/instructions.md";
+export const PROJECT_INSTRUCTIONS_PATH = ".ore-code/instructions.md";
 const MAX_INSTRUCTIONS_CHARS = 12_000;
 
-export interface SeekForgeInstructions {
+export interface OreCodeInstructions {
   projectInstructions?: string;
   sources: Array<{ path: string; scope: "project" | "user"; status: "loaded" | "missing" | "error"; error?: string }>;
   userInstructions?: string;
 }
 
-export async function loadSeekForgeInstructions(input: {
+export async function loadOreCodeInstructions(input: {
   fileHost: FileToolHost;
   userHomePath?: string;
   workspacePath: string;
-}): Promise<SeekForgeInstructions> {
-  const sources: SeekForgeInstructions["sources"] = [];
+}): Promise<OreCodeInstructions> {
+  const sources: OreCodeInstructions["sources"] = [];
   let userInstructions: string | undefined;
   let projectInstructions: string | undefined;
   const canReadLocalFiles = isTauriRuntime() || Boolean(input.userHomePath);
@@ -28,14 +28,14 @@ export async function loadSeekForgeInstructions(input: {
 
   const userHomePath = input.userHomePath ?? (await resolveUserHomePath());
   if (userHomePath) {
-    const userPath = relativeSeekForgePath(userHomePath, "instructions.md");
+    const userPath = relativeOreCodePath(userHomePath, "instructions.md");
     const userResult = await readOptionalInstructions(input.fileHost, userHomePath, userPath);
     sources.push({ path: displayUserPath(userPath), scope: "user", status: userResult.status, error: userResult.error });
     userInstructions = userResult.content;
   }
 
   if (input.workspacePath && input.workspacePath !== ".") {
-    const projectPath = relativeSeekForgePath(input.workspacePath, "instructions.md");
+    const projectPath = relativeOreCodePath(input.workspacePath, "instructions.md");
     const projectResult = await readOptionalInstructions(input.fileHost, input.workspacePath, projectPath);
     sources.push({ path: projectPath, scope: "project", status: projectResult.status, error: projectResult.error });
     projectInstructions = projectResult.content;
@@ -76,8 +76,8 @@ async function readOptionalInstructions(
   }
 }
 
-function relativeSeekForgePath(referencePath: string, fileName: string) {
-  return [".seekforge", fileName].join(pathSeparatorFor(referencePath));
+function relativeOreCodePath(referencePath: string, fileName: string) {
+  return [".ore-code", fileName].join(pathSeparatorFor(referencePath));
 }
 
 function displayUserPath(path: string) {

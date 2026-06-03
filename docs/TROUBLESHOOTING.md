@@ -14,10 +14,10 @@ Use this guide before opening a GitHub issue. Ore Code is pre-release software, 
 
 2. Confirm local runtime paths:
 
-   - Skills: `~/.seekforge/skills`
-   - MCP config: `~/.seekforge/mcp.json`
-   - DeepSeek config: `~/.deepseek/config.toml`
-   - Project-local runtime data: `.seekforge/`
+   - Skills: `~/.ore-code/skills`
+   - MCP config: `~/.ore-code/mcp.json`
+   - DeepSeek config: `~/.ore-code/config.toml`
+   - Project-local runtime data: `.ore-code/`
 
 3. Check [Known Limitations](./KNOWN_LIMITATIONS.md) and [Local Data and Configuration](./LOCAL_DATA_AND_CONFIG.md).
 
@@ -41,7 +41,7 @@ Use this guide before opening a GitHub issue. Ore Code is pre-release software, 
 - Select a real project directory before asking the agent to inspect or modify files.
 - If paths look wrong on Windows, include the drive-letter path in a bug report after redacting private directory names.
 - If Git diff or code changes are empty, confirm the selected workspace is inside a Git repository.
-- Project-local `.seekforge/` data is ignored by Git and can be regenerated if indexing state becomes stale.
+- Project-local `.ore-code/` data is ignored by Git and can be regenerated if indexing state becomes stale.
 
 ## Tool Execution Problems
 
@@ -52,7 +52,7 @@ Use this guide before opening a GitHub issue. Ore Code is pre-release software, 
 
 ## MCP Problems
 
-- Confirm `~/.seekforge/mcp.json` exists and contains the expected server entry.
+- Confirm `~/.ore-code/mcp.json` exists and contains the expected server entry.
 - Confirm the server command works outside Ore Code, especially `npx`-launched servers.
 - Slow MCP startup can delay tool availability. Reconnect one server at a time when debugging.
 - If a tool schema or argument error appears, include the server name, tool name, redacted input JSON, and error text.
@@ -60,7 +60,7 @@ Use this guide before opening a GitHub issue. Ore Code is pre-release software, 
 
 ## Skills Problems
 
-- Skills load from the global skills directory, `~/.seekforge/skills`.
+- Skills load from the global skills directory, `~/.ore-code/skills`.
 - A skill directory should contain a `SKILL.md` file.
 - If a skill disappears after refresh, confirm the file still exists under the global skills directory and is not disabled by its metadata.
 - Avoid putting secrets or project-private data in skill files.

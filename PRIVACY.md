@@ -9,11 +9,11 @@ Ore Code stores local runtime data on the user's machine, including:
 - App settings.
 - Session and transcript data.
 - Tool artifacts.
-- Skills under `~/.seekforge/skills`.
-- MCP configuration under `~/.seekforge/mcp.json`.
+- Skills under `~/.ore-code/skills`.
+- MCP configuration under `~/.ore-code/mcp.json`.
 - Provider configuration metadata.
 
-Project-local `.seekforge/` data is ignored by Git by default.
+Project-local `.ore-code/` data is ignored by Git by default.
 
 See [Local Data and Configuration](./docs/LOCAL_DATA_AND_CONFIG.md) for the current path map, reset guidance, and public reporting checklist.
 

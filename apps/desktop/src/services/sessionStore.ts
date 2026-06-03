@@ -8,11 +8,11 @@ import {
 } from "../features/transcript/transcriptChunks";
 import { isTauriRuntime } from "./fileHost";
 
-const BROWSER_SESSION_INDEX_KEY = "seekforge.sessions.index";
-const BROWSER_SESSION_PREFIX = "seekforge.sessions.";
-const BROWSER_SESSION_TRANSCRIPT_PREFIX = "seekforge.sessions.transcript.";
-const BROWSER_SESSION_TITLES_KEY = "seekforge.sessions.titles";
-const BROWSER_SESSION_WORKSPACES_KEY = "seekforge.sessions.workspaces";
+const BROWSER_SESSION_INDEX_KEY = "ore-code.sessions.index";
+const BROWSER_SESSION_PREFIX = "ore-code.sessions.";
+const BROWSER_SESSION_TRANSCRIPT_PREFIX = "ore-code.sessions.transcript.";
+const BROWSER_SESSION_TITLES_KEY = "ore-code.sessions.titles";
+const BROWSER_SESSION_WORKSPACES_KEY = "ore-code.sessions.workspaces";
 
 export type { SessionSummary };
 

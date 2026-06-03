@@ -9,14 +9,12 @@ import { z } from "zod";
 import { isTauriRuntime } from "./fileHost";
 import { normalizeUiLocalePreference, type UiLocalePreference } from "./uiLocale";
 
-const APP_SETTINGS_STORAGE_KEY = "seekforge.app-settings";
+const APP_SETTINGS_STORAGE_KEY = "ore-code.app-settings";
 export const DEFAULT_PROVIDER = "deepseek";
 export const DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-pro";
 export const DEFAULT_DEEPSEEK_MODEL_MODE = "auto";
 export const DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com/beta";
 export const DEFAULT_DEEPSEEK_THINKING_LEVEL = "auto";
-const LEGACY_DEEPSEEK_DEFAULT_BASE_URL = "https://api.deepseek.com/v1";
-const LEGACY_DEEPSEEK_MODEL_ALIASES = new Set(["deepseek-chat", "deepseek-reasoner"]);
 const DEVELOPER_HARNESS_ENABLED = import.meta.env.DEV || import.meta.env.MODE === "test";
 export type ThemePreference = "system" | "light" | "dark";
 
@@ -102,11 +100,9 @@ function normalizeWorkspacePaths(activeWorkspacePath: string, workspacePaths: st
 }
 
 function normalizeDeepSeekModel(model: string) {
-  const trimmed = model.trim();
-  return LEGACY_DEEPSEEK_MODEL_ALIASES.has(trimmed.toLowerCase()) ? DEFAULT_DEEPSEEK_MODEL : trimmed;
+  return model.trim();
 }
 
 function normalizeDeepSeekBaseUrl(baseUrl: string) {
-  const trimmed = baseUrl.trim();
-  return trimmed === LEGACY_DEEPSEEK_DEFAULT_BASE_URL ? DEFAULT_DEEPSEEK_BASE_URL : trimmed;
+  return baseUrl.trim();
 }

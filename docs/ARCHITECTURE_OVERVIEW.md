@@ -94,12 +94,12 @@ Windows and macOS behavior must stay explicit. Preserve Windows `.cmd` executabl
 
 Ore Code stores user runtime data outside the repository by default:
 
-- User-level skills: `~/.seekforge/skills`
-- User-level MCP config: `~/.seekforge/mcp.json`
-- DeepSeek-compatible provider config: `~/.deepseek/config.toml`
-- Project-local runtime state: `.seekforge/`
+- User-level skills: `~/.ore-code/skills`
+- User-level MCP config: `~/.ore-code/mcp.json`
+- DeepSeek-compatible provider config: `~/.ore-code/config.toml`
+- Project-local runtime state: `.ore-code/`
 
-Session, transcript, artifact, index, task, note, MCP, and settings data should be backward-readable or have a clear reset/migration path. Never silently delete user data as part of a compatibility fix.
+Session, transcript, artifact, index, task, note, MCP, and settings data should use one canonical pre-release shape. If a cleanup intentionally breaks old data, document the reset path instead of adding hidden fallback readers by default.
 
 ## MCP and Skills
 
@@ -137,7 +137,7 @@ Linux may be useful for CI and development checks, but Linux desktop packaging i
 
 ## Stability Rules
 
-Before changing compatibility-sensitive areas, identify the migration or rollback plan:
+Before changing compatibility-sensitive areas, identify the reset, migration, or rollback plan:
 
 - Runtime event names and payloads.
 - Tool names, schemas, risk levels, and output shape.

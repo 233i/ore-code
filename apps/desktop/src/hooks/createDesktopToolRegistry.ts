@@ -39,8 +39,8 @@ import {
 } from "@ore-code/tools";
 import { DEFAULT_DEEPSEEK_BASE_URL } from "../services/appSettings";
 import type { createRuntimeArtifactStore } from "../services/artifactStore";
-import type { SeekForgeInstructions } from "../services/seekforgeInstructions";
-import type { ProviderConfig } from "../services/seekforgeConfig";
+import type { OreCodeInstructions } from "../services/oreCodeInstructions";
+import type { ProviderConfig } from "../services/oreCodeConfig";
 import { createRuntimeFileHost, isTauriRuntime } from "../services/fileHost";
 import { createRuntimeGitHost } from "../services/gitHost";
 import {
@@ -73,7 +73,7 @@ export type DesktopToolRegistryOptions = {
   enableRlmTool?: boolean;
   enableSubagentTools?: boolean;
   fileHost?: FileToolHost;
-  instructions?: SeekForgeInstructions;
+  instructions?: OreCodeInstructions;
   onMcpMessage?: (message: string | null) => void;
   onMcpSnapshot?: (snapshot: McpToolSnapshot | null) => void;
   operatingSystem?: RuntimeOperatingSystem;

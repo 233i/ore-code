@@ -112,11 +112,11 @@ pnpm build:desktop:windows
 
 Ore Code 会在仓库外创建和读取用户级运行时数据：
 
-- `~/.seekforge/skills`
-- `~/.seekforge/mcp.json`
-- `~/.deepseek/config.toml`，用于 DeepSeek-compatible provider 配置
+- `~/.ore-code/skills`
+- `~/.ore-code/mcp.json`
+- `~/.ore-code/config.toml`，用于 DeepSeek-compatible provider 配置
 
-项目内的 `.seekforge/` 运行时数据已被 Git 忽略。`.seekforge` 名称会继续保留，用于兼容已有预发布数据。
+项目内的 `.ore-code/` 运行时数据已被 Git 忽略。
 
 ## 文档
 

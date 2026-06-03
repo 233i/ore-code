@@ -9,8 +9,8 @@ import {
   type LlmClient
 } from "@ore-code/agent-core";
 import type { createRuntimeArtifactStore } from "../services/artifactStore";
-import { loadSeekForgeInstructions, type SeekForgeInstructions } from "../services/seekforgeInstructions";
-import type { ProviderConfig } from "../services/seekforgeConfig";
+import { loadOreCodeInstructions, type OreCodeInstructions } from "../services/oreCodeInstructions";
+import type { ProviderConfig } from "../services/oreCodeConfig";
 import { createRuntimeAutomationStore, createRuntimeDurableTaskStore } from "../services/durableRuntimeStore";
 import { createRuntimeFileHost } from "../services/fileHost";
 import { detectRuntimeOperatingSystem } from "../services/runtimePlatform";
@@ -41,7 +41,7 @@ export function useDurableRuntime(input: {
 
     durableTaskExecutorRunning.current = true;
     try {
-      const instructions = await loadSeekForgeInstructions({
+      const instructions = await loadOreCodeInstructions({
         fileHost: createRuntimeFileHost(),
         workspacePath: input.workspacePath
       });
@@ -103,7 +103,7 @@ export function useDurableRuntime(input: {
   }
 
   async function createBackgroundToolRegistry(
-    instructions?: SeekForgeInstructions,
+    instructions?: OreCodeInstructions,
     operatingSystem = detectRuntimeOperatingSystem()
   ) {
     return createDesktopToolRegistry({

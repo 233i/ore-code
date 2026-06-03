@@ -67,7 +67,7 @@ pub(crate) fn skill_root_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> 
         .path()
         .home_dir()
         .map_err(|error| error.to_string())?
-        .join(".seekforge")
+        .join(".ore-code")
         .join("skills"))
 }
 

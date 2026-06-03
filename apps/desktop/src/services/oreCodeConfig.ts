@@ -44,7 +44,7 @@ export interface ProviderConfig {
   deepSeekThinkingLevel?: DeepSeekThinkingLevel;
 }
 
-export interface ResolvedSeekForgeConfig {
+export interface ResolvedOreCodeConfig {
   activeProfile: string;
   providerId: string;
   providers: ProviderConfig[];
@@ -57,12 +57,12 @@ export interface ResolvedSeekForgeConfig {
 }
 
 const CONFIG_ENV_NAMES = [
-  "SEEKFORGE_PROFILE",
-  "SEEKFORGE_PROVIDER",
-  "SEEKFORGE_MODEL",
-  "SEEKFORGE_DEEPSEEK_MODEL_MODE",
-  "SEEKFORGE_BASE_URL",
-  "SEEKFORGE_DEEPSEEK_THINKING",
+  "ORE_CODE_PROFILE",
+  "ORE_CODE_PROVIDER",
+  "ORE_CODE_MODEL",
+  "ORE_CODE_DEEPSEEK_MODEL_MODE",
+  "ORE_CODE_BASE_URL",
+  "ORE_CODE_DEEPSEEK_THINKING",
   "DEEPSEEK_API_KEY"
 ];
 
@@ -86,23 +86,23 @@ const ConfigStatusSchema = z.object({
   env: z.array(ConfigEnvStatusSchema)
 });
 
-export async function loadSeekForgeConfig(workspacePath: string): Promise<ResolvedSeekForgeConfig> {
+export async function loadOreCodeConfig(workspacePath: string): Promise<ResolvedOreCodeConfig> {
   const status = await loadConfigStatus(workspacePath);
-  return resolveSeekForgeConfig(status);
+  return resolveOreCodeConfig(status);
 }
 
 export async function loadConfigStatus(workspacePath: string): Promise<ConfigStatus> {
   if (!isTauriRuntime()) {
     return ConfigStatusSchema.parse({
       sources: [
-        { scope: "global", path: "~/.deepseek/config.toml", status: "missing" },
-        { scope: "project", path: `${workspacePath}/.deepseek/config.toml`, status: "missing" }
+        { scope: "global", path: "~/.ore-code/config.toml", status: "missing" },
+        { scope: "project", path: `${workspacePath}/.ore-code/config.toml`, status: "missing" }
       ],
       env: CONFIG_ENV_NAMES.map((name) => ({ name, present: false }))
     });
   }
 
-  const raw = await invoke<unknown>("seekforge_config_status", { workspacePath });
+  const raw = await invoke<unknown>("ore_code_config_status", { workspacePath });
   return ConfigStatusSchema.parse(raw);
 }
 
@@ -110,11 +110,11 @@ export async function getConfigEnvSecret(name: string): Promise<string | null> {
   if (!isTauriRuntime()) {
     return null;
   }
-  const result = await invoke<{ name: string; value: string; last4?: string }>("seekforge_config_env_secret_get", { name });
+  const result = await invoke<{ name: string; value: string; last4?: string }>("ore_code_config_env_secret_get", { name });
   return result.value;
 }
 
-export function resolveSeekForgeConfig(status: ConfigStatus): ResolvedSeekForgeConfig {
+export function resolveOreCodeConfig(status: ConfigStatus): ResolvedOreCodeConfig {
   const warnings: string[] = [];
   let merged: TomlTable = {};
 
@@ -124,19 +124,19 @@ export function resolveSeekForgeConfig(status: ConfigStatus): ResolvedSeekForgeC
     }
 
     try {
-      merged = deepMerge(merged, parseSeekForgeToml(source.content));
+      merged = deepMerge(merged, parseOreCodeToml(source.content));
     } catch (error) {
       warnings.push(`${source.scope} config parse failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   const env = envMap(status.env);
-  const activeProfile = env.SEEKFORGE_PROFILE || stringValue(merged.profile) || stringValue(merged.active_profile) || "default";
+  const activeProfile = env.ORE_CODE_PROFILE || stringValue(merged.profile) || stringValue(merged.active_profile) || "default";
   const profiles = tableValue(merged.profiles);
   const profileConfig = tableValue(profiles[activeProfile]);
   const rootProviderId = stringValue(merged.provider);
   const profileProviderId = stringValue(profileConfig.provider);
-  const providerId = env.SEEKFORGE_PROVIDER || profileProviderId || rootProviderId || "deepseek";
+  const providerId = env.ORE_CODE_PROVIDER || profileProviderId || rootProviderId || "deepseek";
   const contextConfig = {
     ...tableValue(merged.context),
     ...tableValue(profileConfig.context)
@@ -174,7 +174,7 @@ export function resolveSeekForgeConfig(status: ConfigStatus): ResolvedSeekForgeC
   if (selected) {
     const profileProviderTable = tableValue(tableValue(profileConfig.provider)[providerId]);
     const thinkingLevel =
-      env.SEEKFORGE_DEEPSEEK_THINKING ||
+      env.ORE_CODE_DEEPSEEK_THINKING ||
       stringValue(profileProviderTable.thinking_level) ||
       stringValue(profileProviderTable.thinkingLevel) ||
       stringValue(profileProviderTable.reasoning_effort) ||
@@ -183,7 +183,7 @@ export function resolveSeekForgeConfig(status: ConfigStatus): ResolvedSeekForgeC
       stringValue(profileConfig.reasoning_effort) ||
       selected.deepSeekThinkingLevel;
     const modelMode =
-      env.SEEKFORGE_DEEPSEEK_MODEL_MODE ||
+      env.ORE_CODE_DEEPSEEK_MODEL_MODE ||
       stringValue(profileProviderTable.model_mode) ||
       stringValue(profileProviderTable.modelMode) ||
       stringValue(profileConfig.model_mode) ||
@@ -193,8 +193,8 @@ export function resolveSeekForgeConfig(status: ConfigStatus): ResolvedSeekForgeC
       ...selected,
       ...profileConfig,
       ...profileProviderTable,
-      model: env.SEEKFORGE_MODEL || stringValue(profileProviderTable.model) || stringValue(profileConfig.model) || selected.model,
-      base_url: env.SEEKFORGE_BASE_URL || stringValue(profileProviderTable.base_url) || stringValue(profileConfig.base_url) || selected.baseUrl
+      model: env.ORE_CODE_MODEL || stringValue(profileProviderTable.model) || stringValue(profileConfig.model) || selected.model,
+      base_url: env.ORE_CODE_BASE_URL || stringValue(profileProviderTable.base_url) || stringValue(profileConfig.base_url) || selected.baseUrl
     };
     if (thinkingLevel) {
       overrides.thinking_level = thinkingLevel;
@@ -218,7 +218,7 @@ export function resolveSeekForgeConfig(status: ConfigStatus): ResolvedSeekForgeC
   };
 }
 
-export function resolveProvider(config: ResolvedSeekForgeConfig | null, providerId: string): ProviderConfig | null {
+export function resolveProvider(config: ResolvedOreCodeConfig | null, providerId: string): ProviderConfig | null {
   if (providerId === "mock") {
     return {
       id: "mock",
@@ -257,7 +257,7 @@ function normalizeProviderConfig(id: string, table: TomlTable, base?: ProviderCo
   };
 }
 
-export function parseSeekForgeToml(content: string): TomlTable {
+export function parseOreCodeToml(content: string): TomlTable {
   const parsed = parseToml(content);
   if (!isTable(parsed)) {
     throw new Error("config root must be a TOML table");
@@ -265,7 +265,7 @@ export function parseSeekForgeToml(content: string): TomlTable {
   return parsed;
 }
 
-export const parseMiniToml = parseSeekForgeToml;
+export const parseMiniToml = parseOreCodeToml;
 
 function deepMerge(left: TomlTable, right: TomlTable): TomlTable {
   const result: TomlTable = { ...left };

@@ -15,7 +15,7 @@ export function SkillList({ errors, onSelectSkill, onToggleSkill, skills }: Skil
         {skills.length === 0 ? (
           <div className="skill-empty">
             <strong>未发现技能</strong>
-            <p>在用户目录创建 <code>~/.seekforge/skills/*/SKILL.md</code> 后刷新。</p>
+            <p>在用户目录创建 <code>~/.ore-code/skills/*/SKILL.md</code> 后刷新。</p>
           </div>
         ) : null}
         {skills.map((skill) => (

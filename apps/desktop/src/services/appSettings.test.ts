@@ -39,17 +39,6 @@ describe("AppSettingsSchema", () => {
     expect(settings).not.toHaveProperty("deepSeekApiKey");
   });
 
-  it("migrates legacy DeepSeek defaults to the V4 Pro endpoint", () => {
-    const settings = normalizeAppSettings(AppSettingsSchema.parse({
-      provider: "deepseek",
-      deepSeekModel: "deepseek-chat",
-      deepSeekBaseUrl: "https://api.deepseek.com/v1"
-    }));
-
-    expect(settings.deepSeekModel).toBe(DEFAULT_DEEPSEEK_MODEL);
-    expect(settings.deepSeekBaseUrl).toBe(DEFAULT_DEEPSEEK_BASE_URL);
-  });
-
   it("normalizes persisted UI locale preferences", () => {
     const settings = normalizeAppSettings(AppSettingsSchema.parse({
       localePreference: "en-US"

@@ -18,7 +18,7 @@ describe("runEnvironmentDoctor", () => {
         "npx --version": processOk("11.0.0\n")
       }),
       shellHost: shellWithCommands({
-        "echo seekforge-shell-ok": ok("seekforge-shell-ok\n")
+        "echo ore-code-shell-ok": ok("ore-code-shell-ok\n")
       }),
       environmentPaths: {
         appDataPath: "/Users/test/Library/Application Support/Ore Code",
@@ -57,7 +57,7 @@ describe("runEnvironmentDoctor", () => {
         "npx --version": processFail("npx not found")
       }),
       shellHost: shellWithCommands({
-        "echo seekforge-shell-ok": ok("seekforge-shell-ok\n")
+        "echo ore-code-shell-ok": ok("ore-code-shell-ok\n")
       })
     });
 
@@ -99,7 +99,7 @@ describe("runEnvironmentDoctor", () => {
         "npx --version": processOk("11.0.0\n")
       }),
       shellHost: shellWithCommands({
-        "echo seekforge-shell-ok": ok("seekforge-shell-ok\n")
+        "echo ore-code-shell-ok": ok("ore-code-shell-ok\n")
       }),
       workspaceSignals: {
         hasPackageJson: true,

@@ -1,6 +1,6 @@
 use super::*;
 
-const DEFAULT_DEEPSEEK_CONFIG: &str = r#"provider = "deepseek"
+const DEFAULT_ORE_CODE_CONFIG: &str = r#"provider = "deepseek"
 
 [providers.deepseek]
 model = "deepseek-v4-pro"
@@ -10,7 +10,9 @@ api_key_env = "DEEPSEEK_API_KEY"
 
 const DEFAULT_MCP_CONFIG: &str = "{\n  \"servers\": {}\n}\n";
 
-const DEFAULT_SEEKFORGE_INSTRUCTIONS: &str = r#"# Ore Code User Instructions
+const ORE_CODE_DIR: &str = ".ore-code";
+
+const DEFAULT_ORE_CODE_INSTRUCTIONS: &str = r#"# Ore Code User Instructions
 
 Add personal, cross-project Ore Code preferences here. These instructions are loaded into each model turn after built-in safety/workflow rules and after the latest user message.
 
@@ -30,18 +32,17 @@ pub(crate) fn ensure_user_environment(app: &tauri::AppHandle) -> Result<(), Stri
 }
 
 pub(crate) fn ensure_user_environment_paths(home: &Path, app_data: &Path) -> Result<(), String> {
-    let deepseek_dir = home.join(".deepseek");
-    let seekforge_dir = home.join(".seekforge");
+    let ore_code_dir = home.join(ORE_CODE_DIR);
 
-    fs::create_dir_all(&deepseek_dir).map_err(|error| error.to_string())?;
-    fs::create_dir_all(seekforge_dir.join("skills")).map_err(|error| error.to_string())?;
+    fs::create_dir_all(&ore_code_dir).map_err(|error| error.to_string())?;
 
-    write_default_file_if_missing(&deepseek_dir.join("config.toml"), DEFAULT_DEEPSEEK_CONFIG)?;
-    write_default_file_if_missing(&seekforge_dir.join("mcp.json"), DEFAULT_MCP_CONFIG)?;
+    write_default_file_if_missing(&ore_code_dir.join("config.toml"), DEFAULT_ORE_CODE_CONFIG)?;
+    write_default_file_if_missing(&ore_code_dir.join("mcp.json"), DEFAULT_MCP_CONFIG)?;
     write_default_file_if_missing(
-        &seekforge_dir.join("instructions.md"),
-        DEFAULT_SEEKFORGE_INSTRUCTIONS,
+        &ore_code_dir.join("instructions.md"),
+        DEFAULT_ORE_CODE_INSTRUCTIONS,
     )?;
+    fs::create_dir_all(ore_code_dir.join("skills")).map_err(|error| error.to_string())?;
 
     for dir in [
         app_data.to_path_buf(),

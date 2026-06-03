@@ -1,6 +1,6 @@
 # Package Boundaries and Compatibility
 
-Ore Code is still pre-release, but contributors should treat package exports, runtime events, tool schemas, settings, and persisted data as compatibility-sensitive. This keeps local sessions, replay fixtures, desktop UI, and future releases understandable as the codebase evolves.
+Ore Code is still pre-release. Contributors should keep package exports, runtime events, tool schemas, settings, and persisted data understandable, but should not accumulate compatibility aliases for old pre-release names or layouts. Prefer one canonical shape plus an explicit reset path when a breaking cleanup is intentional.
 
 ## Workspace Packages
 
@@ -13,11 +13,11 @@ Ore Code is still pre-release, but contributors should treat package exports, ru
 | `@ore-code/harness` | Scenario replay and test harness helpers. | Scenario file format, replay assumptions, mock provider behavior. |
 | `@ore-code/desktop` | Tauri desktop app and OS boundary wiring. | Tauri commands, local data paths, settings shape, UI expectations, process/file/Git/MCP host behavior. |
 
-The packages are currently private workspace packages. The compatibility rules still matter because runtime data can outlive a single code change.
+The packages are currently private workspace packages. Keep stability where it protects active workflows, but avoid long-lived fallback branches for names, paths, or schemas that have not shipped as a supported public contract.
 
 ## Stable-by-Default Contracts
 
-Keep these stable unless the change explicitly documents migration and rollback risk:
+Keep these stable unless the change explicitly documents reset or rollback risk:
 
 - Public package exports from `src/index.ts`.
 - Runtime event names and payload fields.
@@ -27,7 +27,7 @@ Keep these stable unless the change explicitly documents migration and rollback 
 - Prompt section ordering that affects prefix caching.
 - Windows/macOS path, process, and shell behavior.
 
-Adding optional fields is usually safer than renaming or deleting fields. Removing or changing the meaning of a field is a breaking change even before a public package release.
+Adding optional fields is usually safer than renaming or deleting fields. Removing or changing the meaning of a field is a breaking change, but pre-release breaking cleanups should favor deleting obsolete branches over preserving every old shape indefinitely.
 
 ## Runtime Events
 
@@ -45,7 +45,7 @@ When changing event semantics, update replay or harness coverage so old and new 
 Tool schema changes affect model behavior, approvals, context usage, and replay:
 
 - Prefer adding a new optional input field over renaming an existing field.
-- Keep tool names stable. If a tool needs a new name, keep a compatibility alias only when the old behavior can be preserved safely.
+- Keep tool names stable once they are part of a supported surface. For pre-release renames, update call sites and tests instead of keeping aliases by default.
 - Keep risk classification conservative when behavior expands.
 - Keep output summaries compact and avoid putting large raw payloads back into model history by default.
 - Update tool presentation and approval UI when a new tool or high-risk behavior is added.
@@ -54,13 +54,13 @@ Tool schema changes affect model behavior, approvals, context usage, and replay:
 
 Persisted data includes sessions, artifacts, task state, notes, indexes, settings, skills, and MCP configuration.
 
-Changes should either:
+Pre-release persisted-data cleanups should either:
 
-- Be backward-readable without migration.
-- Include a clear migration path.
-- Include a documented reset path when the data is cache-like and safe to rebuild.
+- Keep the current canonical shape unchanged.
+- Include a documented reset path when data is cache-like or safe to rebuild.
+- Include a deliberate migration only when preserving that data is more valuable than keeping the runtime simple.
 
-Never silently delete user data as part of a compatibility fix.
+Do not add silent fallback readers for obsolete paths or keys unless maintaining a supported release requires it.
 
 ## Desktop and OS Boundaries
 
@@ -77,11 +77,11 @@ Desktop-facing changes must keep macOS and Windows in mind:
 If a change intentionally breaks a contract, document:
 
 - What changed.
-- Why compatibility could not be preserved.
+- Why the break is intentional.
 - Which persisted data or user workflows are affected.
 - How to migrate or reset safely.
 - How to roll back.
-- Which tests prove old data is handled or intentionally rejected with a clear error.
+- Which tests prove the new canonical shape works and obsolete data is ignored, reset, or rejected clearly.
 
 Pull requests that touch compatibility-sensitive areas should fill out the compatibility and risk sections of the PR template.
 

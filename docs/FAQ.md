@@ -26,18 +26,18 @@ Other OpenAI-compatible providers may work where configuration supports them, bu
 
 Yes, real model use requires a compatible provider configuration and API key. The desktop app should store provider keys through the secure storage flow where supported.
 
-Local DeepSeek-style configuration can also live in `~/.deepseek/config.toml`. Do not commit API keys or provider secrets to the repository.
+Local DeepSeek-style configuration can also live in `~/.ore-code/config.toml`. Do not commit API keys or provider secrets to the repository.
 
 ## Where Does Ore Code Store Local Data?
 
 Ore Code uses user-level and project-level runtime data:
 
-- `~/.seekforge/skills`
-- `~/.seekforge/mcp.json`
-- `~/.deepseek/config.toml`
-- project-local `.seekforge/` data for runtime state
+- `~/.ore-code/skills`
+- `~/.ore-code/mcp.json`
+- `~/.ore-code/config.toml`
+- project-local `.ore-code/` data for runtime state
 
-Project-local `.seekforge/` data is ignored by Git. See [Local Data and Configuration](./LOCAL_DATA_AND_CONFIG.md) for reset and privacy guidance.
+Project-local `.ore-code/` data is ignored by Git. See [Local Data and Configuration](./LOCAL_DATA_AND_CONFIG.md) for reset and privacy guidance.
 
 ## Does Ore Code Install Dependencies Automatically?
 
@@ -53,13 +53,13 @@ Use [Known Limitations](./KNOWN_LIMITATIONS.md) and [Security](../SECURITY.md) a
 
 ## How Do MCP Servers Work?
 
-MCP server configuration is stored in `~/.seekforge/mcp.json`. The desktop UI provides MCP management flows, but server command availability still depends on local tools such as `node`, `npx`, or the configured executable.
+MCP server configuration is stored in `~/.ore-code/mcp.json`. The desktop UI provides MCP management flows, but server command availability still depends on local tools such as `node`, `npx`, or the configured executable.
 
 If MCP setup fails, check [Troubleshooting](./TROUBLESHOOTING.md) and avoid sharing logs that contain API keys, tokens, private file paths, or workspace data.
 
 ## How Do Skills Work?
 
-Skills are local instructions stored under `~/.seekforge/skills`. A skill appears in the Skills page when it contains a valid `SKILL.md`.
+Skills are local instructions stored under `~/.ore-code/skills`. A skill appears in the Skills page when it contains a valid `SKILL.md`.
 
 Install shared skills into the global skill directory unless a workflow explicitly requires project-local behavior. See [Skill System](./06-skill-system.md).
 

@@ -12,9 +12,9 @@ describe("InteractionDialog helpers", () => {
       request: interactionRequest(),
       customMode: false,
       customText: "",
-      selectedOptionId: "seekforge"
+      selectedOptionId: "ore-code"
     })).toEqual({
-      decision: { type: "option", optionId: "seekforge", value: "/repo/Ore Code" }
+      decision: { type: "option", optionId: "ore-code", value: "/repo/Ore Code" }
     });
   });
 
@@ -23,14 +23,14 @@ describe("InteractionDialog helpers", () => {
       request: interactionRequest(),
       customMode: true,
       customText: "  ",
-      selectedOptionId: "seekforge"
+      selectedOptionId: "ore-code"
     })).toEqual({ error: "请补充信息后再继续。" });
 
     expect(buildInteractionDecision({
       request: interactionRequest(),
       customMode: true,
       customText: " 使用 /tmp/custom ",
-      selectedOptionId: "seekforge"
+      selectedOptionId: "ore-code"
     })).toEqual({
       decision: { type: "custom", customText: "使用 /tmp/custom" }
     });
@@ -48,9 +48,9 @@ function interactionRequest(): Extract<RuntimeEvent, { type: "interaction_reques
     requestId: "request-1",
     title: "选择项目",
     message: "请选择项目。",
-    recommendedOptionId: "seekforge",
+    recommendedOptionId: "ore-code",
     options: [
-      { id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" }
+      { id: "ore-code", label: "Ore Code", value: "/repo/Ore Code" }
     ]
   };
 }

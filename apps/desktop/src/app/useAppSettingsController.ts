@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@ore-code/agent-core";
-import type { ResolvedSeekForgeConfig } from "../services/seekforgeConfig";
+import type { ResolvedOreCodeConfig } from "../services/oreCodeConfig";
 import { loadAppSettings, saveAppSettings, type ThemePreference } from "../services/appSettings";
 import { resolveUiLocale, type UiLocalePreference } from "../services/uiLocale";
 import { addWorkspacePathPreservingOrder } from "../hooks/useWorkspaceProjects";
@@ -22,7 +22,7 @@ type AppSettingsControllerInput = {
   onWorkspaceSettingsLoaded: (path: string, paths: string[]) => Promise<void>;
   provider: Provider;
   recentWorkspacePaths: string[];
-  refreshSeekForgeConfig: (workspacePath: string) => Promise<ResolvedSeekForgeConfig>;
+  refreshOreCodeConfig: (workspacePath: string) => Promise<ResolvedOreCodeConfig>;
   setDeepSeekBaseUrl: (value: string) => void;
   setDeepSeekModel: (value: string) => void;
   setDeepSeekModelMode: (value: DeepSeekModelMode) => void;
@@ -41,7 +41,7 @@ export function useAppSettingsController({
   onWorkspaceSettingsLoaded,
   provider,
   recentWorkspacePaths,
-  refreshSeekForgeConfig,
+  refreshOreCodeConfig,
   setDeepSeekBaseUrl,
   setDeepSeekModel,
   setDeepSeekModelMode,
@@ -128,7 +128,7 @@ export function useAppSettingsController({
       setSettingsLoaded(true);
       setSettingsMessage("设置已加载。");
       await onWorkspaceSettingsLoaded(settings.workspacePath, settings.workspacePaths);
-      const config = await refreshSeekForgeConfig(settings.workspacePath);
+      const config = await refreshOreCodeConfig(settings.workspacePath);
       if (settings.provider === "mock" && config.providerId && config.providerId !== "mock") {
         setProvider(config.providerId);
       }

@@ -297,14 +297,14 @@ function loadedInstructionLines(input: PromptBuildContext) {
     "Instruction priority in this block: project instructions override user global instructions when they conflict.",
     ...(projectInstructions
       ? [
-        "<project_instructions source=\".seekforge/instructions.md\">",
+        "<project_instructions source=\".ore-code/instructions.md\">",
         projectInstructions,
         "</project_instructions>"
       ]
       : ["Project instructions: none."]),
     ...(userInstructions
       ? [
-        "<user_global_instructions source=\"~/.seekforge/instructions.md\">",
+        "<user_global_instructions source=\"~/.ore-code/instructions.md\">",
         userInstructions,
         "</user_global_instructions>"
       ]

@@ -16,7 +16,7 @@ describe("validate_data tool", () => {
     const result = await executeRegisteredTool(
       registryWithValidateData(makeHost()),
       "validate_data",
-      { format: "json", content: "{\"name\":\"seekforge\"}" },
+      { format: "json", content: "{\"name\":\"ore-code\"}" },
       context
     );
 
@@ -36,17 +36,17 @@ describe("validate_data tool", () => {
     const result = await executeRegisteredTool(
       registryWithValidateData(makeHost(reads, "profile = \"default\"\n[context]\nenableCacheWarmup = true")),
       "validate_data",
-      { path: ".deepseek/config.toml" },
+      { path: ".ore-code/config.toml" },
       context
     );
 
-    expect(reads).toEqual([{ workspacePath: "/workspace", path: ".deepseek/config.toml" }]);
+    expect(reads).toEqual([{ workspacePath: "/workspace", path: ".ore-code/config.toml" }]);
     expect(result.type).toBe("completed");
     if (result.type === "completed") {
       expect(result.result.output).toMatchObject({
         valid: true,
         format: "toml",
-        path: ".deepseek/config.toml"
+        path: ".ore-code/config.toml"
       });
     }
   });

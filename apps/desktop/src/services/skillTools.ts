@@ -22,9 +22,9 @@ export function createInstallSkillTool(installer: SkillInstaller = installSkillG
   return {
     name: "install_skill",
     description: [
-      "Install an Ore Code skill into the global user skill directory (~/.seekforge/skills).",
+      "Install an Ore Code skill into the global user skill directory (~/.ore-code/skills).",
       "Use this instead of write_file, apply_patch, or shell commands when the user asks to install or create a skill.",
-      "Never install skills into the selected workspace .seekforge/skills directory."
+      "Never install skills into the selected workspace .ore-code/skills directory."
     ].join(" "),
     capability: "workspace-write",
     approval: "suggest",

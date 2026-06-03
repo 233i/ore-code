@@ -280,14 +280,14 @@ fn fs_delete_file_removes_file_inside_workspace() {
 
 #[test]
 fn skill_id_rejects_path_traversal() {
-    assert!(skill_dir_for_id(Path::new("/tmp/seekforge-skills"), "../escape").is_err());
-    assert!(skill_dir_for_id(Path::new("/tmp/seekforge-skills"), "bad/id").is_err());
-    assert!(skill_dir_for_id(Path::new("/tmp/seekforge-skills"), "-bad").is_err());
+    assert!(skill_dir_for_id(Path::new("/tmp/ore-code-skills"), "../escape").is_err());
+    assert!(skill_dir_for_id(Path::new("/tmp/ore-code-skills"), "bad/id").is_err());
+    assert!(skill_dir_for_id(Path::new("/tmp/ore-code-skills"), "-bad").is_err());
 }
 
 #[test]
 fn skill_dir_for_id_stays_under_skill_root() {
-    let root = Path::new("/tmp/seekforge-skills");
+    let root = Path::new("/tmp/ore-code-skills");
     let result = skill_dir_for_id(root, "reviewer-1").unwrap();
 
     assert_eq!(result, root.join("reviewer-1"));
@@ -534,28 +534,28 @@ fn bootstrap_creates_user_environment_without_project_files() {
 
     ensure_user_environment_paths(&home, &app_data).unwrap();
 
-    assert!(home.join(".deepseek").is_dir());
-    assert!(home.join(".deepseek").join("config.toml").is_file());
-    assert!(home.join(".seekforge").join("skills").is_dir());
-    assert!(home.join(".seekforge").join("instructions.md").is_file());
-    assert!(home.join(".seekforge").join("mcp.json").is_file());
+    assert!(home.join(".ore-code").is_dir());
+    assert!(home.join(".ore-code").join("config.toml").is_file());
+    assert!(home.join(".ore-code").join("skills").is_dir());
+    assert!(home.join(".ore-code").join("instructions.md").is_file());
+    assert!(home.join(".ore-code").join("mcp.json").is_file());
     assert!(app_data.join("artifacts").is_dir());
     assert!(app_data.join("sessions").is_dir());
     assert!(app_data.join("snapshots").is_dir());
     assert!(app_data.join("side-snapshots").is_dir());
     assert!(app_data.join("side-git").is_dir());
     assert!(app_data.join("memory").is_dir());
-    assert!(!root.join(".deepseek").exists());
+    assert!(!root.join(".ore-code").exists());
 
-    let config = fs::read_to_string(home.join(".deepseek").join("config.toml")).unwrap();
+    let config = fs::read_to_string(home.join(".ore-code").join("config.toml")).unwrap();
     assert!(config.contains("model = \"deepseek-v4-pro\""));
     assert!(config.contains("api_key_env = \"DEEPSEEK_API_KEY\""));
 
-    let instructions = fs::read_to_string(home.join(".seekforge").join("instructions.md")).unwrap();
+    let instructions = fs::read_to_string(home.join(".ore-code").join("instructions.md")).unwrap();
     assert!(instructions.contains("# Ore Code User Instructions"));
 
     let mcp: serde_json::Value =
-        serde_json::from_str(&fs::read_to_string(home.join(".seekforge").join("mcp.json")).unwrap())
+        serde_json::from_str(&fs::read_to_string(home.join(".ore-code").join("mcp.json")).unwrap())
             .unwrap();
     assert_eq!(mcp, serde_json::json!({ "servers": {} }));
 }
@@ -565,20 +565,19 @@ fn bootstrap_does_not_overwrite_existing_user_files() {
     let root = make_temp_workspace();
     let home = root.join("home");
     let app_data = root.join("app-data");
-    fs::create_dir_all(home.join(".deepseek")).unwrap();
-    fs::create_dir_all(home.join(".seekforge")).unwrap();
+    fs::create_dir_all(home.join(".ore-code")).unwrap();
     fs::write(
-        home.join(".deepseek").join("config.toml"),
+        home.join(".ore-code").join("config.toml"),
         "provider = \"local\"\n",
     )
     .unwrap();
     fs::write(
-        home.join(".seekforge").join("instructions.md"),
+        home.join(".ore-code").join("instructions.md"),
         "custom instructions\n",
     )
     .unwrap();
     fs::write(
-        home.join(".seekforge").join("mcp.json"),
+        home.join(".ore-code").join("mcp.json"),
         "{ \"servers\": { \"existing\": {} } }\n",
     )
     .unwrap();
@@ -586,15 +585,15 @@ fn bootstrap_does_not_overwrite_existing_user_files() {
     ensure_user_environment_paths(&home, &app_data).unwrap();
 
     assert_eq!(
-        fs::read_to_string(home.join(".deepseek").join("config.toml")).unwrap(),
+        fs::read_to_string(home.join(".ore-code").join("config.toml")).unwrap(),
         "provider = \"local\"\n"
     );
     assert_eq!(
-        fs::read_to_string(home.join(".seekforge").join("mcp.json")).unwrap(),
+        fs::read_to_string(home.join(".ore-code").join("mcp.json")).unwrap(),
         "{ \"servers\": { \"existing\": {} } }\n"
     );
     assert_eq!(
-        fs::read_to_string(home.join(".seekforge").join("instructions.md")).unwrap(),
+        fs::read_to_string(home.join(".ore-code").join("instructions.md")).unwrap(),
         "custom instructions\n"
     );
 }
@@ -1682,7 +1681,7 @@ fn process_run_reports_missing_program() {
         &root,
         ProcessRunInput {
             workspace_path: root.display().to_string(),
-            program: "seekforge-definitely-missing-command".to_string(),
+            program: "ore-code-definitely-missing-command".to_string(),
             args: Vec::new(),
             stdin: None,
             sandbox_policy: None,
@@ -1771,7 +1770,7 @@ fn make_temp_workspace() -> PathBuf {
         .as_nanos();
     let count = TEMP_COUNTER.fetch_add(1, Ordering::Relaxed);
     let root = std::env::temp_dir().join(format!(
-        "seekforge-test-{}-{nanos}-{count}",
+        "ore-code-test-{}-{nanos}-{count}",
         std::process::id()
     ));
     fs::create_dir(&root).unwrap();
@@ -1802,7 +1801,7 @@ fn init_git_repo(root: &Path) {
 }
 
 fn configure_git_identity(root: &Path) {
-    run_git_test_command(root, &["config", "user.email", "seekforge@example.test"]);
+    run_git_test_command(root, &["config", "user.email", "ore-code@example.test"]);
     run_git_test_command(root, &["config", "user.name", "Ore Code Test"]);
 }
 

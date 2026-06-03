@@ -209,9 +209,9 @@ describe("AgentEngine tool execution", () => {
             JSON.stringify({
               title: "选择项目",
               message: "检测到多个项目。",
-              recommendedOptionId: "seekforge",
+              recommendedOptionId: "ore-code",
               options: [
-                { id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" }
+                { id: "ore-code", label: "Ore Code", value: "/repo/Ore Code" }
               ]
             }),
             "</interaction_request>"
@@ -236,8 +236,8 @@ describe("AgentEngine tool execution", () => {
       type: "interaction_requested",
       title: "选择项目",
       message: "检测到多个项目。",
-      recommendedOptionId: "seekforge",
-      options: [{ id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" }]
+      recommendedOptionId: "ore-code",
+      options: [{ id: "ore-code", label: "Ore Code", value: "/repo/Ore Code" }]
     });
   });
 
@@ -1200,9 +1200,9 @@ describe("runtimeEventsToLlmMessages", () => {
         requestId: "request-1",
         title: "选择项目",
         message: "检测到多个项目。",
-        recommendedOptionId: "seekforge",
+        recommendedOptionId: "ore-code",
         options: [
-          { id: "seekforge", label: "Ore Code", value: "/repo/Ore Code" },
+          { id: "ore-code", label: "Ore Code", value: "/repo/Ore Code" },
           { id: "custom", label: "其他" }
         ]
       }),
@@ -1210,7 +1210,7 @@ describe("runtimeEventsToLlmMessages", () => {
         seq: 2,
         type: "interaction_decided",
         requestId: "request-1",
-        decision: { type: "option", optionId: "seekforge" }
+        decision: { type: "option", optionId: "ore-code" }
       })
     ];
 
@@ -1221,13 +1221,13 @@ describe("runtimeEventsToLlmMessages", () => {
         content: [
           "[interaction_requested:request-1] 选择项目",
           "检测到多个项目。",
-          "- seekforge: Ore Code (recommended) = /repo/Ore Code",
+          "- ore-code: Ore Code (recommended) = /repo/Ore Code",
           "- custom: 其他"
         ].join("\n")
       },
       {
         role: "user",
-        content: "[interaction_decided:request-1] User selected seekforge: /repo/Ore Code"
+        content: "[interaction_decided:request-1] User selected ore-code: /repo/Ore Code"
       }
     ]);
   });
