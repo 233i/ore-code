@@ -41,6 +41,10 @@ pnpm-debug.log*
 # Local Ore Code runtime data
 .seekforge/
 
+# Local analysis / indexing artifacts
+.codegraph/
+.understand-anything/
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -59,6 +63,9 @@ apps/**/.vscode/*
 !apps/**/.vscode/settings.json
 !apps/**/.vscode/launch.json
 !apps/**/.vscode/tasks.json
+
+# Local helper scripts
+scripts/sync-upstream.sh
 
 # TypeScript incremental metadata
 *.tsbuildinfo
