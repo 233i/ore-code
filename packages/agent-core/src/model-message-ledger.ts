@@ -25,10 +25,6 @@ type AssistantPart =
   | { type: "text"; text: string }
   | { type: "orphan_tool_result"; result: ToolResult };
 
-const DEFAULT_TOOL_RESULT_MAX_CHARS = 8_000;
-const DEFAULT_SHELL_TOOL_RESULT_MAX_CHARS = 2_000;
-const DEFAULT_MEDIUM_TOOL_RESULT_MAX_CHARS = 12_000;
-
 export class ModelMessageLedger {
   private readonly entries: ModelLedgerEntry[] = [];
   private readonly interactionRequests = new Map<string, InteractionRequestEvent>();
@@ -286,7 +282,10 @@ function interactionDecisionSummary(
 
 function serializeToolEventForLedger(result: ToolResult, options: ModelMessageLedgerOptions = {}) {
   const modelResult = result.artifactId ? summarizeArtifactResult(result) : result;
-  return truncateText(serializeToolResultForModel(modelResult), toolResultMaxChars(result, options));
+  const serialized = serializeToolResultForModel(modelResult);
+  return options.toolResultMaxChars === undefined
+    ? serialized
+    : truncateText(serialized, Math.max(0, options.toolResultMaxChars));
 }
 
 function summarizeArtifactResult(result: ToolResult): ToolResult {
@@ -306,29 +305,6 @@ function summarizeArtifactResult(result: ToolResult): ToolResult {
       contentTruncated: output?.contentTruncated
     }
   };
-}
-
-function toolResultMaxChars(result: ToolResult, options: ModelMessageLedgerOptions) {
-  if (options.toolResultMaxChars !== undefined) {
-    return Math.max(0, options.toolResultMaxChars);
-  }
-
-  const output = typeof result.output === "object" && result.output !== null
-    ? result.output as Record<string, unknown>
-    : undefined;
-  if (!output) {
-    return DEFAULT_TOOL_RESULT_MAX_CHARS;
-  }
-
-  if ("stdout" in output || "stderr" in output || "command" in output || "jobId" in output) {
-    return DEFAULT_SHELL_TOOL_RESULT_MAX_CHARS;
-  }
-
-  if ("matches" in output || "results" in output || "citations" in output || "text" in output || "content" in output) {
-    return DEFAULT_MEDIUM_TOOL_RESULT_MAX_CHARS;
-  }
-
-  return DEFAULT_TOOL_RESULT_MAX_CHARS;
 }
 
 function truncateText(value: string, maxChars: number): string {

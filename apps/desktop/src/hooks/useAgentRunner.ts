@@ -622,6 +622,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
         historyReasoningReplayTokens: runtimeContext.reasoningReplayTokens,
         historyReasoningRetention: runtimeContext.reasoningRetention,
         historyCheckpoint: runtimeContext.checkpoint,
+        historyBriefing: runtimeContext.briefing,
         seqStart: nextSeq(nextEvents),
         signal: runController.signal
       })) {

@@ -1404,7 +1404,7 @@ describe("runtimeEventsToLlmMessages", () => {
     expect(context.messages[1].content).toContain("[truncated");
   });
 
-  it("uses lower default history limits for shell output than search-like output", () => {
+  it("keeps default tool results untrimmed until runtime pre-compress or explicit limits apply", () => {
     const shellContext = buildRuntimeContext([
       runtimeEvent({ seq: 0, type: "user_message", text: "run command" }),
       runtimeEvent({
@@ -1426,7 +1426,7 @@ describe("runtimeEventsToLlmMessages", () => {
       })
     ]);
 
-    expect(shellContext.messages[1].content).toContain("[truncated");
+    expect(shellContext.messages[1].content).not.toContain("[truncated");
     expect(grepContext.messages[1].content).not.toContain("[truncated");
   });
 

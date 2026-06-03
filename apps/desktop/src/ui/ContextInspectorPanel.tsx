@@ -197,10 +197,17 @@ export function ContextInspectorPanel({ usageSummary }: ContextInspectorPanelPro
           <Metric label="Reasoning 修复" value={reasoningHealingText(capacity)} />
           <Metric label="Checkpoint" value={checkpointStatusText(capacity)} />
           <Metric label="新基线" value={checkpointBaselineText(capacity)} />
+          <Metric label="Briefing" value={briefingStatusText(capacity)} />
+          <Metric label="Briefing 基线" value={briefingBaselineText(capacity)} />
         </div>
         {capacity.checkpoint ? (
           <p className="context-seam-message">
             {checkpointReasonText(capacity.checkpoint.reason)}：{capacity.checkpoint.message}
+          </p>
+        ) : null}
+        {capacity.briefing ? (
+          <p className="context-seam-message">
+            Context Briefing：{capacity.briefing.message}
           </p>
         ) : null}
         {capacity.seamLevel && capacity.seamLevel !== "ok" ? (
@@ -368,6 +375,25 @@ function checkpointBaselineText(capacity: NonNullable<UsageSummary["capacity"]>)
     return `${formatCompactTokens(checkpoint.inputTokensBefore)} -> ${formatCompactTokens(checkpoint.inputTokensAfter)}`;
   }
   return `阈值 ${formatCompactTokens(checkpoint.thresholdTokens)}`;
+}
+
+function briefingStatusText(capacity: NonNullable<UsageSummary["capacity"]>) {
+  const briefing = capacity.briefing;
+  if (!briefing) {
+    return "未启用";
+  }
+  return briefing.status === "applied" ? "已生成" : "未触发";
+}
+
+function briefingBaselineText(capacity: NonNullable<UsageSummary["capacity"]>) {
+  const briefing = capacity.briefing;
+  if (!briefing) {
+    return "n/a";
+  }
+  if (briefing.status === "applied" && briefing.inputTokensAfter !== undefined) {
+    return `${formatCompactTokens(briefing.inputTokensBefore)} -> ${formatCompactTokens(briefing.inputTokensAfter)}`;
+  }
+  return `阈值 ${formatCompactTokens(briefing.thresholdTokens)}`;
 }
 
 function checkpointReasonText(reason: NonNullable<NonNullable<UsageSummary["capacity"]>["checkpoint"]>["reason"]) {
