@@ -139,6 +139,16 @@ Project-local runtime data under `.ore-code/` is ignored by Git.
 - [Security](./SECURITY.md)
 - [Changelog](./CHANGELOG.md)
 
+## Star History
+
+<a href="https://www.star-history.com/#233i/ore-code&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=233i/ore-code&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=233i/ore-code&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=233i/ore-code&type=Date" />
+ </picture>
+</a>
+
 ## License
 
 Ore Code is released under the [MIT License](./LICENSE).
