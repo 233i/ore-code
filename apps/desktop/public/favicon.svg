@@ -1,4 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#1f7a5c"/>
-  <path fill="#fff" d="M18 14h16c9.5 0 16 6.8 16 18s-6.5 18-16 18H18V14Zm10 9v18h5.4c5 0 7.9-3.4 7.9-9s-2.9-9-7.9-9H28Z"/>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="43%" r="72%">
+      <stop offset="0%" stop-color="#172933"/>
+      <stop offset="58%" stop-color="#0d151b"/>
+      <stop offset="100%" stop-color="#07090d"/>
+    </radialGradient>
+    <linearGradient id="ore" x1="15" y1="9" x2="51" y2="59" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d7fbff"/>
+      <stop offset="0.4" stop-color="#29d7ff"/>
+      <stop offset="1" stop-color="#0b4962"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="40" y1="17" x2="54" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff2c7"/>
+      <stop offset="0.45" stop-color="#ff9f5c"/>
+      <stop offset="1" stop-color="#22536d"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="58" height="58" rx="13" fill="url(#bg)"/>
+  <circle cx="32" cy="37" r="23" fill="#22cfff" opacity="0.16"/>
+  <path d="M32.2 6.8 48.2 22.4 43.7 49.1 32 58.3 18.5 49 15.8 22.5Z" fill="#062332" stroke="#8df1ff" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M32.2 6.8 26.1 22.7 32 30 40.2 20.4Z" fill="#d6faff" opacity="0.82"/>
+  <path d="M15.8 22.5 26.1 22.7 18.5 49Z" fill="url(#ore)" opacity="0.9"/>
+  <path d="M26.1 22.7 32 30 32 58.3 18.5 49Z" fill="url(#ore)" opacity="0.65"/>
+  <path d="M40.2 20.4 48.2 22.4 43.7 49.1 37.6 48.7Z" fill="url(#warm)" opacity="0.95"/>
+  <path d="M32 30 40.2 20.4 37.6 48.7 32 58.3Z" fill="#0a506c" opacity="0.82"/>
+  <path d="M15.8 22.5 18.5 49 32 58.3 43.7 49.1 48.2 22.4 32.2 6.8" fill="none" stroke="#71eaff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M26.2 21.5 31.5 27.4 31.5 32.5 36 37 36 41.6 32 45.5 32 50.5" fill="none" stroke="#64f6ff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#64f6ff">
+    <circle cx="26.2" cy="21.5" r="1.7"/>
+    <circle cx="31.5" cy="32.5" r="1.5"/>
+    <circle cx="36" cy="37" r="1.5"/>
+    <circle cx="36" cy="41.6" r="1.5"/>
+    <circle cx="32" cy="45.5" r="1.5"/>
+    <circle cx="32" cy="50.5" r="1.6"/>
+  </g>
 </svg>

@@ -80,6 +80,34 @@ const MCP_PROTOCOL_VERSION: &str = "2024-11-05";
 const DEFAULT_MCP_TIMEOUT_SECS: u64 = 5;
 const AUTOMATION_DAEMON_INTERVAL_SECS: u64 = 60;
 
+#[cfg(target_os = "macos")]
+const APP_ICON_PNG: &[u8] = include_bytes!("../icons/icon.png");
+
+#[cfg(target_os = "macos")]
+fn apply_macos_runtime_app_icon() {
+    use objc2::MainThreadMarker;
+    use objc2::ffi::NSUInteger;
+    use objc2_app_kit::{NSApplication, NSImage};
+    use objc2_foundation::NSData;
+
+    let Some(mtm) = MainThreadMarker::new() else {
+        return;
+    };
+    let data = unsafe {
+        NSData::dataWithBytes_length(
+            APP_ICON_PNG.as_ptr().cast(),
+            APP_ICON_PNG.len() as NSUInteger,
+        )
+    };
+
+    if let Some(icon) = NSImage::initWithData(mtm.alloc::<NSImage>(), &data) {
+        let app = NSApplication::sharedApplication(mtm);
+        unsafe {
+            app.setApplicationIconImage(Some(&icon));
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -88,6 +116,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
+            #[cfg(target_os = "macos")]
+            apply_macos_runtime_app_icon();
             bootstrap::ensure_user_environment(app.handle())?;
             automation_daemon::start_automation_daemon(app.handle().clone());
             Ok(())
