@@ -1,12 +1,12 @@
-import { startTransition, useState, type Dispatch, type MouseEvent, type MutableRefObject, type SetStateAction } from "react";
+import { startTransition, useRef, useState, type Dispatch, type MouseEvent, type MutableRefObject, type SetStateAction } from "react";
 import type { RuntimeEvent, ToolCall } from "@ore-code/protocol";
 import {
   latestTurnTrackedChangesFromEvents,
   type TrackedFileChange
 } from "../features/changes/changeLedger";
 import type { ChangeGroup } from "../features/changes/changeGroups";
-import { derivePersistedTranscriptItems } from "../features/transcript/transcriptChunks";
-import { deleteSession, listSessions, loadSessionEvents, renameSession, saveSessionEvents, type SessionSummary } from "../services/sessionStore";
+import { transcriptItemsFromTail } from "../features/transcript/transcriptChunks";
+import { deleteSession, listSessions, loadSessionEvents, loadSessionTranscriptTail, renameSession, saveSessionEvents, type SessionSummary } from "../services/sessionStore";
 import {
   createTurnSnapshotStore,
   trackedChangesFromSnapshot
@@ -19,6 +19,17 @@ export type SessionContextMenu = {
   x: number;
   y: number;
 } | null;
+
+type TranscriptEventBase = {
+  eventCount: number;
+  items: TranscriptItem[];
+  threadId: string;
+};
+
+type LoadedSessionRuntime = {
+  events: RuntimeEvent[];
+  trackedChanges: TrackedFileChange[];
+};
 
 export function useSessions(input: {
   events: RuntimeEvent[];
@@ -33,6 +44,7 @@ export function useSessions(input: {
   setPromptText: Dispatch<SetStateAction<string>>;
   setSelectedChangeGroup: Dispatch<SetStateAction<ChangeGroup>>;
   setSelectedChangePath: Dispatch<SetStateAction<string | null>>;
+  setSessionRuntimeLoading: Dispatch<SetStateAction<boolean>>;
   setShowInspector: Dispatch<SetStateAction<boolean>>;
   setShowNewSession: Dispatch<SetStateAction<boolean>>;
   setShowSearch: Dispatch<SetStateAction<boolean>>;
@@ -40,6 +52,7 @@ export function useSessions(input: {
   setShowSkills: Dispatch<SetStateAction<boolean>>;
   setTaskFileChanges: Dispatch<SetStateAction<TrackedFileChange[]>>;
   setTranscriptItems: Dispatch<SetStateAction<TranscriptItem[]>>;
+  setTranscriptEventBase: (base: TranscriptEventBase | null) => void;
   setThreadId: Dispatch<SetStateAction<string>>;
   setChangesMessage: Dispatch<SetStateAction<string | null>>;
   taskFileChangesRef: MutableRefObject<TrackedFileChange[]>;
@@ -51,8 +64,11 @@ export function useSessions(input: {
   const [renamingThreadId, setRenamingThreadId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
   const [sessionContextMenu, setSessionContextMenu] = useState<SessionContextMenu>(null);
+  const loadSessionRequestIdRef = useRef(0);
+  const loadedRuntimeCacheRef = useRef(new Map<string, LoadedSessionRuntime>());
 
   function startNewSession() {
+    loadSessionRequestIdRef.current += 1;
     input.setShowNewSession(false);
     input.setShowSkills(false);
     input.setShowSettings(false);
@@ -60,6 +76,8 @@ export function useSessions(input: {
     input.setThreadId(createThreadId());
     input.setEvents([]);
     input.setTranscriptItems([]);
+    input.setTranscriptEventBase(null);
+    input.setSessionRuntimeLoading(false);
     input.taskFileChangesRef.current = [];
     input.setTaskFileChanges([]);
     input.setClearedChangeTurnId(null);
@@ -99,29 +117,37 @@ export function useSessions(input: {
   }
 
   async function loadSession(summary: SessionSummary) {
+    const requestId = loadSessionRequestIdRef.current + 1;
+    loadSessionRequestIdRef.current = requestId;
+    const cacheKey = sessionRuntimeCacheKey(summary);
+    const cachedRuntime = loadedRuntimeCacheRef.current.get(cacheKey);
+
     try {
       setSessionContextMenu(null);
       input.setShowSkills(false);
       input.setShowSettings(false);
       input.setShowSearch(false);
-      const loadedEvents = await loadSessionEvents(summary.threadId);
-      const visibleTranscriptItems = derivePersistedTranscriptItems(loadedEvents);
-      let restoredChanges = latestTurnTrackedChangesFromEvents(loadedEvents);
-      const snapshotId = latestSnapshotIdFromEvents(loadedEvents);
-      if (snapshotId) {
-        try {
-          const snapshot = await createTurnSnapshotStore().loadTurnSnapshot(snapshotId);
-          restoredChanges = trackedChangesFromSnapshot(snapshot);
-        } catch (error) {
-          input.setChangesMessage(`加载文件快照失败：${error instanceof Error ? error.message : String(error)}`);
-        }
+      input.setSessionRuntimeLoading(!cachedRuntime);
+
+      const tail = await loadSessionTranscriptTail(summary.threadId);
+      if (loadSessionRequestIdRef.current !== requestId) {
+        return;
       }
+
+      const tailItems = transcriptItemsFromTail(tail);
+      const tailMatchesRuntime = tail?.updatedAt === summary.updatedAt;
+      input.setTranscriptEventBase({
+        eventCount: tailMatchesRuntime ? summary.eventCount : 0,
+        items: tailMatchesRuntime ? tailItems : [],
+        threadId: summary.threadId
+      });
+
       startTransition(() => {
         input.setThreadId(summary.threadId);
-        input.setTranscriptItems(visibleTranscriptItems);
-        input.setEvents(loadedEvents);
-        input.taskFileChangesRef.current = restoredChanges;
-        input.setTaskFileChanges(restoredChanges);
+        input.setTranscriptItems(tailItems);
+        input.setEvents(cachedRuntime?.events ?? []);
+        input.taskFileChangesRef.current = cachedRuntime?.trackedChanges ?? [];
+        input.setTaskFileChanges(cachedRuntime?.trackedChanges ?? []);
         input.setClearedChangeTurnId(null);
         input.setSelectedChangePath(null);
         input.setSelectedChangeGroup("turn");
@@ -133,8 +159,43 @@ export function useSessions(input: {
         input.setExpandedMessage(null);
       });
       setSessionMessage(`已加载会话：${summary.title}`);
+
+      if (cachedRuntime) {
+        input.setSessionRuntimeLoading(false);
+        return;
+      }
+
+      void hydrateSessionRuntime(summary, cacheKey, requestId);
     } catch (error) {
+      if (loadSessionRequestIdRef.current === requestId) {
+        input.setSessionRuntimeLoading(false);
+      }
       setSessionMessage(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function hydrateSessionRuntime(summary: SessionSummary, cacheKey: string, requestId: number) {
+    try {
+      const loadedRuntime = await loadSessionRuntime(summary.threadId, (error) => {
+        input.setChangesMessage(`加载文件快照失败：${error instanceof Error ? error.message : String(error)}`);
+      });
+      loadedRuntimeCacheRef.current.set(cacheKey, loadedRuntime);
+      if (loadSessionRequestIdRef.current !== requestId) {
+        return;
+      }
+      startTransition(() => {
+        input.setEvents(loadedRuntime.events);
+        input.taskFileChangesRef.current = loadedRuntime.trackedChanges;
+        input.setTaskFileChanges(loadedRuntime.trackedChanges);
+      });
+    } catch (error) {
+      if (loadSessionRequestIdRef.current === requestId) {
+        setSessionMessage(error instanceof Error ? error.message : String(error));
+      }
+    } finally {
+      if (loadSessionRequestIdRef.current === requestId) {
+        input.setSessionRuntimeLoading(false);
+      }
     }
   }
 
@@ -249,6 +310,27 @@ export function useSessions(input: {
 
 function createThreadId() {
   return `thread-${crypto.randomUUID()}`;
+}
+
+async function loadSessionRuntime(threadId: string, onSnapshotLoadError?: (error: unknown) => void): Promise<LoadedSessionRuntime> {
+  const events = await loadSessionEvents(threadId);
+  let trackedChanges = latestTurnTrackedChangesFromEvents(events);
+  const snapshotId = latestSnapshotIdFromEvents(events);
+  if (snapshotId) {
+    try {
+      const snapshot = await createTurnSnapshotStore().loadTurnSnapshot(snapshotId);
+      trackedChanges = trackedChangesFromSnapshot(snapshot);
+    } catch (error) {
+      onSnapshotLoadError?.(error);
+      // Fall back to the event-derived change list; the caller owns user-facing error state.
+    }
+  }
+
+  return { events, trackedChanges };
+}
+
+function sessionRuntimeCacheKey(summary: SessionSummary) {
+  return `${summary.threadId}:${summary.eventCount}:${summary.updatedAt}`;
 }
 
 function latestSnapshotIdFromEvents(events: RuntimeEvent[]) {

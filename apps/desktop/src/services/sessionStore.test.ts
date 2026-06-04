@@ -58,6 +58,7 @@ describe("sessionStore browser fallback", () => {
     const earlier = await loadSessionTranscriptChunk("thread-transcript", 0);
 
     expect(tail?.chunk?.index).toBe(1);
+    expect(tail?.updatedAt).toBe("2026-05-09T00:01:40.000Z");
     expect(tail?.hiddenItemCount).toBe(80);
     expect(tail?.previousChunkIndex).toBe(0);
     expect(tail?.chunk?.items[0]).toMatchObject({ type: "message", message: { text: "read files 40" } });

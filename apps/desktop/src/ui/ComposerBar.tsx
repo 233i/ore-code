@@ -102,6 +102,10 @@ export function ComposerBar({
   const showSlashPalette = isLocalSlashPrompt && (matchedSlashCommands.length > 0 || promptText.trim().length > 1);
 
   const requestSend = () => {
+    if (disabled) {
+      return;
+    }
+
     if (!hasWorkspace && !isLocalSlashPrompt && promptHasText) {
       onOpenWorkspaceDialog();
       return;

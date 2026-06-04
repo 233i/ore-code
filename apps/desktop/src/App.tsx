@@ -113,6 +113,12 @@ import "./styles/skills.css";
 import "./styles/dialogs.css";
 import "./styles/automation.css";
 
+type TranscriptEventBase = {
+  eventCount: number;
+  items: TranscriptItem[];
+  threadId: string;
+};
+
 function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -127,6 +133,7 @@ function App() {
   const [showInspector, setShowInspector] = useState(false);
   const [events, setEvents] = useState<RuntimeEvent[]>([]);
   const [transcriptItems, setTranscriptItems] = useState<TranscriptItem[]>([]);
+  const [sessionRuntimeLoading, setSessionRuntimeLoading] = useState(false);
   const [activeTurnSkill, setActiveTurnSkill] = useState<{ id: string; name: string } | null>(null);
   const [artifacts, setArtifacts] = useState<ArtifactMetadata[]>([]);
   const [selectedArtifact, setSelectedArtifact] = useState<ArtifactRecord | null>(null);
@@ -134,6 +141,7 @@ function App() {
   const [notes, setNotes] = useState<NoteRecord[]>([]);
   const [noteMessage, setNoteMessage] = useState<string | null>(null);
   const setSessionMessageRef = useRef<((value: string | null) => void) | null>(null);
+  const transcriptEventBaseRef = useRef<TranscriptEventBase | null>(null);
   const captureSidebarOrderRef = useRef<(() => void) | null>(null);
   const setFilePanelPathRef = useRef<((path: string) => void) | null>(null);
   const {
@@ -443,6 +451,7 @@ function App() {
     setPromptText,
     setSelectedChangeGroup,
     setSelectedChangePath,
+    setSessionRuntimeLoading,
     setShowInspector,
     setShowNewSession,
     setShowSearch,
@@ -450,6 +459,9 @@ function App() {
     setShowSkills,
     setTaskFileChanges,
     setThreadId,
+    setTranscriptEventBase: (base) => {
+      transcriptEventBaseRef.current = base;
+    },
     taskFileChangesRef,
     threadId,
     workspacePath
@@ -599,6 +611,9 @@ function App() {
 
   useEffect(() => {
     if (events.length === 0) {
+      if (transcriptEventBaseRef.current?.threadId === threadId) {
+        return;
+      }
       setTranscriptItems([]);
       return;
     }
@@ -608,6 +623,17 @@ function App() {
       return;
     }
 
+    const transcriptBase = transcriptEventBaseRef.current;
+    if (transcriptBase?.threadId === threadId && events.length >= transcriptBase.eventCount) {
+      const liveEvents = events.slice(transcriptBase.eventCount);
+      if (liveEvents.length === 0) {
+        return;
+      }
+      setTranscriptItems([...transcriptBase.items, ...derivePersistedTranscriptItems(liveEvents)]);
+      return;
+    }
+
+    transcriptEventBaseRef.current = null;
     setTranscriptItems(derivePersistedTranscriptItems(events));
   }, [events, threadId]);
 
@@ -1262,7 +1288,7 @@ function App() {
           }}
           onOpenWorkspaceDialog={openNewSessionDialog}
           onRunStarter={(prompt) => void runAgentTurn(prompt)}
-          runDisabled={isRunning}
+          runDisabled={isRunning || sessionRuntimeLoading}
           onToggleMessageFeedback={toggleMessageFeedback}
           scrollKey={threadId}
         >
@@ -1294,7 +1320,7 @@ function App() {
 
         <ComposerBar
           attachments={composerAttachments}
-          disabled={isRunning}
+          disabled={isRunning || sessionRuntimeLoading}
           hasWorkspace={workspacePath !== "."}
           includeIdeContext={includeIdeContext}
           isRunning={isCurrentThreadRunning}

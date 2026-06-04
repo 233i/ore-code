@@ -95,7 +95,8 @@ function transcriptLoadFromBundle(transcript: TranscriptChunkBundle | null): Tra
     chunk,
     hiddenItemCount,
     previousChunkIndex: chunk && chunk.index > 0 ? chunk.index - 1 : null,
-    totalItemCount: transcript.totalItemCount
+    totalItemCount: transcript.totalItemCount,
+    updatedAt: transcript.updatedAt
   };
 }
 

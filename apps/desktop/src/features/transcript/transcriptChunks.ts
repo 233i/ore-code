@@ -76,6 +76,7 @@ export type TranscriptTailLoad = {
   hiddenItemCount: number;
   previousChunkIndex?: number | null;
   totalItemCount: number;
+  updatedAt?: string;
 };
 
 export type TranscriptHistoryGapItem = {
