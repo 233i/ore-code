@@ -151,6 +151,16 @@ export function shouldRefreshProjectIndexForEvent(event: RuntimeEvent) {
   return event.type === "file_changed" || event.type === "snapshot_restored";
 }
 
+export function shouldRefreshProjectIndexAfterIndexedAt(event: RuntimeEvent, indexedAt?: string) {
+  if (!indexedAt || !shouldRefreshProjectIndexForEvent(event)) {
+    return false;
+  }
+
+  const eventTime = Date.parse(event.createdAt);
+  const indexedTime = Date.parse(indexedAt);
+  return Number.isFinite(eventTime) && Number.isFinite(indexedTime) && eventTime > indexedTime;
+}
+
 export function projectIndexStatusFromRefreshResult(result: ProjectIndexRefreshResult): ProjectIndexStatus {
   return {
     documentCount: result.documentCount,

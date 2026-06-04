@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { projectIndexStatusFromRefreshResult, shouldRefreshProjectIndexForEvent } from "./appShellUtils";
+import { projectIndexStatusFromRefreshResult, shouldRefreshProjectIndexAfterIndexedAt } from "./appShellUtils";
 import type { ProjectIndexStatus } from "./appTypes";
 import { createRuntimeFileHost } from "../services/fileHost";
 import { refreshProjectIndex } from "../services/projectIndex";
@@ -49,7 +49,7 @@ export function useProjectIndexController({
     }
 
     const latestEvent = events[events.length - 1];
-    if (!latestEvent || !shouldRefreshProjectIndexForEvent(latestEvent)) {
+    if (!latestEvent || !shouldRefreshProjectIndexAfterIndexedAt(latestEvent, projectIndexStatus.updatedAt)) {
       return;
     }
 
@@ -64,7 +64,7 @@ export function useProjectIndexController({
     }, 1200);
 
     return () => window.clearTimeout(timer);
-  }, [events.length, settingsLoaded, workspacePath]);
+  }, [events.length, projectIndexStatus.updatedAt, settingsLoaded, workspacePath]);
 
   async function runProjectIndexRefresh(refreshId: number, targetWorkspacePath: string) {
     try {

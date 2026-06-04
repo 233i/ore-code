@@ -2,9 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   dedupeAttachments,
   formatConversationRelativeTime,
-  normalizeSettingsSection
+  normalizeSettingsSection,
+  shouldRefreshProjectIndexAfterIndexedAt
 } from "./appShellUtils";
 import type { ComposerAttachment } from "../ui/composerTypes";
+import type { RuntimeEvent } from "@ore-code/protocol";
 
 describe("formatConversationRelativeTime", () => {
   afterEach(() => {
@@ -47,6 +49,29 @@ describe("normalizeSettingsSection", () => {
   });
 });
 
+describe("shouldRefreshProjectIndexAfterIndexedAt", () => {
+  it("ignores historical file events that are older than the current index", () => {
+    expect(shouldRefreshProjectIndexAfterIndexedAt(
+      runtimeEvent("file_changed", "2026-06-04T08:00:00.000Z"),
+      "2026-06-04T09:00:00.000Z"
+    )).toBe(false);
+  });
+
+  it("refreshes for file events newer than the current index", () => {
+    expect(shouldRefreshProjectIndexAfterIndexedAt(
+      runtimeEvent("file_changed", "2026-06-04T10:00:00.000Z"),
+      "2026-06-04T09:00:00.000Z"
+    )).toBe(true);
+  });
+
+  it("does not refresh without an indexed timestamp", () => {
+    expect(shouldRefreshProjectIndexAfterIndexedAt(
+      runtimeEvent("file_changed", "2026-06-04T10:00:00.000Z"),
+      undefined
+    )).toBe(false);
+  });
+});
+
 describe("dedupeAttachments", () => {
   it("keeps the last attachment for duplicate paths", () => {
     const attachments: ComposerAttachment[] = [
@@ -61,3 +86,14 @@ describe("dedupeAttachments", () => {
     ]);
   });
 });
+
+function runtimeEvent(type: "file_changed" | "snapshot_restored" | "assistant_message", createdAt: string): RuntimeEvent {
+  return {
+    id: "event-1",
+    seq: 1,
+    threadId: "thread-1",
+    turnId: "turn-1",
+    createdAt,
+    type
+  } as RuntimeEvent;
+}

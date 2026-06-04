@@ -37,6 +37,7 @@ type TranscriptProps = {
   currentWorkspaceLabel: string;
   hasWorkspace: boolean;
   isRunning: boolean;
+  runDisabled?: boolean;
   items: TranscriptItem[];
   loadingEarlier?: boolean;
   messageFeedback: Record<string, MessageFeedback>;
@@ -55,6 +56,7 @@ export function Transcript({
   currentWorkspaceLabel,
   hasWorkspace,
   isRunning,
+  runDisabled = isRunning,
   items,
   loadingEarlier = false,
   messageFeedback,
@@ -130,7 +132,7 @@ export function Transcript({
           <TranscriptEmptyState
             currentWorkspaceLabel={currentWorkspaceLabel}
             hasWorkspace={hasWorkspace}
-            isRunning={isRunning}
+            runDisabled={runDisabled}
             onOpenWorkspaceDialog={onOpenWorkspaceDialog}
             onRunStarter={onRunStarter}
           />
@@ -463,13 +465,13 @@ function CodebaseContextHint({ event }: { event: Extract<RuntimeEvent, { type: "
 function TranscriptEmptyState({
   currentWorkspaceLabel,
   hasWorkspace,
-  isRunning,
+  runDisabled,
   onOpenWorkspaceDialog,
   onRunStarter
 }: {
   currentWorkspaceLabel: string;
   hasWorkspace: boolean;
-  isRunning: boolean;
+  runDisabled: boolean;
   onOpenWorkspaceDialog: () => void;
   onRunStarter: (prompt: string) => void;
 }) {
@@ -489,12 +491,12 @@ function TranscriptEmptyState({
           </button>
         ) : null}
         <div className="starter-grid" aria-label="起始任务">
-          <button type="button" disabled={isRunning || !hasWorkspace} onClick={() => onRunStarter("列出当前工作区并总结项目结构")}>
+          <button type="button" disabled={runDisabled || !hasWorkspace} onClick={() => onRunStarter("列出当前工作区并总结项目结构")}>
             <span><FolderIcon size="18px" /></span>
             <strong>查看工作区</strong>
             <small>总结项目结构和关键模块</small>
           </button>
-          <button type="button" disabled={isRunning || !hasWorkspace} onClick={() => onRunStarter("运行 pnpm --filter @ore-code/desktop test")}>
+          <button type="button" disabled={runDisabled || !hasWorkspace} onClick={() => onRunStarter("运行 pnpm --filter @ore-code/desktop test")}>
             <span><PlayCircleIcon size="18px" /></span>
             <strong>运行测试</strong>
             <small>检查当前桌面端状态</small>

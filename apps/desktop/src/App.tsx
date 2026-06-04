@@ -496,6 +496,7 @@ function App() {
     pendingApproval,
     pendingApprovalRisk,
     pendingInteraction,
+    runningThreadId,
     sessionApprovalCacheCount,
     runAgentTurn,
     setPendingApproval,
@@ -543,6 +544,7 @@ function App() {
     workspacePath
   });
   pendingApprovalSetterRef.current = setPendingApproval;
+  const isCurrentThreadRunning = isRunning && runningThreadId === threadId;
 
   const deferredEvents = useDeferredValue(events);
   const shellJobs = useMemo(() => deriveShellJobs(deferredEvents), [deferredEvents]);
@@ -925,9 +927,6 @@ function App() {
   }
 
   async function loadSessionForWorkspace(summary: SessionSummary) {
-    if (isRunning) {
-      stopAgentTurn();
-    }
     captureSidebarScrollForThread(summary.threadId);
     closeWorkspacePanels();
     if (summary.workspacePath && !sameWorkspacePath(summary.workspacePath, workspacePath)) {
@@ -1252,7 +1251,7 @@ function App() {
         <Transcript
           currentWorkspaceLabel={currentWorkspaceLabel}
           hasWorkspace={workspacePath !== "."}
-          isRunning={isRunning}
+          isRunning={isCurrentThreadRunning}
           items={transcriptItems}
           messageFeedback={messageFeedback}
           onCopyMessage={(text) => void copyMessageText(text)}
@@ -1263,6 +1262,7 @@ function App() {
           }}
           onOpenWorkspaceDialog={openNewSessionDialog}
           onRunStarter={(prompt) => void runAgentTurn(prompt)}
+          runDisabled={isRunning}
           onToggleMessageFeedback={toggleMessageFeedback}
           scrollKey={threadId}
         >
@@ -1297,7 +1297,7 @@ function App() {
           disabled={isRunning}
           hasWorkspace={workspacePath !== "."}
           includeIdeContext={includeIdeContext}
-          isRunning={isRunning}
+          isRunning={isCurrentThreadRunning}
           modelLabel={modelLabel}
           deepSeekModelMode={effectiveDeepSeekModelMode}
           deepSeekThinkingLevel={deepSeekThinkingLevel}

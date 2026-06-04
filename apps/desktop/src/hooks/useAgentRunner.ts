@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import {
   AgentEngine,
   buildRuntimeContextFromMessages,
@@ -67,6 +67,8 @@ import {
 type ActiveTurnSkill = { id: string; name: string } | null;
 type InteractionRequestEvent = Extract<RuntimeEvent, { type: "interaction_requested" }>;
 type ModelLedgerRecord = { ledger: ModelMessageLedger; eventCount: number; lastSeq: number; eventHash: string };
+type PendingApprovalRequest = { threadId: string; call: ToolCall };
+type PendingInteractionRequest = { threadId: string; request: InteractionRequestEvent };
 const INTERACTION_CONTINUE_PROMPT = "继续，根据用户刚才的选择推进计划。";
 const ENABLE_PREFIX_INVARIANT_ASSERT = import.meta.env.DEV || import.meta.env.MODE === "test";
 
@@ -115,12 +117,16 @@ export type UseAgentRunnerInput = {
 
 export function useAgentRunner(input: UseAgentRunnerInput) {
   const [isRunning, setIsRunning] = useState(false);
+  const [runningThreadId, setRunningThreadId] = useState<string | null>(null);
   const [pendingApproval, setPendingApproval] = useState<ToolCall | null>(null);
   const [pendingInteraction, setPendingInteraction] = useState<InteractionRequestEvent | null>(null);
   const [sessionApprovalCacheCount, setSessionApprovalCacheCount] = useState(0);
   const approvalResolver = useRef<((decision: ApprovalDecision | undefined) => void) | null>(null);
   const interactionResolver = useRef<((decision: InteractionDecision | undefined) => void) | null>(null);
+  const pendingApprovalRequest = useRef<PendingApprovalRequest | null>(null);
+  const pendingInteractionRequest = useRef<PendingInteractionRequest | null>(null);
   const runAbortController = useRef<AbortController | null>(null);
+  const runningThreadIdRef = useRef<string | null>(null);
   const cacheWarmupRecords = useRef(new Map<string, CacheWarmupRecord>());
   const immutablePrefixSnapshots = useRef(new Map<string, ImmutablePrefixSnapshot>());
   const assembledRequestSnapshots = useRef(new Map<string, AssembledRequest>());
@@ -130,6 +136,18 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
   const visibleThreadIdRef = useRef(input.threadId);
   const pendingApprovalRisk = useMemo(() => getShellApprovalRisk(pendingApproval), [pendingApproval]);
   visibleThreadIdRef.current = input.threadId;
+
+  useEffect(() => {
+    const approval = pendingApprovalRequest.current;
+    setPendingApproval(approval?.threadId === input.threadId ? approval.call : null);
+
+    const interaction = pendingInteractionRequest.current;
+    setPendingInteraction(interaction?.threadId === input.threadId ? interaction.request : null);
+  }, [input.threadId]);
+
+  function setActiveRunningThreadId(threadId: string | null) {
+    setRefAndState(runningThreadIdRef, setRunningThreadId, threadId);
+  }
 
   async function runAgentTurn(prompt = "", options: {
     forceDeepSeekModelMode?: Exclude<DeepSeekModelMode, "auto">;
@@ -143,22 +161,27 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
     }
 
     let userPrompt = prompt.trim() || "列出当前工作区";
+    const activeThreadId = input.threadId;
+    const activeThreadVisible = () => visibleThreadIdRef.current === activeThreadId;
     const skillPrompt = resolveSkillPromptFromSlashInput(userPrompt, input.availableSlashCommands);
     if (skillPrompt) {
       userPrompt = skillPrompt.prompt;
-      input.setActiveTurnSkill(skillPrompt.skill);
+      if (activeThreadVisible()) {
+        input.setActiveTurnSkill(skillPrompt.skill);
+      }
     } else if (await input.executeLocalSlashCommand(userPrompt)) {
       return;
     } else {
-      input.setActiveTurnSkill(null);
+      if (activeThreadVisible()) {
+        input.setActiveTurnSkill(null);
+      }
     }
 
     const permission = resolvePermissionPreset(input.permissionPreset, input.mode === "plan");
     const operatingSystem = detectRuntimeOperatingSystem();
     const priorEvents = options.priorEvents ?? input.events;
-    const activeThreadId = input.threadId;
     const setActiveSessionMessage = (message: string | null) => {
-      if (visibleThreadIdRef.current === activeThreadId) {
+      if (activeThreadVisible()) {
         input.setSessionMessage(message);
       }
     };
@@ -202,30 +225,42 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       text: userPrompt
     };
     let nextEvents: RuntimeEvent[] = [...priorEvents, earlyUserMessageEvent];
-    if (visibleThreadIdRef.current === activeThreadId) {
+    if (activeThreadVisible()) {
       input.setEvents(nextEvents);
     }
     void input.persistSession(activeThreadId, nextEvents, { silent: true });
-    input.setPromptText("");
-    input.setAttachments([]);
+    if (activeThreadVisible()) {
+      input.setPromptText("");
+      input.setAttachments([]);
+    }
 
     const runController = new AbortController();
     runAbortController.current = runController;
+    setActiveRunningThreadId(activeThreadId);
+    let activeTaskFileChanges: TrackedFileChange[] = [];
+    const setActiveTaskFileChanges = (changes: TrackedFileChange[]) => {
+      activeTaskFileChanges = changes;
+      if (!activeThreadVisible()) {
+        return;
+      }
+      input.taskFileChangesRef.current = changes;
+      input.setTaskFileChanges(changes);
+    };
     setIsRunning(true);
     setPendingApproval(null);
     input.setProviderError(null);
     setActiveSessionMessage("正在准备请求。");
 
     try {
-      input.taskFileChangesRef.current = [];
-      input.setTaskFileChanges([]);
-      input.setClearedChangeTurnId(null);
+      setActiveTaskFileChanges([]);
+      if (activeThreadVisible()) {
+        input.setClearedChangeTurnId(null);
+      }
       const fileHost = createChangeTrackingFileHost(createRuntimeFileHost(), (change) => {
-        if (visibleThreadIdRef.current !== activeThreadId) {
+        setActiveTaskFileChanges([...activeTaskFileChanges, change]);
+        if (!activeThreadVisible()) {
           return;
         }
-        input.taskFileChangesRef.current = [...input.taskFileChangesRef.current, change];
-        input.setTaskFileChanges(input.taskFileChangesRef.current);
         input.setSelectedChangePath((current) => current ?? change.path);
         input.setSelectedChangeGroup("turn");
         input.setChangeDiffPreview(change.diff);
@@ -234,7 +269,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
         fileHost,
         priorEvents,
         prompt: userPrompt,
-        trackedChanges: input.taskFileChangesRef.current,
+        trackedChanges: activeTaskFileChanges,
         workspacePath: input.workspacePath
       });
       if (runController.signal.aborted) {
@@ -396,17 +431,19 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       syncModelMessageLedgerRecord(modelLedgerRecord, sequencedEvent, nextEvents.length);
       if (sequencedEvent.type === "interaction_requested") {
         pendingInteractionEvent = sequencedEvent;
-        if (visibleThreadIdRef.current === activeThreadId) {
+        pendingInteractionRequest.current = { threadId: activeThreadId, request: sequencedEvent };
+        if (activeThreadVisible()) {
           setPendingInteraction(sequencedEvent);
         }
       }
       if (sequencedEvent.type === "interaction_decided" && pendingInteractionEvent?.requestId === sequencedEvent.requestId) {
         pendingInteractionEvent = null;
-        if (visibleThreadIdRef.current === activeThreadId) {
+        pendingInteractionRequest.current = null;
+        if (activeThreadVisible()) {
           setPendingInteraction(null);
         }
       }
-      if (visibleThreadIdRef.current === activeThreadId) {
+      if (activeThreadVisible()) {
         input.setEvents(nextEvents);
       }
     };
@@ -596,13 +633,19 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
 
           return new Promise((resolve) => {
             approvalResolver.current = resolve;
-            setPendingApproval(call);
+            pendingApprovalRequest.current = { threadId: activeThreadId, call };
+            if (activeThreadVisible()) {
+              setPendingApproval(call);
+            }
           });
         },
         requestInteraction: (request) => {
-          setPendingInteraction(request);
           return new Promise((resolve) => {
             interactionResolver.current = resolve;
+            pendingInteractionRequest.current = { threadId: activeThreadId, request };
+            if (activeThreadVisible()) {
+              setPendingInteraction(request);
+            }
           });
         }
       }
@@ -636,7 +679,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       if (error instanceof ToolProfileEscalationError && input.provider === "deepseek" && toolProfile === "readonly") {
         escalateToPro = error;
         nextEvents = [...priorEvents, earlyUserMessageEvent];
-        if (visibleThreadIdRef.current === activeThreadId) {
+        if (activeThreadVisible()) {
           input.setEvents(nextEvents);
         }
         restoreMapEntry(immutablePrefixSnapshots.current, activeThreadId, previousImmutablePrefix);
@@ -667,9 +710,9 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
         }
       }
 
-      if (!escalateToPro && (input.taskFileChangesRef.current.length > 0 || sideSnapshotId)) {
+      if (!escalateToPro && (activeTaskFileChanges.length > 0 || sideSnapshotId)) {
         const snapshot = snapshotFromTrackedChanges({
-          changes: input.taskFileChangesRef.current,
+          changes: activeTaskFileChanges,
           threadId: activeThreadId,
           turnId,
           workspacePath: input.workspacePath,
@@ -689,7 +732,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
 
       if (!escalateToPro) {
         const fileChangeEvents = trackedChangesToRuntimeEvents({
-          changes: input.taskFileChangesRef.current,
+          changes: activeTaskFileChanges,
           threadId: activeThreadId,
           turnId,
           snapshotId,
@@ -712,7 +755,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
             sideGitCommit,
             sidePostGitCommit,
             sideGitBranch,
-            fileCount: input.taskFileChangesRef.current.length
+            fileCount: activeTaskFileChanges.length
           } as RuntimeEvent);
         }
         const projectDelta = buildProjectDeltaEventBody(nextEvents, turnId);
@@ -732,16 +775,16 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       }
       if (runAbortController.current === runController) {
         runAbortController.current = null;
+        setActiveRunningThreadId(null);
         setIsRunning(false);
       }
-      if (pendingInteractionEvent && visibleThreadIdRef.current === activeThreadId) {
+      if (pendingInteractionEvent && activeThreadVisible()) {
         setPendingInteraction(pendingInteractionEvent);
       }
     }
 
-    if (escalateToPro && visibleThreadIdRef.current === activeThreadId) {
-      input.taskFileChangesRef.current = [];
-      input.setTaskFileChanges([]);
+    if (escalateToPro && activeThreadVisible()) {
+      setActiveTaskFileChanges([]);
       await runAgentTurn(userPrompt, {
         forceDeepSeekModelMode: "pro",
         priorEvents,
@@ -750,12 +793,13 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       });
     }
     } catch (error) {
-      if (!runController.signal.aborted && visibleThreadIdRef.current === activeThreadId) {
+      if (!runController.signal.aborted && activeThreadVisible()) {
         input.setProviderError(messageFromUnknown(error));
       }
     } finally {
       if (runAbortController.current === runController) {
         runAbortController.current = null;
+        setActiveRunningThreadId(null);
         setIsRunning(false);
         setActiveSessionMessage(null);
       }
@@ -764,62 +808,73 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
 
   function stopAgentTurn() {
     runAbortController.current?.abort();
-    if (pendingApproval) {
-      approvalResolver.current?.({ callId: pendingApproval.id, decision: "denied" });
+    if (pendingApprovalRequest.current) {
+      approvalResolver.current?.({ callId: pendingApprovalRequest.current.call.id, decision: "denied" });
       approvalResolver.current = null;
+      pendingApprovalRequest.current = null;
       setPendingApproval(null);
     }
-    if (pendingInteraction) {
+    if (pendingInteractionRequest.current) {
       interactionResolver.current?.(undefined);
       interactionResolver.current = null;
+      pendingInteractionRequest.current = null;
       setPendingInteraction(null);
     }
-    input.setSessionMessage("正在停止当前任务。");
+    if (runningThreadIdRef.current === input.threadId) {
+      input.setSessionMessage("正在停止当前任务。");
+    }
   }
 
   function decideApproval(decision: ApprovalDecision["decision"], editedInput?: unknown, rememberForSession = false) {
-    if (!pendingApproval) {
+    const approval = pendingApprovalRequest.current;
+    if (!approval || approval.threadId !== input.threadId) {
       return;
     }
+    const pendingApprovalCall = approval.call;
 
     const resolvedDecision: ApprovalDecision = {
-      callId: pendingApproval.id,
+      callId: pendingApprovalCall.id,
       decision: rememberForSession && decision === "approved-once" ? "approved-always" : decision,
       ...(decision === "edited" ? { editedInput } : {})
     };
-    if (resolvedDecision.decision === "approved-always" && isCacheableApproval(pendingApproval)) {
-      sessionApprovalCache.current.set(approvalCacheKey(pendingApproval), resolvedDecision);
+    if (resolvedDecision.decision === "approved-always" && isCacheableApproval(pendingApprovalCall)) {
+      sessionApprovalCache.current.set(approvalCacheKey(pendingApprovalCall), resolvedDecision);
       setSessionApprovalCacheCount(sessionApprovalCache.current.size);
     }
     approvalResolver.current?.(resolvedDecision);
     approvalResolver.current = null;
+    pendingApprovalRequest.current = null;
     setPendingApproval(null);
   }
 
   async function decideInteraction(decision: InteractionDecision) {
-    if (!pendingInteraction) {
+    const interaction = pendingInteractionRequest.current;
+    if (!interaction || interaction.threadId !== input.threadId) {
       return;
     }
+    const pendingInteractionEvent = interaction.request;
 
     const decisionEvent: RuntimeEvent = {
       id: crypto.randomUUID(),
       seq: nextSeq(input.events),
-      threadId: pendingInteraction.threadId,
-      turnId: pendingInteraction.turnId,
+      threadId: pendingInteractionEvent.threadId,
+      turnId: pendingInteractionEvent.turnId,
       createdAt: new Date().toISOString(),
       type: "interaction_decided",
-      requestId: pendingInteraction.requestId,
+      requestId: pendingInteractionEvent.requestId,
       decision
     };
     if (interactionResolver.current) {
       interactionResolver.current(decision);
       interactionResolver.current = null;
+      pendingInteractionRequest.current = null;
       setPendingInteraction(null);
       return;
     }
 
     const nextEvents = [...input.events, decisionEvent];
     input.setEvents(nextEvents);
+    pendingInteractionRequest.current = null;
     setPendingInteraction(null);
     await input.persistSession(input.threadId, nextEvents, { silent: true });
     void runAgentTurn(INTERACTION_CONTINUE_PROMPT, { priorEvents: nextEvents });
@@ -840,9 +895,15 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
     pendingInteraction,
     pendingApprovalRisk,
     runAgentTurn,
+    runningThreadId,
     setPendingApproval,
     stopAgentTurn
   };
+}
+
+function setRefAndState<T>(ref: MutableRefObject<T>, setState: Dispatch<SetStateAction<T>>, value: T) {
+  ref.current = value;
+  setState(value);
 }
 
 function composePromptWithComposerContext(
