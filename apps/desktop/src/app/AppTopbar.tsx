@@ -1,5 +1,5 @@
 import { Button } from "tdesign-react";
-import { FolderIcon, ModeDarkIcon, ModeLightIcon, SettingIcon, ToolsIcon } from "tdesign-icons-react";
+import { FolderIcon, ModeDarkIcon, ModeLightIcon, SettingIcon, TaskIcon, ToolsIcon } from "tdesign-icons-react";
 import { projectIndexStatusLabel, projectIndexStatusTitle } from "./appShellUtils";
 import type { ProjectIndexStatus } from "./appTypes";
 import { useI18n } from "../i18n/I18nProvider";
@@ -8,7 +8,9 @@ type AppTopbarProps = {
   conversationTitle: string;
   currentWorkspaceLabel: string;
   eventsCount: number;
+  activeTaskCount: number;
   onOpenSettings: () => void;
+  onOpenTaskWorkspace: () => void;
   onOpenWorkspaceDialog: () => void;
   onThemePreferenceChange: (value: "light" | "dark") => void;
   onToggleInspector: () => void;
@@ -16,6 +18,7 @@ type AppTopbarProps = {
   resolvedTheme: "light" | "dark";
   sessionMessage: string | null;
   showInspector: boolean;
+  showTasks: boolean;
   workspacePath: string;
 };
 
@@ -23,7 +26,9 @@ export function AppTopbar({
   conversationTitle,
   currentWorkspaceLabel,
   eventsCount,
+  activeTaskCount,
   onOpenSettings,
+  onOpenTaskWorkspace,
   onOpenWorkspaceDialog,
   onThemePreferenceChange,
   onToggleInspector,
@@ -31,6 +36,7 @@ export function AppTopbar({
   resolvedTheme,
   sessionMessage,
   showInspector,
+  showTasks,
   workspacePath
 }: AppTopbarProps) {
   const { locale, t } = useI18n();
@@ -67,6 +73,17 @@ export function AppTopbar({
         </div>
       </div>
       <div className="topbar-actions" aria-label={t("app.aria.workspaceControls")}>
+        <button
+          aria-label={t("app.action.tasks")}
+          className={showTasks ? "topbar-task-button active" : "topbar-task-button"}
+          title={t("app.action.tasks")}
+          type="button"
+          onClick={onOpenTaskWorkspace}
+        >
+          <TaskIcon size="16px" />
+          <span>{t("app.action.tasks")}</span>
+          {activeTaskCount > 0 ? <strong>{activeTaskCount}</strong> : null}
+        </button>
         <Button
           aria-label={themeLabel}
           className="icon-button"

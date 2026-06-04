@@ -243,6 +243,60 @@
   min-width: 0;
 }
 
+.topbar-task-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  display: inline-flex;
+  font: inherit;
+  gap: 6px;
+  height: 29px;
+  max-width: 128px;
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.topbar-task-button:hover {
+  background: var(--surface-hover);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.topbar-task-button.active {
+  background: var(--surface-active);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.topbar-task-button svg {
+  flex: 0 0 auto;
+}
+
+.topbar-task-button span {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-task-button strong {
+  background: var(--accent);
+  border-radius: 999px;
+  color: var(--surface);
+  display: block;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 16px;
+  min-width: 16px;
+  padding: 0 5px;
+  text-align: center;
+}
+
 .icon-button.t-button,
 .icon-button {
   background: transparent;
@@ -266,6 +320,12 @@
   background: var(--surface-active);
   border-color: var(--line);
   color: var(--text);
+}
+
+@media (max-width: 720px) {
+  .topbar-task-button span {
+    display: none;
+  }
 }
 
 @media (max-width: 1280px) {

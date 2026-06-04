@@ -7,7 +7,7 @@ import { DurableTaskManager } from "./task-tools";
 describe("DurableTaskExecutor", () => {
   it("claims and completes the oldest queued durable task", async () => {
     const manager = new DurableTaskManager();
-    const task = await manager.create({ prompt: "Summarize the workspace", title: "Workspace summary" });
+    const task = await manager.create({ prompt: "Summarize the workspace", title: "Workspace summary", workspacePath: "/workspace" });
     const executor = new DurableTaskExecutor(manager, {
       workspacePath: "/workspace",
       createClient: async () => new MockLlmClient([
@@ -26,8 +26,10 @@ describe("DurableTaskExecutor", () => {
     });
     expect(result.task).toMatchObject({
       id: task.id,
+      executionThreadId: `durable-task-${task.id}`,
       status: "completed",
       output: "done",
+      workspacePath: "/workspace",
       eventCount: 6
     });
     expect(result.task?.threadId).toBe(`durable-task-${task.id}`);
@@ -36,7 +38,7 @@ describe("DurableTaskExecutor", () => {
 
   it("marks a task failed when the model turn fails", async () => {
     const manager = new DurableTaskManager();
-    await manager.create({ prompt: "Fail this task" });
+    await manager.create({ prompt: "Fail this task", workspacePath: "/workspace" });
     const executor = new DurableTaskExecutor(manager, {
       workspacePath: "/workspace",
       createClient: async () => new MockLlmClient([
@@ -64,5 +66,18 @@ describe("DurableTaskExecutor", () => {
     });
 
     await expect(executor.runNext()).resolves.toEqual({ ran: false });
+  });
+
+  it("does not claim queued tasks from another workspace", async () => {
+    const manager = new DurableTaskManager();
+    await manager.create({ prompt: "Other workspace task", workspacePath: "/other" });
+    const executor = new DurableTaskExecutor(manager, {
+      workspacePath: "/workspace",
+      createClient: async () => new MockLlmClient([{ type: "done" }]),
+      createRegistry: () => new ToolRegistry()
+    });
+
+    await expect(executor.runNext()).resolves.toEqual({ ran: false });
+    expect((await manager.list({ workspacePath: "/other" }))[0]?.status).toBe("queued");
   });
 });

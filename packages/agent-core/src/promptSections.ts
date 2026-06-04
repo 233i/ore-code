@@ -360,6 +360,8 @@ function durableTaskLines(context: PromptBuildContext) {
   return [
     "Durable task execution:",
     "You are executing a queued durable task. Keep the task checklist, gates, and final task state current.",
+    "Before marking the task completed, make the evidence loop explicit: what changed, what verification ran, and the pass/fail result.",
+    "Record tests, builds, packaging, smoke checks, and manual verification as gates with commands or concise summaries.",
     ...(context.durableTaskNote?.trim() ? [context.durableTaskNote.trim()] : [])
   ];
 }

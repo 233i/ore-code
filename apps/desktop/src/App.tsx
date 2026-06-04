@@ -10,7 +10,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { ConfigProvider, Dialog } from "tdesign-react";
 import tdesignEnUS from "tdesign-react/es/locale/en_US";
 import tdesignZhCN from "tdesign-react/es/locale/zh_CN";
-import type { NoteRecord, ResolvedDeepSeekTurnModel } from "@ore-code/agent-core";
+import type { DurableTaskSnapshot, NoteRecord, ResolvedDeepSeekTurnModel } from "@ore-code/agent-core";
 import type { ArtifactMetadata, ArtifactRecord } from "@ore-code/protocol";
 import type { RuntimeEvent, ToolCall } from "@ore-code/protocol";
 import { AppSettingsOverlay } from "./app/AppSettingsOverlay";
@@ -78,6 +78,7 @@ import { ComposerBar } from "./ui/ComposerBar";
 import { ApprovalDialog, InteractionDialog, NewSessionDialog, SearchDialog } from "./ui/DialogPanels";
 import { MarkdownView } from "./ui/MarkdownView";
 import { SkillsWorkspace } from "./ui/SkillsWorkspace";
+import { TaskWorkspace } from "./ui/TaskWorkspace";
 import { InspectorPanel } from "./ui/InspectorPanel";
 import { Transcript, type TranscriptItem } from "./ui/Transcript";
 import { formatToolPayload } from "./ui/ToolCard";
@@ -112,6 +113,7 @@ import "./styles/settings.css";
 import "./styles/skills.css";
 import "./styles/dialogs.css";
 import "./styles/automation.css";
+import "./styles/tasks.css";
 
 type TranscriptEventBase = {
   eventCount: number;
@@ -125,6 +127,7 @@ function App() {
   const [showNewSession, setShowNewSession] = useState(false);
   const [showSkills, setShowSkills] = useState(false);
   const [showAutomation, setShowAutomation] = useState(false);
+  const [showTasks, setShowTasks] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSettingsSection, setActiveSettingsSection] = useState<SettingsSection>("general");
   const [settingsQuery, setSettingsQuery] = useState("");
@@ -330,10 +333,13 @@ function App() {
     automationBusy,
     automationMessage,
     automations,
+    cancelTask,
+    continueTask,
     createAutomation,
     deleteAutomation,
     durableTasks,
     refreshAutomationWorkspace,
+    retryTask,
     runAutomationNow,
     runDueAutomations,
     toggleAutomation
@@ -343,6 +349,10 @@ function App() {
     runDurableTaskExecutorTick,
     workspacePath
   });
+  const activeTaskCount = useMemo(
+    () => durableTasks.filter((task) => task.status === "running" || task.status === "queued" || task.status === "failed").length,
+    [durableTasks]
+  );
   const {
     cancelBackgroundShellJob,
     jobMessage,
@@ -406,6 +416,7 @@ function App() {
     onOpenPanel: (panel) => {
       setShowSkills(false);
       setShowAutomation(false);
+      setShowTasks(false);
       setShowSettings(false);
       setShowSearch(false);
       setShowNewSession(false);
@@ -698,7 +709,7 @@ function App() {
         await automationManager.current.reload();
         await durableTaskManager.current.reload();
         await runDurableTaskExecutorTick();
-        if (showAutomation) {
+        if (showAutomation || showTasks) {
           await refreshAutomationWorkspace();
         }
       } catch (error) {
@@ -712,7 +723,7 @@ function App() {
     }, 60_000);
 
     return () => window.clearInterval(timer);
-  }, [settingsLoaded, showAutomation, workspacePath]);
+  }, [settingsLoaded, showAutomation, showTasks, workspacePath]);
 
   useEffect(() => {
     if (!showInspector) {
@@ -802,6 +813,13 @@ function App() {
   useEffect(() => {
     void refreshChanges();
   }, [workspacePath]);
+
+  useEffect(() => {
+    if (!settingsLoaded) {
+      return;
+    }
+    void refreshAutomationWorkspace();
+  }, [settingsLoaded, workspacePath]);
 
   useEffect(() => {
     if (showSkills) {
@@ -1055,6 +1073,7 @@ function App() {
 
   function closeWorkspacePanels() {
     setShowAutomation(false);
+    setShowTasks(false);
     setShowSkills(false);
     setShowSettings(false);
     setShowSearch(false);
@@ -1080,9 +1099,17 @@ function App() {
     void refreshAutomationWorkspace();
   }
 
+  function openTaskWorkspace() {
+    closeWorkspacePanels();
+    setShowTasks(true);
+    void refreshAutomationWorkspace();
+    void refreshChanges();
+  }
+
   function openSearchPanel(initialQuery = "") {
     setShowSkills(false);
     setShowAutomation(false);
+    setShowTasks(false);
     setShowSettings(false);
     setShowInspector(false);
     setShowNewSession(false);
@@ -1093,6 +1120,7 @@ function App() {
   function openSettingsPanel() {
     setShowSkills(false);
     setShowAutomation(false);
+    setShowTasks(false);
     setShowInspector(false);
     setShowSearch(false);
     setShowNewSession(false);
@@ -1102,6 +1130,7 @@ function App() {
   function switchResourcePanel(panel: Panel) {
     setShowSkills(false);
     setShowAutomation(false);
+    setShowTasks(false);
     setShowSettings(false);
     setShowSearch(false);
     setShowNewSession(false);
@@ -1110,6 +1139,32 @@ function App() {
     if (panel === "Changes") {
       void refreshChanges();
     }
+  }
+
+  function openTaskWorkspaceChanges() {
+    setShowTasks(false);
+    switchResourcePanel("Changes");
+  }
+
+  function openTaskWorkspaceArtifact(id: string) {
+    setShowTasks(false);
+    switchResourcePanel("Artifacts");
+    void openArtifact(id);
+  }
+
+  function openTaskWorkspaceSession(threadId: string, task: DurableTaskSnapshot) {
+    if (!threadId) {
+      return;
+    }
+    const summary = sessions.find((candidate) => candidate.threadId === threadId) ?? {
+      threadId,
+      title: task.title,
+      eventCount: task.eventCount ?? 0,
+      updatedAt: task.updatedAt,
+      workspacePath: task.workspacePath ?? workspacePath
+    };
+    setShowTasks(false);
+    void loadSessionForWorkspace(summary);
   }
 
   async function persistSettingsAndUserConfig() {
@@ -1260,10 +1315,12 @@ function App() {
 
       <section className="main-column">
         <AppTopbar
+          activeTaskCount={activeTaskCount}
           conversationTitle={conversationTitle}
           currentWorkspaceLabel={currentWorkspaceLabel}
           eventsCount={events.length}
           onOpenSettings={openSettingsPanel}
+          onOpenTaskWorkspace={openTaskWorkspace}
           onOpenWorkspaceDialog={openNewSessionDialog}
           onThemePreferenceChange={setThemePreference}
           onToggleInspector={() => setShowInspector((visible) => !visible)}
@@ -1271,6 +1328,7 @@ function App() {
           resolvedTheme={resolvedTheme}
           sessionMessage={sessionMessage}
           showInspector={showInspector}
+          showTasks={showTasks}
           workspacePath={workspacePath}
         />
 
@@ -1475,6 +1533,25 @@ function App() {
         onToggleAutomation={toggleAutomation}
         tasks={durableTasks}
         visible={showAutomation}
+      />
+      <TaskWorkspace
+        busy={automationBusy}
+        changeReviewFileCount={changeReviewFileCount}
+        changeReviewGroups={changeReviewGroups}
+        currentWorkspaceLabel={currentWorkspaceLabel}
+        message={automationMessage}
+        onCancelTask={cancelTask}
+        onClose={() => setShowTasks(false)}
+        onContinueTask={continueTask}
+        onOpenArtifact={openTaskWorkspaceArtifact}
+        onOpenChanges={openTaskWorkspaceChanges}
+        onOpenRelatedSession={openTaskWorkspaceSession}
+        onRefresh={() => refreshAutomationWorkspace()}
+        onRetryTask={retryTask}
+        tasks={durableTasks}
+        totalReviewAdditions={totalReviewAdditions}
+        totalReviewDeletions={totalReviewDeletions}
+        visible={showTasks}
       />
       <SkillsWorkspace
         errors={skillErrors}

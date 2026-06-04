@@ -150,7 +150,8 @@ export function toolPromptHintLines(source?: ToolPromptHintSource): string[] {
     lines.push("After editing code, use lsp_diagnostics when available to collect language diagnostics before finalizing.");
   }
   if (has("task_create", "checklist_write")) {
-    lines.push("For long-running or multi-step work, create a durable task, keep its checklist current, and record verification gates and PR attempts as evidence.");
+    lines.push("For long-running or multi-step coding work, create a durable task early, keep its checklist current, and record test/build/package verification with task_gate_run or task_gate_record before finalizing.");
+    lines.push("Task evidence must make the loop visible: what changed, what ran, and how it ended; attach artifacts and PR attempts when they exist.");
   }
   if (has("automation_create")) {
     lines.push("For recurring work, use automation tools to create, inspect, update, pause, resume, run, or delete scheduled automations.");

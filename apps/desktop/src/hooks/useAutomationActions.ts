@@ -25,7 +25,7 @@ export function useAutomationActions(input: {
         input.automationManager.current.reload()
       ]);
       const [nextTasks, nextAutomations] = await Promise.all([
-        input.durableTaskManager.current.list(),
+        input.durableTaskManager.current.list({ workspacePath: input.workspacePath }),
         input.automationManager.current.list(100)
       ]);
       setDurableTasks(nextTasks);
@@ -110,16 +110,136 @@ export function useAutomationActions(input: {
     }
   }
 
+  async function cancelTask(id: string) {
+    setAutomationBusy(true);
+    try {
+      const canceled = await input.durableTaskManager.current.cancel(id);
+      await refreshAutomationWorkspace(`已取消任务：${canceled.title}`);
+    } catch (error) {
+      setAutomationMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setAutomationBusy(false);
+    }
+  }
+
+  async function retryTask(id: string) {
+    setAutomationBusy(true);
+    try {
+      const source = await input.durableTaskManager.current.read(id);
+      const created = await input.durableTaskManager.current.create({
+        title: truncateTaskTitle(`重试：${source.title}`),
+        prompt: buildRetryPrompt(source),
+        sourceThreadId: source.sourceThreadId,
+        workspacePath: source.workspacePath ?? input.workspacePath
+      });
+      await input.runDurableTaskExecutorTick();
+      await refreshAutomationWorkspace(`已创建重试任务：${created.title}`);
+    } catch (error) {
+      setAutomationMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setAutomationBusy(false);
+    }
+  }
+
+  async function continueTask(id: string) {
+    setAutomationBusy(true);
+    try {
+      const source = await input.durableTaskManager.current.read(id);
+      const created = await input.durableTaskManager.current.create({
+        title: truncateTaskTitle(`继续：${source.title}`),
+        prompt: buildContinuePrompt(source),
+        sourceThreadId: source.sourceThreadId,
+        workspacePath: source.workspacePath ?? input.workspacePath
+      });
+      await input.runDurableTaskExecutorTick();
+      await refreshAutomationWorkspace(`已创建继续任务：${created.title}`);
+    } catch (error) {
+      setAutomationMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setAutomationBusy(false);
+    }
+  }
+
   return {
     automationBusy,
     automationMessage,
     automations,
+    cancelTask,
+    continueTask,
     createAutomation,
     deleteAutomation,
     durableTasks,
     refreshAutomationWorkspace,
+    retryTask,
     runAutomationNow,
     runDueAutomations,
     toggleAutomation
   };
+}
+
+function truncateTaskTitle(value: string) {
+  return value.length > 120 ? `${value.slice(0, 117)}...` : value;
+}
+
+function buildRetryPrompt(task: DurableTaskSnapshot) {
+  return [
+    `重试 durable task ${task.id}：${task.title}`,
+    "",
+    "要求：重新检查当前代码状态，不要假设上次执行仍然有效；先写入/更新 checklist，测试、构建、打包命令必须记录为 gate；最终必须说明改了什么、跑了什么、结果如何。",
+    "",
+    "原始目标：",
+    task.prompt,
+    "",
+    "上次执行摘要：",
+    summarizeTaskForFollowUp(task)
+  ].join("\n");
+}
+
+function buildContinuePrompt(task: DurableTaskSnapshot) {
+  return [
+    `继续 durable task ${task.id}：${task.title}`,
+    "",
+    "要求：基于现有结果继续推进，不重复已经完成的 checklist；必要时补充 checklist；测试、构建、打包命令必须记录为 gate；最终必须说明改了什么、跑了什么、结果如何。",
+    "",
+    "原始目标：",
+    task.prompt,
+    "",
+    "当前任务状态：",
+    summarizeTaskForFollowUp(task)
+  ].join("\n");
+}
+
+function summarizeTaskForFollowUp(task: DurableTaskSnapshot) {
+  const lines = [
+    `状态：${task.status}`,
+    task.output ? `输出：${task.output}` : "",
+    task.error ? `错误：${task.error}` : ""
+  ].filter(Boolean);
+
+  if (task.checklist.length > 0) {
+    lines.push("Checklist：");
+    for (const item of task.checklist) {
+      lines.push(`- ${item.status}：${item.content}`);
+    }
+  }
+
+  if (task.gates.length > 0) {
+    lines.push("验证 gates：");
+    for (const gate of task.gates) {
+      lines.push(`- ${gate.status}：${gate.name}${gate.command ? ` (${gate.command})` : ""} -> ${gate.summary}`);
+    }
+  }
+
+  if (task.artifacts.length > 0) {
+    lines.push("Artifacts：");
+    for (const artifact of task.artifacts) {
+      lines.push(`- ${artifact.summary}：${artifact.artifactId}`);
+    }
+  }
+
+  if (task.threadId) {
+    lines.push(`关联会话：${task.threadId}`);
+  }
+
+  return lines.join("\n");
 }
