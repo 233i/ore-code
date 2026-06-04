@@ -188,13 +188,14 @@ export class AutomationManager {
     await this.ensureLoaded();
     const automation = this.requireAutomation(automationId);
     const now = new Date();
-    const run = await this.enqueueRun(automation, now);
+    const runWorkspacePath = automationWorkspacePath(automation, workspacePath);
+    const run = await this.enqueueRun(automation, now, runWorkspacePath);
     await this.persist();
 
     return {
       run: { ...run },
       automation: this.snapshotAutomation(automation),
-      workspacePath,
+      workspacePath: runWorkspacePath,
       taskCreated: Boolean(run.taskId)
     };
   }
@@ -210,6 +211,9 @@ export class AutomationManager {
 
     for (const automation of this.automations.values()) {
       if (automation.status !== "active") {
+        continue;
+      }
+      if (!automationMatchesWorkspace(automation, workspacePath)) {
         continue;
       }
       if (!automation.nextRunAt) {
@@ -229,11 +233,12 @@ export class AutomationManager {
         continue;
       }
 
-      const run = await this.enqueueRun(automation, dueAt);
+      const runWorkspacePath = automationWorkspacePath(automation, workspacePath);
+      const run = await this.enqueueRun(automation, dueAt, runWorkspacePath);
       outputs.push({
         run: { ...run },
         automation: this.snapshotAutomation(automation),
-        workspacePath,
+        workspacePath: runWorkspacePath,
         taskCreated: Boolean(run.taskId)
       });
     }
@@ -244,7 +249,7 @@ export class AutomationManager {
     return outputs;
   }
 
-  private async enqueueRun(automation: AutomationRecord, scheduledFor: Date) {
+  private async enqueueRun(automation: AutomationRecord, scheduledFor: Date, workspacePath: string) {
     const now = new Date();
     const run: AutomationRunRecord = {
       schemaVersion: CURRENT_AUTOMATION_RUN_SCHEMA_VERSION,
@@ -259,7 +264,8 @@ export class AutomationManager {
       if (this.options.taskManager) {
         const task = await this.options.taskManager.create({
           title: `Automation: ${automation.name}`,
-          prompt: automation.prompt
+          prompt: automation.prompt,
+          workspacePath
         });
         run.status = "running";
         run.startedAt = new Date().toISOString();
@@ -535,4 +541,21 @@ function nextRunAfter(rrule: string, after: Date) {
 
 function dayToken(date: Date): WeekdayToken {
   return ["SU", "MO", "TU", "WE", "TH", "FR", "SA"][date.getDay()] as WeekdayToken;
+}
+
+function automationMatchesWorkspace(automation: AutomationRecord, workspacePath: string) {
+  return automation.cwds.length === 0 || automation.cwds.some((cwd) => sameWorkspacePath(cwd, workspacePath));
+}
+
+function automationWorkspacePath(automation: AutomationRecord, workspacePath: string) {
+  return automation.cwds[0] ?? workspacePath;
+}
+
+function sameWorkspacePath(left: string | undefined, right: string | undefined) {
+  return normalizeWorkspacePath(left) === normalizeWorkspacePath(right);
+}
+
+function normalizeWorkspacePath(value: string | undefined) {
+  const trimmed = value?.trim() || ".";
+  return trimmed.replace(/[\\/]+$/, "") || ".";
 }

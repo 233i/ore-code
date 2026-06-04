@@ -5,7 +5,9 @@ import type { ShellToolHost } from "@ore-code/tools";
 const context = {
   workspacePath: "/workspace",
   mode: "agent" as const,
-  trustedWorkspace: false
+  trustedWorkspace: false,
+  threadId: "source-thread",
+  turnId: "source-turn"
 };
 
 describe("createTaskTools", () => {
@@ -19,8 +21,10 @@ describe("createTaskTools", () => {
 
     const created = await taskCreate.execute({ prompt: "Ship durable task support" }, context);
     expect(created.output).toMatchObject({
+      sourceThreadId: "source-thread",
       title: "Ship durable task support",
-      status: "queued"
+      status: "queued",
+      workspacePath: "/workspace"
     });
 
     await checklistWrite.execute({
@@ -38,6 +42,36 @@ describe("createTaskTools", () => {
         { id: 2, content: "Run gate", status: "in_progress" }
       ]
     });
+  });
+
+  it("lists tasks only for the requested workspace", async () => {
+    const manager = new DurableTaskManager();
+    const tools = createTaskTools(manager);
+    const taskCreate = tools.find((tool) => tool.name === "task_create")!;
+    const taskList = tools.find((tool) => tool.name === "task_list")!;
+    const checklistWrite = tools.find((tool) => tool.name === "checklist_write")!;
+
+    await taskCreate.execute({ prompt: "Workspace task" }, context);
+    await taskCreate.execute({ prompt: "Other task", workspacePath: "/other" }, context);
+    await checklistWrite.execute({
+      items: [{ content: "Current workspace checklist", status: "in_progress" }]
+    }, context);
+
+    const listed = await taskList.execute({}, context);
+    expect(listed.output).toMatchObject([
+      {
+        prompt: "Workspace task",
+        checklist: [{ content: "Current workspace checklist" }]
+      }
+    ]);
+
+    const other = await taskList.execute({ workspacePath: "/other" }, context);
+    expect(other.output).toMatchObject([
+      {
+        prompt: "Other task",
+        checklist: []
+      }
+    ]);
   });
 
   it("runs verification gates through the shell host", async () => {
@@ -107,6 +141,41 @@ describe("createTaskTools", () => {
           preflightStatus: "unknown"
         }
       ]
+    });
+  });
+
+  it("keeps canceled tasks canceled when late execution results arrive", async () => {
+    const manager = new DurableTaskManager();
+    const task = await manager.create({ prompt: "Long running task" });
+
+    await manager.claimNextQueued();
+    await manager.cancel(task.id);
+
+    const completed = await manager.completeExecution({
+      taskId: task.id,
+      threadId: "thread-1",
+      turnId: "turn-1",
+      eventCount: 10,
+      output: "late success"
+    });
+
+    expect(completed).toMatchObject({
+      error: "Canceled by user or agent.",
+      status: "canceled"
+    });
+    expect(completed.output).toBeUndefined();
+
+    const failed = await manager.failExecution({
+      taskId: task.id,
+      threadId: "thread-1",
+      turnId: "turn-2",
+      eventCount: 12,
+      error: "late failure"
+    });
+
+    expect(failed).toMatchObject({
+      error: "Canceled by user or agent.",
+      status: "canceled"
     });
   });
 });

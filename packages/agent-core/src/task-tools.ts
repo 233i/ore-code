@@ -11,11 +11,18 @@ const DEFAULT_GATE_TIMEOUT_MS = 60_000;
 
 const TaskCreateInputSchema = z.object({
   prompt: z.string().trim().min(1),
+  sourceThreadId: z.string().trim().min(1).optional(),
+  workspacePath: z.string().trim().min(1).optional(),
   title: z.string().trim().min(1).max(120).optional()
 });
 
 const TaskIdInputSchema = z.object({
-  taskId: z.string().trim().min(1).optional()
+  taskId: z.string().trim().min(1).optional(),
+  workspacePath: z.string().trim().min(1).optional()
+});
+
+const TaskListInputSchema = z.object({
+  workspacePath: z.string().trim().min(1).optional()
 });
 
 const TaskUpdateInputSchema = TaskIdInputSchema.extend({
@@ -130,8 +137,11 @@ export interface DurableTaskSnapshot {
   startedAt?: string;
   endedAt?: string;
   threadId?: string;
+  sourceThreadId?: string;
+  executionThreadId?: string;
   turnId?: string;
   eventCount?: number;
+  workspacePath?: string;
   output?: string;
   checklist: TaskChecklistItem[];
   gates: TaskGate[];
@@ -179,6 +189,8 @@ export class DurableTaskManager {
       status: "queued",
       createdAt: now,
       updatedAt: now,
+      sourceThreadId: input.sourceThreadId,
+      workspacePath: input.workspacePath,
       checklist: [],
       gates: [],
       artifacts: [],
@@ -196,21 +208,22 @@ export class DurableTaskManager {
     return this.snapshot(task);
   }
 
-  async list() {
+  async list(input: z.infer<typeof TaskListInputSchema> = {}) {
     await this.ensureLoaded();
     return [...this.tasks.values()]
+      .filter((task) => !input.workspacePath || sameWorkspacePath(task.workspacePath, input.workspacePath))
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .map((task) => this.snapshot(task));
   }
 
-  async read(taskId?: string) {
+  async read(taskId?: string, workspacePath?: string) {
     await this.ensureLoaded();
-    return this.snapshot(this.requireTask(taskId));
+    return this.snapshot(this.requireTask(taskId, workspacePath));
   }
 
   async update(input: z.infer<typeof TaskUpdateInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     if (input.title) {
       task.title = input.title;
     }
@@ -226,21 +239,22 @@ export class DurableTaskManager {
     return this.snapshot(task);
   }
 
-  async cancel(taskId?: string) {
+  async cancel(taskId?: string, workspacePath?: string) {
     await this.ensureLoaded();
-    const task = this.requireTask(taskId);
+    const task = this.requireTask(taskId, workspacePath);
     task.status = "canceled";
     task.error = "Canceled by user or agent.";
+    task.endedAt = new Date().toISOString();
     this.appendTimeline(task, "task", "Task canceled.");
     this.touch(task);
     await this.persist();
     return this.snapshot(task);
   }
 
-  async claimNextQueued() {
+  async claimNextQueued(input: z.infer<typeof TaskListInputSchema> = {}) {
     await this.ensureLoaded();
     const task = [...this.tasks.values()]
-      .filter((candidate) => candidate.status === "queued")
+      .filter((candidate) => candidate.status === "queued" && (!input.workspacePath || sameWorkspacePath(candidate.workspacePath, input.workspacePath)))
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
     if (!task) {
       return null;
@@ -261,12 +275,20 @@ export class DurableTaskManager {
     threadId: string;
     turnId: string;
     eventCount: number;
+    workspacePath?: string;
     output?: string;
   }) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
+    if (task.status === "canceled") {
+      this.appendTimeline(task, "task", "Task execution completed after cancellation; result ignored.");
+      this.touch(task);
+      await this.persist();
+      return this.snapshot(task);
+    }
     task.status = "completed";
     task.threadId = input.threadId;
+    task.executionThreadId = input.threadId;
     task.turnId = input.turnId;
     task.eventCount = input.eventCount;
     task.output = input.output;
@@ -284,12 +306,20 @@ export class DurableTaskManager {
     turnId: string;
     eventCount: number;
     error: string;
+    workspacePath?: string;
     output?: string;
   }) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
+    if (task.status === "canceled") {
+      this.appendTimeline(task, "task", "Task execution failed after cancellation; result ignored.");
+      this.touch(task);
+      await this.persist();
+      return this.snapshot(task);
+    }
     task.status = "failed";
     task.threadId = input.threadId;
+    task.executionThreadId = input.threadId;
     task.turnId = input.turnId;
     task.eventCount = input.eventCount;
     task.output = input.output;
@@ -303,7 +333,7 @@ export class DurableTaskManager {
 
   async writeChecklist(input: z.infer<typeof ChecklistWriteInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const now = new Date().toISOString();
     task.checklist = input.items.map((item, index) => ({
       id: index + 1,
@@ -319,7 +349,7 @@ export class DurableTaskManager {
 
   async addChecklist(input: z.infer<typeof ChecklistAddInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const now = new Date().toISOString();
     const item: TaskChecklistItem = {
       id: nextNumberId(task.checklist),
@@ -336,7 +366,7 @@ export class DurableTaskManager {
 
   async updateChecklist(input: z.infer<typeof ChecklistUpdateInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const item = task.checklist.find((candidate) => candidate.id === input.id);
     if (!item) {
       throw new Error(`Unknown checklist item ${input.id} for task ${task.id}.`);
@@ -354,9 +384,9 @@ export class DurableTaskManager {
     return { task: this.snapshot(task), item: { ...item } };
   }
 
-  async listChecklist(taskId?: string) {
+  async listChecklist(taskId?: string, workspacePath?: string) {
     await this.ensureLoaded();
-    const task = this.requireTask(taskId);
+    const task = this.requireTask(taskId, workspacePath);
     return { taskId: task.id, checklist: task.checklist.map((item) => ({ ...item })) };
   }
 
@@ -367,7 +397,7 @@ export class DurableTaskManager {
     onOutput?: (delta: { stream: "stdout" | "stderr"; text: string }) => void
   ) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     if (!shellHost) {
       throw new Error("task_gate_run requires a shell host.");
     }
@@ -392,7 +422,7 @@ export class DurableTaskManager {
 
   async recordGate(input: z.infer<typeof GateRecordInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const gate = this.addGate(task, {
       name: input.name,
       command: input.command,
@@ -408,7 +438,7 @@ export class DurableTaskManager {
 
   async recordArtifact(input: z.infer<typeof ArtifactRecordInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const ref: TaskArtifactRef = {
       id: nextNumberId(task.artifacts),
       artifactId: input.artifactId,
@@ -425,7 +455,7 @@ export class DurableTaskManager {
 
   async recordPrAttempt(input: z.infer<typeof PrAttemptRecordInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const now = new Date().toISOString();
     const attempt: TaskPrAttempt = {
       id: nextNumberId(task.prAttempts),
@@ -442,15 +472,15 @@ export class DurableTaskManager {
     return { task: this.snapshot(task), attempt: { ...attempt } };
   }
 
-  async listPrAttempts(taskId?: string) {
+  async listPrAttempts(taskId?: string, workspacePath?: string) {
     await this.ensureLoaded();
-    const task = this.requireTask(taskId);
+    const task = this.requireTask(taskId, workspacePath);
     return { taskId: task.id, attempts: task.prAttempts.map((attempt) => ({ ...attempt })) };
   }
 
   async readPrAttempt(input: z.infer<typeof PrAttemptIdInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const attempt = task.prAttempts.find((candidate) => candidate.id === input.attemptId);
     if (!attempt) {
       throw new Error(`Unknown PR attempt ${input.attemptId} for task ${task.id}.`);
@@ -460,7 +490,7 @@ export class DurableTaskManager {
 
   async preflightPrAttempt(input: z.infer<typeof PrAttemptIdInputSchema>) {
     await this.ensureLoaded();
-    const task = this.requireTask(input.taskId);
+    const task = this.requireTask(input.taskId, input.workspacePath);
     const attempt = task.prAttempts.find((candidate) => candidate.id === input.attemptId);
     if (!attempt) {
       throw new Error(`Unknown PR attempt ${input.attemptId} for task ${task.id}.`);
@@ -488,8 +518,9 @@ export class DurableTaskManager {
     return { ...gate };
   }
 
-  private requireTask(taskId?: string) {
-    const id = taskId ?? this.activeTaskId;
+  private requireTask(taskId?: string, workspacePath?: string) {
+    const activeTask = taskId ? undefined : this.resolveActiveTaskForWorkspace(workspacePath);
+    const id = taskId ?? activeTask?.id ?? this.activeTaskId;
     if (!id) {
       throw new Error("No active durable task. Create a task first or pass taskId.");
     }
@@ -497,8 +528,24 @@ export class DurableTaskManager {
     if (!task) {
       throw new Error(`Unknown durable task: ${id}`);
     }
+    if (workspacePath && !sameWorkspacePath(task.workspacePath, workspacePath)) {
+      throw new Error(`Durable task ${id} does not belong to workspace ${workspacePath}.`);
+    }
     this.activeTaskId = id;
     return task;
+  }
+
+  private resolveActiveTaskForWorkspace(workspacePath?: string) {
+    if (!workspacePath || !this.activeTaskId) {
+      return undefined;
+    }
+    const activeTask = this.tasks.get(this.activeTaskId);
+    if (activeTask && sameWorkspacePath(activeTask.workspacePath, workspacePath)) {
+      return activeTask;
+    }
+    return [...this.tasks.values()]
+      .filter((task) => sameWorkspacePath(task.workspacePath, workspacePath))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
   }
 
   private appendTimeline(task: DurableTaskSnapshot, type: TaskTimelineEntry["type"], message: string) {
@@ -557,8 +604,17 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: TaskCreateInputSchema,
-      async execute(input) {
-        return { callId: "task_create", ok: true, output: await manager.create(TaskCreateInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = TaskCreateInputSchema.parse(input);
+        return {
+          callId: "task_create",
+          ok: true,
+          output: await manager.create({
+            ...parsed,
+            sourceThreadId: parsed.sourceThreadId ?? context.threadId,
+            workspacePath: parsed.workspacePath ?? context.workspacePath
+          })
+        };
       }
     },
     {
@@ -566,9 +622,10 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       description: "List durable tasks, newest updated first.",
       capability: "readonly",
       approval: "never",
-      inputSchema: z.object({}),
-      async execute() {
-        return { callId: "task_list", ok: true, output: await manager.list() };
+      inputSchema: TaskListInputSchema,
+      async execute(input, context) {
+        const parsed = TaskListInputSchema.parse(input);
+        return { callId: "task_list", ok: true, output: await manager.list({ workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -577,8 +634,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: TaskIdInputSchema,
-      async execute(input) {
-        return { callId: "task_read", ok: true, output: await manager.read(TaskIdInputSchema.parse(input).taskId) };
+      async execute(input, context) {
+        const parsed = TaskIdInputSchema.parse(input);
+        return { callId: "task_read", ok: true, output: await manager.read(parsed.taskId, parsed.workspacePath ?? context.workspacePath) };
       }
     },
     {
@@ -587,8 +645,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: TaskUpdateInputSchema,
-      async execute(input) {
-        return { callId: "task_update", ok: true, output: await manager.update(TaskUpdateInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = TaskUpdateInputSchema.parse(input);
+        return { callId: "task_update", ok: true, output: await manager.update({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -597,8 +656,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: TaskIdInputSchema,
-      async execute(input) {
-        return { callId: "task_cancel", ok: true, output: await manager.cancel(TaskIdInputSchema.parse(input).taskId) };
+      async execute(input, context) {
+        const parsed = TaskIdInputSchema.parse(input);
+        return { callId: "task_cancel", ok: true, output: await manager.cancel(parsed.taskId, parsed.workspacePath ?? context.workspacePath) };
       }
     },
     {
@@ -607,8 +667,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: ChecklistWriteInputSchema,
-      async execute(input) {
-        return { callId: "checklist_write", ok: true, output: await manager.writeChecklist(ChecklistWriteInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = ChecklistWriteInputSchema.parse(input);
+        return { callId: "checklist_write", ok: true, output: await manager.writeChecklist({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -617,8 +678,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: ChecklistAddInputSchema,
-      async execute(input) {
-        return { callId: "checklist_add", ok: true, output: await manager.addChecklist(ChecklistAddInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = ChecklistAddInputSchema.parse(input);
+        return { callId: "checklist_add", ok: true, output: await manager.addChecklist({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -627,8 +689,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: ChecklistUpdateInputSchema,
-      async execute(input) {
-        return { callId: "checklist_update", ok: true, output: await manager.updateChecklist(ChecklistUpdateInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = ChecklistUpdateInputSchema.parse(input);
+        return { callId: "checklist_update", ok: true, output: await manager.updateChecklist({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -637,8 +700,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: TaskIdInputSchema,
-      async execute(input) {
-        return { callId: "checklist_list", ok: true, output: await manager.listChecklist(TaskIdInputSchema.parse(input).taskId) };
+      async execute(input, context) {
+        const parsed = TaskIdInputSchema.parse(input);
+        return { callId: "checklist_list", ok: true, output: await manager.listChecklist(parsed.taskId, parsed.workspacePath ?? context.workspacePath) };
       }
     },
     {
@@ -648,12 +712,16 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       approval: "required",
       inputSchema: GateRunInputSchema,
       async execute(input, context) {
+        const parsed = GateRunInputSchema.parse(input);
         return {
           callId: "task_gate_run",
           ok: true,
           output: await manager.runGate(
-            GateRunInputSchema.parse(input),
-            context.workspacePath,
+            {
+              ...parsed,
+              workspacePath: parsed.workspacePath ?? context.workspacePath
+            },
+            parsed.workspacePath ?? context.workspacePath,
             options.shellHost,
             context.onCommandOutput && context.toolCallId
               ? (delta) => context.onCommandOutput?.({ callId: context.toolCallId ?? "task_gate_run", ...delta })
@@ -668,8 +736,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: GateRecordInputSchema,
-      async execute(input) {
-        return { callId: "task_gate_record", ok: true, output: await manager.recordGate(GateRecordInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = GateRecordInputSchema.parse(input);
+        return { callId: "task_gate_record", ok: true, output: await manager.recordGate({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -678,8 +747,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: ArtifactRecordInputSchema,
-      async execute(input) {
-        return { callId: "task_artifact_record", ok: true, output: await manager.recordArtifact(ArtifactRecordInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = ArtifactRecordInputSchema.parse(input);
+        return { callId: "task_artifact_record", ok: true, output: await manager.recordArtifact({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -688,8 +758,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: PrAttemptRecordInputSchema,
-      async execute(input) {
-        return { callId: "pr_attempt_record", ok: true, output: await manager.recordPrAttempt(PrAttemptRecordInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = PrAttemptRecordInputSchema.parse(input);
+        return { callId: "pr_attempt_record", ok: true, output: await manager.recordPrAttempt({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -698,8 +769,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: TaskIdInputSchema,
-      async execute(input) {
-        return { callId: "pr_attempt_list", ok: true, output: await manager.listPrAttempts(TaskIdInputSchema.parse(input).taskId) };
+      async execute(input, context) {
+        const parsed = TaskIdInputSchema.parse(input);
+        return { callId: "pr_attempt_list", ok: true, output: await manager.listPrAttempts(parsed.taskId, parsed.workspacePath ?? context.workspacePath) };
       }
     },
     {
@@ -708,8 +780,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: PrAttemptIdInputSchema,
-      async execute(input) {
-        return { callId: "pr_attempt_read", ok: true, output: await manager.readPrAttempt(PrAttemptIdInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = PrAttemptIdInputSchema.parse(input);
+        return { callId: "pr_attempt_read", ok: true, output: await manager.readPrAttempt({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     },
     {
@@ -718,8 +791,9 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
       capability: "readonly",
       approval: "never",
       inputSchema: PrAttemptIdInputSchema,
-      async execute(input) {
-        return { callId: "pr_attempt_preflight", ok: true, output: await manager.preflightPrAttempt(PrAttemptIdInputSchema.parse(input)) };
+      async execute(input, context) {
+        const parsed = PrAttemptIdInputSchema.parse(input);
+        return { callId: "pr_attempt_preflight", ok: true, output: await manager.preflightPrAttempt({ ...parsed, workspacePath: parsed.workspacePath ?? context.workspacePath }) };
       }
     }
   ];
@@ -728,6 +802,15 @@ export function createTaskTools(manager: DurableTaskManager, options: TaskToolOp
 function summarizePrompt(prompt: string) {
   const firstLine = prompt.trim().split(/\r?\n/, 1)[0] ?? "Durable task";
   return firstLine.length > 80 ? `${firstLine.slice(0, 77)}...` : firstLine;
+}
+
+function sameWorkspacePath(left: string | undefined, right: string | undefined) {
+  return normalizeWorkspacePath(left) === normalizeWorkspacePath(right);
+}
+
+function normalizeWorkspacePath(value: string | undefined) {
+  const trimmed = value?.trim() || ".";
+  return trimmed.replace(/[\\/]+$/, "") || ".";
 }
 
 function nextNumberId(items: Array<{ id: number }>) {

@@ -11,6 +11,8 @@ export interface ToolContext {
   workspacePath: string;
   mode: "plan" | "agent" | "yolo";
   trustedWorkspace: boolean;
+  threadId?: string;
+  turnId?: string;
   toolCallId?: string;
   onCommandOutput?: (delta: { callId: string; stream: "stdout" | "stderr"; text: string }) => void;
   onRuntimeEvent?: (event: ToolRuntimeEvent) => void;

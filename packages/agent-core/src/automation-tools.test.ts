@@ -73,6 +73,12 @@ describe("createAutomationTools", () => {
       taskCreated: true
     });
     expect((run.output as { run: { taskId?: string } }).run.taskId).toMatch(/^task-/);
+    expect(await taskManager.list({ workspacePath: "/workspace" })).toMatchObject([
+      {
+        prompt: "Triage open issues",
+        workspacePath: "/workspace"
+      }
+    ]);
 
     const loaded = await tools.find((tool) => tool.name === "automation_read")!.execute({
       automation_id: automationId
@@ -159,6 +165,38 @@ describe("createAutomationTools", () => {
     expect(second).toHaveLength(0);
     expect(saved.runs).toHaveLength(1);
     expect(saved.automations[0].nextRunAt).toBe("2026-05-14T02:00:00.000Z");
+  });
+
+  it("does not run due automations for another workspace", async () => {
+    const taskManager = new DurableTaskManager();
+    const saved: AutomationState = {
+      automations: [{
+        schemaVersion: 1,
+        id: "automation-other",
+        name: "Other job",
+        prompt: "Run other job",
+        rrule: "FREQ=HOURLY;INTERVAL=1",
+        cwds: ["/other"],
+        status: "active",
+        createdAt: "2026-05-14T00:00:00.000Z",
+        updatedAt: "2026-05-14T00:00:00.000Z",
+        nextRunAt: "2026-05-14T01:00:00.000Z"
+      }],
+      runs: []
+    };
+    const store = {
+      async load() {
+        return saved;
+      },
+      async save(state: AutomationState) {
+        saved.automations = state.automations;
+        saved.runs = state.runs;
+      }
+    };
+    const manager = new AutomationManager({ store, taskManager });
+
+    await expect(manager.runDue("/workspace", new Date("2026-05-14T01:05:00.000Z"))).resolves.toEqual([]);
+    expect(await taskManager.list({ workspacePath: "/other" })).toEqual([]);
   });
 
   it("rejects unsupported RRULE fields", async () => {

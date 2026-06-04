@@ -363,7 +363,9 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
           toolContext: {
             workspacePath: input.workspacePath,
             mode: permission.mode,
-            trustedWorkspace: permission.trustedWorkspace
+            trustedWorkspace: permission.trustedWorkspace,
+            threadId: activeThreadId,
+            turnId
           },
           userPrompt
         });
@@ -594,6 +596,8 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
           workspacePath: input.workspacePath,
           mode: permission.mode,
           trustedWorkspace: permission.trustedWorkspace,
+          threadId: activeThreadId,
+          turnId,
           onCommandOutput: ({ callId, stream, text }) => {
             if (!text) return;
             appendRuntimeEvent({

@@ -39,21 +39,24 @@ export class DurableTaskExecutor {
       return { ran: false, error: "Durable task executor is already running." };
     }
 
-    const task = await this.taskManager.claimNextQueued();
+    const task = await this.taskManager.claimNextQueued({ workspacePath: this.options.workspacePath });
     if (!task) {
       return { ran: false };
     }
 
     this.running = true;
-    const threadId = task.threadId ?? `durable-task-${task.id}`;
+    const workspacePath = task.workspacePath ?? this.options.workspacePath;
+    const threadId = task.executionThreadId ?? task.threadId ?? `durable-task-${task.id}`;
     const turnId = crypto.randomUUID();
     const events: RuntimeEvent[] = [];
 
     try {
       const context: ToolContext = {
-        workspacePath: this.options.workspacePath,
+        workspacePath,
         mode: this.options.mode ?? "agent",
         trustedWorkspace: this.options.trustedWorkspace ?? false,
+        threadId,
+        turnId,
         onRuntimeEvent: (event) => {
           events.push({
             id: crypto.randomUUID(),
@@ -97,6 +100,7 @@ export class DurableTaskExecutor {
           threadId,
           turnId,
           eventCount: events.length,
+          workspacePath,
           output,
           error: failed.message
         })
@@ -105,6 +109,7 @@ export class DurableTaskExecutor {
           threadId,
           turnId,
           eventCount: events.length,
+          workspacePath,
           output
         });
 
@@ -122,6 +127,7 @@ export class DurableTaskExecutor {
         threadId,
         turnId,
         eventCount: events.length,
+        workspacePath,
         output: assistantOutput(events),
         error: message
       });
