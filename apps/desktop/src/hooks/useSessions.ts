@@ -5,8 +5,8 @@ import {
   type TrackedFileChange
 } from "../features/changes/changeLedger";
 import type { ChangeGroup } from "../features/changes/changeGroups";
-import { transcriptItemsFromRecentEvents, transcriptItemsFromTail } from "../features/transcript/transcriptChunks";
-import { deleteSession, listSessions, loadSessionEvents, loadSessionTranscriptTail, renameSession, saveSessionEvents, type SessionSummary } from "../services/sessionStore";
+import { derivePersistedTranscriptItems } from "../features/transcript/transcriptChunks";
+import { deleteSession, listSessions, loadSessionEvents, renameSession, saveSessionEvents, type SessionSummary } from "../services/sessionStore";
 import {
   createTurnSnapshotStore,
   trackedChangesFromSnapshot
@@ -104,14 +104,8 @@ export function useSessions(input: {
       input.setShowSkills(false);
       input.setShowSettings(false);
       input.setShowSearch(false);
-      const [transcriptTail, loadedEvents] = await Promise.all([
-        loadSessionTranscriptTail(summary.threadId),
-        loadSessionEvents(summary.threadId)
-      ]);
-      const transcriptItems = transcriptItemsFromTail(transcriptTail);
-      const visibleTranscriptItems = transcriptItems.length > 0
-        ? transcriptItems
-        : transcriptItemsFromRecentEvents(loadedEvents);
+      const loadedEvents = await loadSessionEvents(summary.threadId);
+      const visibleTranscriptItems = derivePersistedTranscriptItems(loadedEvents);
       let restoredChanges = latestTurnTrackedChangesFromEvents(loadedEvents);
       const snapshotId = latestSnapshotIdFromEvents(loadedEvents);
       if (snapshotId) {

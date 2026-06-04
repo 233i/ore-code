@@ -86,7 +86,6 @@ export type TranscriptHistoryGapItem = {
 };
 
 const DEFAULT_CHUNK_SIZE = 80;
-const DEFAULT_RECENT_EVENT_WINDOW = 360;
 const MAX_REASONING_CHARS = 1_600;
 const MAX_TOOL_SUMMARY_CHARS = 1_200;
 const MAX_ACTIVITY_TOOLS = 8;
@@ -125,45 +124,11 @@ export function transcriptItemsFromTail(tail: TranscriptTailLoad | null): Array<
   if (!tail?.chunk) {
     return [];
   }
-  if (tail.hiddenItemCount <= 0) {
-    return tail.chunk.items;
-  }
-  return [
-    {
-      hiddenItemCount: tail.hiddenItemCount,
-      id: `history-gap:${tail.hiddenItemCount}`,
-      previousChunkIndex: tail.previousChunkIndex ?? null,
-      type: "history_gap"
-    },
-    ...tail.chunk.items
-  ];
+  return tail.chunk.items;
 }
 
-export function transcriptItemsFromRecentEvents(
-  events: RuntimeEvent[],
-  options: { maxEvents?: number } = {}
-): Array<PersistedTranscriptItem | TranscriptHistoryGapItem> {
-  const maxEvents = Math.max(1, options.maxEvents ?? DEFAULT_RECENT_EVENT_WINDOW);
-  if (events.length <= maxEvents) {
-    return derivePersistedTranscriptItems(events);
-  }
-
-  const tailEvents = events.slice(events.length - maxEvents);
-  const items = derivePersistedTranscriptItems(tailEvents);
-  if (items.length === 0) {
-    return [];
-  }
-
-  const hiddenEventCount = events.length - tailEvents.length;
-  return [
-    {
-      hiddenItemCount: hiddenEventCount,
-      id: `history-gap:events:${hiddenEventCount}:${tailEvents[0]?.id ?? "tail"}`,
-      previousChunkIndex: null,
-      type: "history_gap"
-    },
-    ...items
-  ];
+export function transcriptItemsFromRecentEvents(events: RuntimeEvent[]): Array<PersistedTranscriptItem | TranscriptHistoryGapItem> {
+  return derivePersistedTranscriptItems(events);
 }
 
 export function derivePersistedTranscriptItems(events: RuntimeEvent[]): PersistedTranscriptItem[] {

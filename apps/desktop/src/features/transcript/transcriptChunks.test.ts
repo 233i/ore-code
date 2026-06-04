@@ -33,7 +33,7 @@ describe("transcript chunks", () => {
     expect(JSON.stringify(items)).not.toContain("very large content");
   });
 
-  it("chunks transcript items and exposes the latest chunk with a history gap", () => {
+  it("loads transcript chunks without exposing a history gap", () => {
     const events = Array.from({ length: 5 }, (_, index) => [
       event("user_message", { id: `u${index}`, text: `user ${index}` }),
       event("assistant_message", { id: `a${index}`, text: `assistant ${index}` })
@@ -48,20 +48,26 @@ describe("transcript chunks", () => {
     });
 
     expect(bundle.chunks).toHaveLength(3);
-    expect(tailItems[0]).toMatchObject({ type: "history_gap", hiddenItemCount: 8 });
-    expect(tailItems.slice(1).map((item) => item.id)).toEqual(["message:u4", "message:a4"]);
+    expect(tailItems.map((item) => item.id)).toEqual(["message:u4", "message:a4"]);
   });
 
-  it("derives the visible transcript from a bounded recent event tail", () => {
+  it("derives the visible transcript from all available events", () => {
     const events = Array.from({ length: 6 }, (_, index) => [
       event("user_message", { id: `u${index}`, text: `user ${index}` }),
       event("assistant_message", { id: `a${index}`, text: `assistant ${index}` })
     ]).flat();
 
-    const tailItems = transcriptItemsFromRecentEvents(events, { maxEvents: 4 });
+    const tailItems = transcriptItemsFromRecentEvents(events);
 
-    expect(tailItems[0]).toMatchObject({ type: "history_gap", hiddenItemCount: 8 });
-    expect(tailItems.slice(1).map((item) => item.id)).toEqual([
+    expect(tailItems.map((item) => item.id)).toEqual([
+      "message:u0",
+      "message:a0",
+      "message:u1",
+      "message:a1",
+      "message:u2",
+      "message:a2",
+      "message:u3",
+      "message:a3",
       "message:u4",
       "message:a4",
       "message:u5",

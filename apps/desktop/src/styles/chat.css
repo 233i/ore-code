@@ -12,6 +12,7 @@
   flex-direction: column;
   gap: 10px;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 22px var(--chat-content-gutter) 10px;
 }
@@ -19,17 +20,37 @@
 .transcript.transcript-virtuoso {
   display: block;
   gap: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
-.transcript.transcript-virtuoso [data-index] {
-  margin: 0 auto 10px;
-  max-width: var(--chat-content-max-width);
+.transcript.transcript-virtuoso > * {
+  max-width: none;
+  min-width: 0;
   width: 100%;
 }
 
+.transcript.transcript-virtuoso [data-index] {
+  margin: 0 0 10px;
+  max-width: none;
+  min-width: 0;
+  width: 100%;
+}
+
+.transcript-item-frame,
 .transcript-virtual-footer {
-  margin: 0 auto;
+  min-width: 0;
+  padding-left: var(--chat-content-gutter);
+  padding-right: var(--chat-content-gutter);
+  width: 100%;
+}
+
+.transcript-item-content,
+.transcript-virtual-footer > * {
+  margin-left: auto;
+  margin-right: auto;
   max-width: var(--chat-content-max-width);
+  min-width: 0;
   width: 100%;
 }
 
@@ -60,7 +81,7 @@
 }
 
 .transcript > * {
-  max-width: var(--chat-content-max-width);
+  max-width: 100%;
   width: 100%;
 }
 
@@ -257,6 +278,9 @@
   font-size: 15px;
   line-height: 1.52;
   margin-bottom: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .message.user {
@@ -371,6 +395,9 @@
 
 .markdown-view {
   line-height: 1.5;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .markdown-view > :first-child {
@@ -434,7 +461,9 @@
   border-radius: 6px;
   font-family: var(--mono);
   font-size: 0.92em;
+  overflow-wrap: anywhere;
   padding: 1px 4px;
+  word-break: break-word;
 }
 
 .markdown-view pre {
@@ -445,8 +474,13 @@
   font-size: 12px;
   line-height: 18px;
   margin: 8px 0;
-  overflow: auto;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
   padding: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .markdown-code-block {
@@ -529,7 +563,10 @@
   color: var(--text);
   display: block;
   font-size: inherit;
+  overflow-wrap: anywhere;
   padding: 0;
+  white-space: inherit;
+  word-break: break-word;
 }
 
 .code-token.keyword {
@@ -596,15 +633,17 @@
 
 .markdown-view table {
   border-collapse: collapse;
-  display: block;
-  overflow: auto;
+  display: table;
+  table-layout: fixed;
   width: 100%;
 }
 
 .markdown-view th,
 .markdown-view td {
   border: 1px solid var(--line);
+  overflow-wrap: anywhere;
   padding: 6px 8px;
+  word-break: break-word;
 }
 
 .markdown-view th {
@@ -657,7 +696,7 @@
 }
 
 .activity-group.transcript-event {
-  width: min(100%, 860px);
+  width: min(100%, var(--chat-content-max-width));
 }
 
 .event-row-button {
@@ -671,11 +710,16 @@
   font: inherit;
   gap: 12px;
   grid-template-columns: minmax(0, auto) auto;
+  justify-content: start;
   min-height: 23px;
   max-width: 100%;
   padding: 0 6px;
   text-align: left;
   width: auto;
+}
+
+.activity-row-button {
+  justify-self: start;
 }
 
 .event-row-button:hover {
@@ -891,15 +935,23 @@
   padding: 6px;
 }
 
+.tool-card-body p {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .tool-action-summary {
   color: var(--muted-strong);
   font-size: 12px;
   line-height: 18px;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
+  overflow-wrap: anywhere;
   padding: 2px 3px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .tool-meta-grid {
@@ -1003,8 +1055,13 @@
   line-height: 16px;
   margin: 0;
   max-height: 280px;
-  overflow: auto;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
   padding: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .tool-command-output {
@@ -1107,6 +1164,9 @@
   border-radius: 0;
   color: var(--text);
   max-height: 210px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
   padding: 8px 9px;
   white-space: pre-wrap;
   word-break: break-word;
@@ -1243,6 +1303,9 @@
   border: 0;
   border-radius: 0;
   max-height: 260px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
   padding: 8px 9px;
   white-space: pre-wrap;
   word-break: break-word;
@@ -2033,6 +2096,8 @@
 
 @media (max-width: 840px) {
   .transcript {
+    --chat-content-gutter: 16px;
+    --chat-content-max-width: 100%;
     padding: 18px 16px 10px;
   }
 

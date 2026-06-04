@@ -40,10 +40,7 @@ import { useWorkspaceController } from "./app/useWorkspaceController";
 import { sumChangeStat } from "./features/changes/changeSummary";
 import { deriveShellJobs } from "./features/jobs/shellJobs";
 import {
-  derivePersistedTranscriptItems,
-  transcriptItemsFromRecentEvents,
-  transcriptItemsFromTail,
-  type TranscriptHistoryGapItem
+  derivePersistedTranscriptItems
 } from "./features/transcript/transcriptChunks";
 import { createRuntimeArtifactStore } from "./services/artifactStore";
 import {
@@ -57,7 +54,7 @@ import { createRuntimeFileHost, isTauriRuntime } from "./services/fileHost";
 import { createRuntimeNoteStore } from "./services/noteStore";
 import { createRuntimeProcessHost } from "./services/processHost";
 import { createRuntimeShellHost } from "./services/shellHost";
-import { loadSessionTranscriptChunk, type SessionSummary } from "./services/sessionStore";
+import type { SessionSummary } from "./services/sessionStore";
 import {
   renderSkillIndex,
   skillSlashCommands,
@@ -130,7 +127,6 @@ function App() {
   const [showInspector, setShowInspector] = useState(false);
   const [events, setEvents] = useState<RuntimeEvent[]>([]);
   const [transcriptItems, setTranscriptItems] = useState<TranscriptItem[]>([]);
-  const [loadingEarlierTranscript, setLoadingEarlierTranscript] = useState(false);
   const [activeTurnSkill, setActiveTurnSkill] = useState<{ id: string; name: string } | null>(null);
   const [artifacts, setArtifacts] = useState<ArtifactMetadata[]>([]);
   const [selectedArtifact, setSelectedArtifact] = useState<ArtifactRecord | null>(null);
@@ -610,37 +606,8 @@ function App() {
       return;
     }
 
-    setTranscriptItems(transcriptItemsFromRecentEvents(events));
+    setTranscriptItems(derivePersistedTranscriptItems(events));
   }, [events, threadId]);
-
-  async function loadEarlierTranscript(gap: TranscriptHistoryGapItem) {
-    if (loadingEarlierTranscript) {
-      return;
-    }
-
-    setLoadingEarlierTranscript(true);
-    try {
-      if (typeof gap.previousChunkIndex === "number") {
-        const earlier = await loadSessionTranscriptChunk(threadId, gap.previousChunkIndex);
-        const earlierItems = transcriptItemsFromTail(earlier);
-        if (earlierItems.length > 0) {
-          setTranscriptItems((current) => [
-            ...earlierItems,
-            ...(current[0]?.type === "history_gap" ? current.slice(1) : current)
-          ]);
-          return;
-        }
-      }
-
-      if (events.length > 0) {
-        setTranscriptItems(derivePersistedTranscriptItems(events));
-      }
-    } catch (error) {
-      setSessionMessage(error instanceof Error ? error.message : String(error));
-    } finally {
-      setLoadingEarlierTranscript(false);
-    }
-  }
 
   useEffect(() => {
     void refreshSessions();
@@ -1287,11 +1254,9 @@ function App() {
           hasWorkspace={workspacePath !== "."}
           isRunning={isRunning}
           items={transcriptItems}
-          loadingEarlier={loadingEarlierTranscript}
           messageFeedback={messageFeedback}
           onCopyMessage={(text) => void copyMessageText(text)}
           onExpandMessage={setExpandedMessage}
-          onLoadEarlier={(gap) => void loadEarlierTranscript(gap)}
           onOpenArtifact={(artifactId) => {
             switchResourcePanel("Artifacts");
             void openArtifact(artifactId);

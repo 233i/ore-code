@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode, type WheelEvent } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { ChevronDownIcon, FolderIcon, PlayCircleIcon } from "tdesign-icons-react";
 import type { RuntimeEvent } from "@ore-code/protocol";
@@ -115,14 +115,16 @@ export function Transcript({
       virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: Math.max(0, items.length - 1) });
     };
     const animationFrame = window.requestAnimationFrame(scrollToBottom);
+    const settledTimer = window.setTimeout(scrollToBottom, 80);
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(settledTimer);
     };
-  }, [items, scrollKey]);
+  }, [isRunning, items, scrollKey]);
 
   return (
-    <div className="transcript-shell">
+    <div className="transcript-shell" onWheel={handleTranscriptWheel}>
       {isEmpty ? (
         <section className="transcript" aria-label="Transcript">
           <TranscriptEmptyState
@@ -148,16 +150,20 @@ export function Transcript({
           increaseViewportBy={{ bottom: 360, top: 360 }}
           initialTopMostItemIndex={Math.max(0, items.length - 1)}
           itemContent={(_index, item) => (
-            <TranscriptItemView
-              item={item}
-              loadingEarlier={loadingEarlier}
-              messageFeedback={messageFeedback}
-              onCopyMessage={onCopyMessage}
-              onExpandMessage={onExpandMessage}
-              onLoadEarlier={onLoadEarlier}
-              onOpenArtifact={onOpenArtifact}
-              onToggleMessageFeedback={onToggleMessageFeedback}
-            />
+            <div className="transcript-item-frame">
+              <div className="transcript-item-content">
+                <TranscriptItemView
+                  item={item}
+                  loadingEarlier={loadingEarlier}
+                  messageFeedback={messageFeedback}
+                  onCopyMessage={onCopyMessage}
+                  onExpandMessage={onExpandMessage}
+                  onLoadEarlier={onLoadEarlier}
+                  onOpenArtifact={onOpenArtifact}
+                  onToggleMessageFeedback={onToggleMessageFeedback}
+                />
+              </div>
+            </div>
           )}
           key={scrollKey ?? "default"}
           ref={virtuosoRef}
@@ -173,10 +179,23 @@ export function Transcript({
   );
 
   function handleAtBottomStateChange(atBottom: boolean) {
-    shouldFollowOutputRef.current = atBottom;
     if (atBottom) {
+      shouldFollowOutputRef.current = true;
       setShowJumpToBottom(false);
+      return;
     }
+
+    if (!isRunning) {
+      shouldFollowOutputRef.current = false;
+    }
+  }
+
+  function handleTranscriptWheel(event: WheelEvent<HTMLDivElement>) {
+    if (!isRunning || event.deltaY >= 0) {
+      return;
+    }
+    shouldFollowOutputRef.current = false;
+    setShowJumpToBottom(true);
   }
 
   function jumpToBottom() {
