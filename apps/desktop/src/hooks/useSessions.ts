@@ -45,6 +45,7 @@ export function useSessions(input: {
   setSelectedChangeGroup: Dispatch<SetStateAction<ChangeGroup>>;
   setSelectedChangePath: Dispatch<SetStateAction<string | null>>;
   setSessionRuntimeLoading: Dispatch<SetStateAction<boolean>>;
+  setRuntimeEvents: (events: RuntimeEvent[]) => void;
   setShowInspector: Dispatch<SetStateAction<boolean>>;
   setShowNewSession: Dispatch<SetStateAction<boolean>>;
   setShowSearch: Dispatch<SetStateAction<boolean>>;
@@ -75,6 +76,7 @@ export function useSessions(input: {
     input.setShowSearch(false);
     input.setThreadId(createThreadId());
     input.setEvents([]);
+    input.setRuntimeEvents([]);
     input.setTranscriptItems([]);
     input.setTranscriptEventBase(null);
     input.setSessionRuntimeLoading(false);
@@ -141,11 +143,12 @@ export function useSessions(input: {
         items: tailMatchesRuntime ? tailItems : [],
         threadId: summary.threadId
       });
+      input.setRuntimeEvents(cachedRuntime?.events ?? []);
 
       startTransition(() => {
         input.setThreadId(summary.threadId);
         input.setTranscriptItems(tailItems);
-        input.setEvents(cachedRuntime?.events ?? []);
+        input.setEvents([]);
         input.taskFileChangesRef.current = cachedRuntime?.trackedChanges ?? [];
         input.setTaskFileChanges(cachedRuntime?.trackedChanges ?? []);
         input.setClearedChangeTurnId(null);
@@ -183,8 +186,8 @@ export function useSessions(input: {
       if (loadSessionRequestIdRef.current !== requestId) {
         return;
       }
+      input.setRuntimeEvents(loadedRuntime.events);
       startTransition(() => {
-        input.setEvents(loadedRuntime.events);
         input.taskFileChangesRef.current = loadedRuntime.trackedChanges;
         input.setTaskFileChanges(loadedRuntime.trackedChanges);
       });

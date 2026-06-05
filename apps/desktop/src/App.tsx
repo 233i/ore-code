@@ -137,6 +137,7 @@ function App() {
   const [events, setEvents] = useState<RuntimeEvent[]>([]);
   const [transcriptItems, setTranscriptItems] = useState<TranscriptItem[]>([]);
   const [sessionRuntimeLoading, setSessionRuntimeLoading] = useState(false);
+  const [sessionWorkspaceLoading, setSessionWorkspaceLoading] = useState(false);
   const [activeTurnSkill, setActiveTurnSkill] = useState<{ id: string; name: string } | null>(null);
   const [artifacts, setArtifacts] = useState<ArtifactMetadata[]>([]);
   const [selectedArtifact, setSelectedArtifact] = useState<ArtifactRecord | null>(null);
@@ -145,6 +146,8 @@ function App() {
   const [noteMessage, setNoteMessage] = useState<string | null>(null);
   const setSessionMessageRef = useRef<((value: string | null) => void) | null>(null);
   const transcriptEventBaseRef = useRef<TranscriptEventBase | null>(null);
+  const runtimeEventsRef = useRef<RuntimeEvent[]>([]);
+  const workspaceApplyRequestIdRef = useRef(0);
   const captureSidebarOrderRef = useRef<(() => void) | null>(null);
   const setFilePanelPathRef = useRef<((path: string) => void) | null>(null);
   const {
@@ -377,6 +380,52 @@ function App() {
     snapshotId: string;
     turnId: string;
   }) => void) | null>(null);
+
+  function setRuntimeEventsForCurrentSession(nextEvents: RuntimeEvent[]) {
+    runtimeEventsRef.current = nextEvents;
+  }
+
+  function setRuntimeVisibleEvents(value: SetStateAction<RuntimeEvent[]>) {
+    setEvents((current) => {
+      const nextEvents = typeof value === "function"
+        ? (value as (current: RuntimeEvent[]) => RuntimeEvent[])(current)
+        : value;
+      runtimeEventsRef.current = nextEvents;
+      return nextEvents;
+    });
+  }
+
+  function getCurrentRuntimeEvents() {
+    const cachedEvents = runtimeEventsRef.current;
+    const cachedThreadId = cachedEvents[cachedEvents.length - 1]?.threadId;
+    if (cachedEvents.length > 0 && (!cachedThreadId || cachedThreadId === threadId)) {
+      return cachedEvents;
+    }
+
+    const stateThreadId = events[events.length - 1]?.threadId;
+    return !stateThreadId || stateThreadId === threadId ? events : [];
+  }
+
+  function exposeRuntimeEventsForInspector() {
+    const runtimeEvents = getCurrentRuntimeEvents();
+    if (runtimeEvents.length === 0) {
+      return;
+    }
+
+    const runtimeThreadId = runtimeEvents[runtimeEvents.length - 1]?.threadId;
+    if (runtimeThreadId && runtimeThreadId !== threadId) {
+      return;
+    }
+
+    const currentLastEventId = events[events.length - 1]?.id;
+    const runtimeLastEventId = runtimeEvents[runtimeEvents.length - 1]?.id;
+    if (events.length === runtimeEvents.length && currentLastEventId === runtimeLastEventId) {
+      return;
+    }
+
+    setRuntimeVisibleEvents(runtimeEvents);
+  }
+
   const {
     changeDiffPreview,
     changeReviewFileCount,
@@ -463,6 +512,7 @@ function App() {
     setSelectedChangeGroup,
     setSelectedChangePath,
     setSessionRuntimeLoading,
+    setRuntimeEvents: setRuntimeEventsForCurrentSession,
     setShowInspector,
     setShowNewSession,
     setShowSearch,
@@ -482,7 +532,7 @@ function App() {
     appendSnapshotRestoredEvent,
     restoreTurnFromCommand
   } = useTurnRestore({
-    events,
+    getEvents: getCurrentRuntimeEvents,
     mode,
     permissionPreset,
     persistSession,
@@ -490,7 +540,7 @@ function App() {
     setChangeDiffPreview,
     setChangesMessage,
     setClearedChangeTurnId,
-    setEvents,
+    setEvents: setRuntimeVisibleEvents,
     setSelectedChangeGroup,
     setSelectedChangePath,
     setSessionMessage,
@@ -552,7 +602,7 @@ function App() {
     setChangeDiffPreview,
     setChangesMessage,
     setClearedChangeTurnId,
-    setEvents,
+    setEvents: setRuntimeVisibleEvents,
     setMcpMessage,
     setMcpSnapshot,
     setPromptText,
@@ -568,6 +618,18 @@ function App() {
   });
   pendingApprovalSetterRef.current = setPendingApproval;
   const isCurrentThreadRunning = isRunning && runningThreadId === threadId;
+  const sessionInputLoading = sessionRuntimeLoading || sessionWorkspaceLoading;
+
+  async function runAgentTurnWithRuntime(prompt = "") {
+    if (!isRunning && sessionInputLoading) {
+      setSessionMessage("会话仍在加载工作区或历史事件，请稍后再发送。");
+      return;
+    }
+
+    await runAgentTurn(prompt, {
+      priorEvents: getCurrentRuntimeEvents()
+    });
+  }
 
   const deferredEvents = useDeferredValue(events);
   const shellJobs = useMemo(() => deriveShellJobs(deferredEvents), [deferredEvents]);
@@ -688,7 +750,15 @@ function App() {
     }
 
     void refreshChanges();
-  }, [showInspector, workspacePath]);
+  }, [showInspector]);
+
+  useEffect(() => {
+    if (!showInspector || sessionInputLoading) {
+      return;
+    }
+
+    exposeRuntimeEventsForInspector();
+  }, [showInspector, sessionInputLoading, threadId]);
 
   useEffect(() => {
     if (!showInspector || selectedChangePath || changeReviewFiles.length === 0) {
@@ -809,10 +879,6 @@ function App() {
 
     void runDoctor();
   }, [settingsLoaded]);
-
-  useEffect(() => {
-    void refreshChanges();
-  }, [workspacePath]);
 
   useEffect(() => {
     if (!settingsLoaded) {
@@ -971,12 +1037,37 @@ function App() {
   }
 
   async function loadSessionForWorkspace(summary: SessionSummary) {
+    const requestId = workspaceApplyRequestIdRef.current + 1;
+    workspaceApplyRequestIdRef.current = requestId;
+    const nextWorkspacePath = summary.workspacePath;
+    const needsWorkspaceApply = Boolean(nextWorkspacePath && !sameWorkspacePath(nextWorkspacePath, workspacePath));
+
+    setSessionWorkspaceLoading(needsWorkspaceApply);
     captureSidebarScrollForThread(summary.threadId);
     closeWorkspacePanels();
-    if (summary.workspacePath && !sameWorkspacePath(summary.workspacePath, workspacePath)) {
-      await applyWorkspacePath(summary.workspacePath);
-    }
     await loadSession(summary);
+    if (workspaceApplyRequestIdRef.current !== requestId) {
+      return;
+    }
+
+    if (!needsWorkspaceApply || !nextWorkspacePath) {
+      if (workspaceApplyRequestIdRef.current === requestId) {
+        setSessionWorkspaceLoading(false);
+      }
+      return;
+    }
+
+    void applyWorkspacePath(nextWorkspacePath)
+      .catch((error) => {
+        if (workspaceApplyRequestIdRef.current === requestId) {
+          setSessionMessage(error instanceof Error ? error.message : String(error));
+        }
+      })
+      .finally(() => {
+        if (workspaceApplyRequestIdRef.current === requestId) {
+          setSessionWorkspaceLoading(false);
+        }
+      });
   }
 
   async function collectDoctorContext(): Promise<{ environmentPaths?: EnvironmentPaths; workspaceSignals: WorkspaceSignals }> {
@@ -1230,7 +1321,7 @@ function App() {
     refreshOreCodeConfig,
     refreshMcpTools,
     removeDeepSeekApiKey,
-    runAgentTurn,
+    runAgentTurn: runAgentTurnWithRuntime,
     buildEnvironmentInstallPlanForSettings,
     closeEnvironmentInstallDialog: () => setEnvironmentInstallDialogOpen(false),
     runDoctor,
@@ -1345,8 +1436,8 @@ function App() {
             void openArtifact(artifactId);
           }}
           onOpenWorkspaceDialog={openNewSessionDialog}
-          onRunStarter={(prompt) => void runAgentTurn(prompt)}
-          runDisabled={isRunning || sessionRuntimeLoading}
+          onRunStarter={(prompt) => void runAgentTurnWithRuntime(prompt)}
+          runDisabled={isRunning || sessionInputLoading}
           onToggleMessageFeedback={toggleMessageFeedback}
           scrollKey={threadId}
         >
@@ -1378,7 +1469,7 @@ function App() {
 
         <ComposerBar
           attachments={composerAttachments}
-          disabled={isRunning || sessionRuntimeLoading}
+          disabled={isRunning || sessionInputLoading}
           hasWorkspace={workspacePath !== "."}
           includeIdeContext={includeIdeContext}
           isRunning={isCurrentThreadRunning}
@@ -1396,7 +1487,7 @@ function App() {
           onDeepSeekModelModeChange={setDeepSeekModelMode}
           onDeepSeekThinkingLevelChange={setDeepSeekThinkingLevel}
           onRemoveAttachment={removeComposerAttachment}
-          onSend={(prompt) => void runAgentTurn(prompt)}
+          onSend={(prompt) => void runAgentTurnWithRuntime(prompt)}
           onStop={stopAgentTurn}
           onSelectSlashCommand={selectSlashCommand}
           onToggleIdeContext={setIncludeIdeContext}

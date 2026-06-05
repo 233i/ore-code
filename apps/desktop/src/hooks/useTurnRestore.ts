@@ -6,7 +6,7 @@ import { createTurnSnapshotStore } from "../services/turnSnapshotStore";
 import type { AppMode, PermissionPreset } from "../ui/permissionPreset";
 
 export function useTurnRestore(input: {
-  events: RuntimeEvent[];
+  getEvents: () => RuntimeEvent[];
   mode: AppMode;
   permissionPreset: PermissionPreset;
   persistSession: (threadId: string, events: RuntimeEvent[], options?: { silent?: boolean }) => Promise<void>;
@@ -32,9 +32,10 @@ export function useTurnRestore(input: {
     turnId: string;
   }) {
     input.setEvents((current) => {
+      const baseEvents = current.length > 0 ? current : input.getEvents();
       const event: RuntimeEvent = {
         id: crypto.randomUUID(),
-        seq: nextSeq(current),
+        seq: nextSeq(baseEvents),
         threadId: input.threadId,
         turnId: eventInput.turnId,
         createdAt: new Date().toISOString(),
@@ -45,14 +46,15 @@ export function useTurnRestore(input: {
         ok: eventInput.ok,
         failures: eventInput.failures.length > 0 ? eventInput.failures : undefined
       };
-      const nextEvents = [...current, event];
+      const nextEvents = [...baseEvents, event];
       void input.persistSession(input.threadId, nextEvents, { silent: true });
       return nextEvents;
     });
   }
 
   async function restoreTurnFromCommand(args: string) {
-    const restorableTurns = listRestorableTurns(input.events);
+    const runtimeEvents = input.getEvents();
+    const restorableTurns = listRestorableTurns(runtimeEvents);
     if (restorableTurns.length === 0) {
       input.setSessionMessage("没有可恢复的 turn snapshot。");
       input.setChangesMessage("没有可恢复的 turn snapshot。");
@@ -93,7 +95,7 @@ export function useTurnRestore(input: {
         failures: result.failures
       });
       if (result.ok) {
-        if (target.turnId === latestUserTurnIdFromEvents(input.events)) {
+        if (target.turnId === latestUserTurnIdFromEvents(runtimeEvents)) {
           input.taskFileChangesRef.current = [];
           input.setTaskFileChanges([]);
           input.setSelectedChangePath(null);

@@ -31,16 +31,19 @@ export function useProjectIndexController({
     }
 
     const refreshId = ++projectIndexRefreshIdRef.current;
-    setProjectIndexStatus({
-      documentCount: 0,
-      message: "正在建立项目索引...",
-      state: "indexing"
-    });
-    const timer = window.setTimeout(() => {
+    const cancelRefresh = scheduleIdleProjectIndexRefresh(() => {
+      if (refreshId !== projectIndexRefreshIdRef.current) {
+        return;
+      }
+      setProjectIndexStatus({
+        documentCount: 0,
+        message: "正在建立项目索引...",
+        state: "indexing"
+      });
       void runProjectIndexRefresh(refreshId, workspacePath);
-    }, 350);
+    });
 
-    return () => window.clearTimeout(timer);
+    return cancelRefresh;
   }, [settingsLoaded, workspacePath]);
 
   useEffect(() => {
@@ -54,16 +57,19 @@ export function useProjectIndexController({
     }
 
     const refreshId = ++projectIndexRefreshIdRef.current;
-    setProjectIndexStatus((current) => ({
-      ...current,
-      message: "正在增量刷新索引...",
-      state: "indexing"
-    }));
-    const timer = window.setTimeout(() => {
+    const cancelRefresh = scheduleIdleProjectIndexRefresh(() => {
+      if (refreshId !== projectIndexRefreshIdRef.current) {
+        return;
+      }
+      setProjectIndexStatus((current) => ({
+        ...current,
+        message: "正在增量刷新索引...",
+        state: "indexing"
+      }));
       void runProjectIndexRefresh(refreshId, workspacePath);
-    }, 1200);
+    }, 1800);
 
-    return () => window.clearTimeout(timer);
+    return cancelRefresh;
   }, [events.length, projectIndexStatus.updatedAt, settingsLoaded, workspacePath]);
 
   async function runProjectIndexRefresh(refreshId: number, targetWorkspacePath: string) {
@@ -89,4 +95,20 @@ export function useProjectIndexController({
   }
 
   return { projectIndexStatus };
+}
+
+type IdleSchedulerWindow = Window & {
+  cancelIdleCallback?: (handle: number) => void;
+  requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
+};
+
+function scheduleIdleProjectIndexRefresh(callback: () => void, timeoutMs = 1500) {
+  const idleWindow = window as IdleSchedulerWindow;
+  if (typeof idleWindow.requestIdleCallback === "function") {
+    const idleId = idleWindow.requestIdleCallback(callback, { timeout: timeoutMs });
+    return () => idleWindow.cancelIdleCallback?.(idleId);
+  }
+
+  const timer = window.setTimeout(callback, timeoutMs);
+  return () => window.clearTimeout(timer);
 }
