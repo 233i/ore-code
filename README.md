@@ -1,26 +1,28 @@
 <p align="center">
-  <img src="./apps/desktop/src-tauri/icons/128x128.png" alt="Ore Code icon" width="96" height="96">
+  <img src="./apps/desktop/src-tauri/icons/128x128.png" alt="Ore Code icon" width="104" height="104">
 </p>
 
 <h1 align="center">Ore Code</h1>
 
 <p align="center">
-  <strong>DeepSeek-first desktop coding agent workbench.</strong>
+  <strong>A DeepSeek-first desktop coding agent workbench for real projects.</strong>
 </p>
 
 <p align="center">
-  Long-context coding, structured tool execution, local project context, MCP integrations, skills, automation, and a native desktop shell for macOS and Windows.
+  Long-context coding, local tool execution, code change review, MCP integrations, skills, automation, and native macOS / Windows packaging.
 </p>
 
 <p align="center">
-  <a href="https://github.com/233i/ore-code/releases"><img alt="Release" src="https://img.shields.io/github/v/release/233i/ore-code?include_prereleases&style=flat-square"></a>
+  <a href="https://github.com/233i/ore-code/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/233i/ore-code?style=flat-square"></a>
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/github/license/233i/ore-code?style=flat-square"></a>
-  <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-24292f?style=flat-square">
+  <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20Apple%20Silicon%20%7C%20Windows%20x64-24292f?style=flat-square">
   <img alt="Built with Tauri" src="https://img.shields.io/badge/Tauri-2.x-24c8db?style=flat-square">
 </p>
 
 <p align="center">
-  <a href="https://github.com/233i/ore-code/releases/tag/v0.1.0"><strong>Download Preview</strong></a>
+  <a href="https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_aarch64.dmg"><strong>Download for macOS</strong></a>
+  ·
+  <a href="https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_x64-setup.exe"><strong>Download for Windows</strong></a>
   ·
   <a href="./docs/README.md">Docs</a>
   ·
@@ -29,39 +31,45 @@
 
 ![Ore Code home screen](./docs/assets/ore-code-home.png)
 
-> Status: pre-release. Ore Code is source-available under the MIT License.
+## What It Is
 
-## Why Ore Code
+Ore Code is a desktop coding agent built around real workspace context. It combines a TypeScript agent runtime, a React/Tauri desktop app, and a Rust OS boundary for local file, shell, process, Git, keychain, artifact, and MCP operations.
 
-Ore Code is built for coding workflows where the agent needs to inspect real project context, run tools predictably, and keep long conversations coherent. It combines a TypeScript agent runtime, a React/Tauri desktop app, and a Rust OS boundary for local file, process, Git, and MCP operations.
-
-| Long-context agent | Local desktop tools | DeepSeek-first workflow |
-| --- | --- | --- |
-| Model-aware context budgets, history compression, and request shaping for large coding turns. | File operations, shell/process execution, tests, Git review, code execution, web fetch, and MCP servers. | Provider configuration, thinking-level controls, prompt/cache stability, and DeepSeek-compatible defaults. |
+It is designed for coding sessions where the agent needs to inspect the project, run commands, keep track of long conversations, and show exactly what changed.
 
 ## Highlights
 
-- DeepSeek-oriented agent runtime with plan, agent, and full-access workflows.
-- Desktop UI for chat, tool approvals, skills, automations, project indexing, usage/context visibility, and code changes.
-- Structured tools for file operations, shell/process execution, tests, Git diff review, code execution, web fetch, LSP diagnostics, and MCP servers.
-- Harness and replay packages for testing agent behavior without relying on live models.
-- Cross-platform desktop work for macOS and Windows.
+| Coding workflow | Local execution | Context control |
+| --- | --- | --- |
+| Chat with a project-aware agent, review diffs, restore task changes, and keep task status visible. | Run file, shell, process, Git, test, web fetch, artifact, and MCP tools through a native desktop boundary. | Use history compression, context briefing, checkpoint summaries, usage visibility, and DeepSeek-compatible request shaping. |
+
+| Configuration | Skills and MCP | Release targets |
+| --- | --- | --- |
+| Configure provider, model, base URL, and thinking behavior in `~/.ore-code/config.toml`; keep API keys in the OS keychain. | Add reusable skills, connect MCP servers, and keep project-specific instructions under `.ore-code/`. | Current release supports macOS Apple Silicon and Windows x64 installers. |
 
 ## Download
 
-The current public build is a macOS Apple Silicon pre-release:
+Latest release: [Ore Code v0.1.0](https://github.com/233i/ore-code/releases/tag/v0.1.0)
 
-- [Download `Ore.Code_0.1.0_aarch64.dmg`](https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_aarch64.dmg)
-- SHA-256: `805dc211c21d0d8995115260bd91c0b856d44d09775f3ba65a2a629b47773eaa`
+| Platform | Installer | SHA-256 |
+| --- | --- | --- |
+| macOS Apple Silicon | [`Ore.Code_0.1.0_aarch64.dmg`](https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_aarch64.dmg) | `b315d91a8aa3dbbc072f879687de201ecf380e33a83a5701911851c9d637ff15` |
+| Windows x64 | [`Ore.Code_0.1.0_x64-setup.exe`](https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_x64-setup.exe) | `07c3ef5d07cfbf24ab90ef9baa71dc078e66adf6104032af608197e707aa2267` |
 
-### macOS Pre-Release Install
+Only install builds downloaded from this repository's GitHub Releases.
 
-The first macOS pre-release builds are unsigned and not notarized. When macOS blocks the app, open it once with either of these flows:
+### macOS Install Note
 
-- Control-click or right-click `Ore Code.app`, choose **Open**, then choose **Open** again in the confirmation dialog.
-- If macOS still blocks it, open **System Settings > Privacy & Security**, find the Ore Code warning, and choose **Open Anyway**.
+The macOS build is ad-hoc signed and not notarized because the project is not using an Apple Developer ID certificate yet. If macOS blocks the app:
 
-Only install builds downloaded from this repository's GitHub releases.
+1. Control-click or right-click `Ore Code.app`.
+2. Choose **Open**.
+3. Confirm **Open** again.
+4. If needed, use **System Settings > Privacy & Security > Open Anyway**.
+
+### Windows Install Note
+
+Windows may show a SmartScreen warning for early builds. If you downloaded the installer from the official release page, choose **More info** and then **Run anyway**.
 
 ## Repository Layout
 
@@ -93,12 +101,11 @@ pnpm install
 pnpm dev
 ```
 
-Run package checks:
+Run local checks:
 
 ```bash
-pnpm --filter @ore-code/desktop typecheck
-pnpm --filter @ore-code/desktop test
-pnpm --filter @ore-code/desktop lint
+pnpm ci:local
+pnpm --filter @ore-code/desktop smoke
 ```
 
 Build installers:
@@ -112,9 +119,9 @@ pnpm build:desktop:windows
 
 Ore Code keeps user-level runtime data outside the repository:
 
-- `~/.ore-code/skills`
-- `~/.ore-code/mcp.json`
-- `~/.ore-code/config.toml` for DeepSeek-compatible provider configuration
+- `~/.ore-code/config.toml` for provider/model/base URL/thinking configuration
+- `~/.ore-code/mcp.json` for user-level MCP servers
+- `~/.ore-code/skills` for user-level skills
 
 Project-local runtime data under `.ore-code/` is ignored by Git.
 
@@ -128,6 +135,7 @@ Project-local runtime data under `.ore-code/` is ignored by Git.
 - [Package boundaries and compatibility](./docs/API_AND_COMPATIBILITY.md)
 - [Roadmap](./docs/ROADMAP.md)
 - [Skill system](./docs/06-skill-system.md)
+- [DeepSeek V4 context strategy](./docs/DEEPSEEK_V4_CONTEXT.md)
 - [Known limitations](./docs/KNOWN_LIMITATIONS.md)
 
 ## Project

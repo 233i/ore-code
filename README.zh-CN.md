@@ -1,26 +1,28 @@
 <p align="center">
-  <img src="./apps/desktop/src-tauri/icons/128x128.png" alt="Ore Code icon" width="96" height="96">
+  <img src="./apps/desktop/src-tauri/icons/128x128.png" alt="Ore Code 图标" width="104" height="104">
 </p>
 
 <h1 align="center">Ore Code</h1>
 
 <p align="center">
-  <strong>面向 DeepSeek 的桌面端 AI 编码工作台。</strong>
+  <strong>面向 DeepSeek 和真实项目上下文的桌面端 AI 编码工作台。</strong>
 </p>
 
 <p align="center">
-  面向长上下文编码、结构化工具调用、本地项目上下文、MCP 集成、技能、自动化，以及 macOS 和 Windows 桌面体验。
+  长上下文编码、本地工具执行、代码变更审查、MCP 集成、技能、自动化，以及原生 macOS / Windows 安装包。
 </p>
 
 <p align="center">
-  <a href="https://github.com/233i/ore-code/releases"><img alt="Release" src="https://img.shields.io/github/v/release/233i/ore-code?include_prereleases&style=flat-square"></a>
-  <a href="./LICENSE"><img alt="License" src="https://img.shields.io/github/license/233i/ore-code?style=flat-square"></a>
-  <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-24292f?style=flat-square">
+  <a href="https://github.com/233i/ore-code/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/233i/ore-code?style=flat-square"></a>
+  <a href="./LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/233i/ore-code?style=flat-square"></a>
+  <img alt="平台" src="https://img.shields.io/badge/platform-macOS%20Apple%20Silicon%20%7C%20Windows%20x64-24292f?style=flat-square">
   <img alt="Built with Tauri" src="https://img.shields.io/badge/Tauri-2.x-24c8db?style=flat-square">
 </p>
 
 <p align="center">
-  <a href="https://github.com/233i/ore-code/releases/tag/v0.1.0"><strong>下载预览版</strong></a>
+  <a href="https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_aarch64.dmg"><strong>下载 macOS 版</strong></a>
+  ·
+  <a href="https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_x64-setup.exe"><strong>下载 Windows 版</strong></a>
   ·
   <a href="./docs/README.md">文档</a>
   ·
@@ -29,39 +31,45 @@
 
 ![Ore Code home screen](./docs/assets/ore-code-home.png)
 
-> 状态：预发布。当前仓库源码基于 MIT License 发布。
+## 这是什么
 
-## 为什么是 Ore Code
+Ore Code 是一个围绕真实工作区上下文构建的桌面端编码 Agent。它由 TypeScript agent runtime、React/Tauri 桌面应用和 Rust OS boundary 组成，负责本地文件、shell、process、Git、keychain、artifact 和 MCP 操作。
 
-Ore Code 面向需要真实项目上下文、稳定工具执行和长对话连续性的编码工作流。它由 TypeScript agent runtime、React/Tauri 桌面应用和 Rust OS 边界组成，覆盖本地文件、进程、Git 和 MCP 操作。
-
-| 长上下文 Agent | 本地桌面工具 | DeepSeek-first 工作流 |
-| --- | --- | --- |
-| 面向大型编码任务的模型容量估算、历史压缩和请求组织。 | 文件操作、shell/process 执行、测试、Git review、代码执行、web fetch 和 MCP server。 | Provider 配置、thinking level 控制、prompt/cache 稳定性，以及 DeepSeek-compatible 默认配置。 |
+它适合需要 Agent 读取真实项目、执行命令、保持长对话连续性，并清楚展示“改了什么、跑了什么、结果如何”的编码场景。
 
 ## 亮点
 
-- 面向 DeepSeek 的 Agent runtime，支持计划、Agent 和完全访问等工作模式。
-- 桌面 UI 覆盖对话、工具审批、技能、自动化、项目索引、用量/上下文可视化和代码变更。
-- 提供结构化工具：文件操作、shell/process 执行、测试、Git diff review、代码执行、web fetch、LSP diagnostics 和 MCP server。
-- 提供 harness 和 replay 相关包，用于在不依赖真实模型的情况下测试 Agent 行为。
-- 持续完善 macOS 和 Windows 跨平台桌面能力。
+| 编码工作流 | 本地执行 | 上下文控制 |
+| --- | --- | --- |
+| 与项目感知 Agent 对话，查看 diff，撤销本轮任务变更，并持续看到任务状态。 | 通过原生桌面边界运行 file、shell、process、Git、test、web fetch、artifact 和 MCP 工具。 | 支持历史压缩、context briefing、checkpoint summary、用量可视化和 DeepSeek-compatible 请求组织。 |
+
+| 配置 | 技能和 MCP | 发布目标 |
+| --- | --- | --- |
+| 在 `~/.ore-code/config.toml` 中配置 provider、model、base URL 和 thinking；API Key 只进入系统钥匙串。 | 添加可复用技能，连接 MCP server，并在项目 `.ore-code/` 中维护项目指令。 | 当前正式版提供 macOS Apple Silicon 和 Windows x64 安装包。 |
 
 ## 下载
 
-当前公开构建是 macOS Apple Silicon 预发布版：
+最新版本：[Ore Code v0.1.0](https://github.com/233i/ore-code/releases/tag/v0.1.0)
 
-- [下载 `Ore.Code_0.1.0_aarch64.dmg`](https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_aarch64.dmg)
-- SHA-256：`805dc211c21d0d8995115260bd91c0b856d44d09775f3ba65a2a629b47773eaa`
-
-### macOS 预发布版安装
-
-首个 macOS 预发布包未签名、未公证。macOS 拦截应用时，可以用下面任一方式首次打开：
-
-- 按住 Control 点击或右键点击 `Ore Code.app`，选择**打开**，然后在确认弹窗里再次选择**打开**。
-- 如果仍然被拦截，打开**系统设置 > 隐私与安全性**，找到 Ore Code 的拦截提示，选择**仍要打开**。
+| 平台 | 安装包 | SHA-256 |
+| --- | --- | --- |
+| macOS Apple Silicon | [`Ore.Code_0.1.0_aarch64.dmg`](https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_aarch64.dmg) | `b315d91a8aa3dbbc072f879687de201ecf380e33a83a5701911851c9d637ff15` |
+| Windows x64 | [`Ore.Code_0.1.0_x64-setup.exe`](https://github.com/233i/ore-code/releases/download/v0.1.0/Ore.Code_0.1.0_x64-setup.exe) | `07c3ef5d07cfbf24ab90ef9baa71dc078e66adf6104032af608197e707aa2267` |
 
 只安装本仓库 GitHub Releases 中发布的构建产物。
+
+### macOS 安装提示
+
+macOS 构建使用 ad-hoc 签名，尚未使用 Apple Developer ID 签名和公证。macOS 拦截应用时：
+
+1. 按住 Control 点击或右键点击 `Ore Code.app`。
+2. 选择**打开**。
+3. 在确认弹窗里再次选择**打开**。
+4. 如果仍然被拦截，打开**系统设置 > 隐私与安全性**，选择**仍要打开**。
+
+### Windows 安装提示
+
+早期构建可能触发 Windows SmartScreen 提醒。如果安装包来自官方 release 页面，可以选择**更多信息**，再选择**仍要运行**。
 
 ## 仓库结构
 
@@ -93,12 +101,11 @@ pnpm install
 pnpm dev
 ```
 
-运行包级检查：
+运行本地检查：
 
 ```bash
-pnpm --filter @ore-code/desktop typecheck
-pnpm --filter @ore-code/desktop test
-pnpm --filter @ore-code/desktop lint
+pnpm ci:local
+pnpm --filter @ore-code/desktop smoke
 ```
 
 构建安装包：
@@ -112,9 +119,9 @@ pnpm build:desktop:windows
 
 Ore Code 会在仓库外创建和读取用户级运行时数据：
 
-- `~/.ore-code/skills`
-- `~/.ore-code/mcp.json`
-- `~/.ore-code/config.toml`，用于 DeepSeek-compatible provider 配置
+- `~/.ore-code/config.toml`，用于 provider/model/base URL/thinking 配置
+- `~/.ore-code/mcp.json`，用于用户级 MCP server
+- `~/.ore-code/skills`，用于用户级 skills
 
 项目内的 `.ore-code/` 运行时数据已被 Git 忽略。
 
@@ -128,6 +135,7 @@ Ore Code 会在仓库外创建和读取用户级运行时数据：
 - [包边界和兼容性](./docs/API_AND_COMPATIBILITY.md)
 - [路线图](./docs/ROADMAP.md)
 - [技能系统](./docs/06-skill-system.md)
+- [DeepSeek V4 上下文策略](./docs/DEEPSEEK_V4_CONTEXT.md)
 - [已知限制](./docs/KNOWN_LIMITATIONS.md)
 
 ## 项目
