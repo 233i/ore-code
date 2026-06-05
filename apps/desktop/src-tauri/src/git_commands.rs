@@ -155,16 +155,15 @@ pub(crate) fn read_git_diff(
     }
 
     let repo_root = git_repo_root(workspace)?;
-    if !staged {
-        if let Some(path) = path {
-            if is_untracked_git_path(&repo_root, path)? {
-                return Ok(GitDiffResult {
-                    is_repo: true,
-                    diff: build_untracked_file_diff(&repo_root, path)?,
-                    error: None,
-                });
-            }
-        }
+    if !staged
+        && let Some(path) = path
+        && is_untracked_git_path(&repo_root, path)?
+    {
+        return Ok(GitDiffResult {
+            is_repo: true,
+            diff: build_untracked_file_diff(&repo_root, path)?,
+            error: None,
+        });
     }
 
     let mut args = vec!["diff", "--no-ext-diff"];

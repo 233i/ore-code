@@ -530,20 +530,20 @@ pub(crate) async fn mcp_reload_server(
         if manager.snapshot.is_none() {
             manager.snapshot = Some(config_snapshot.clone());
         }
-        if !server_config.disabled {
-            if let Some(snapshot) = manager.snapshot.as_mut() {
-                replace_mcp_server_snapshot(
-                    snapshot,
-                    mcp_server_snapshot_from_config(
-                        &server_config,
-                        "connecting",
-                        None,
-                        Vec::new(),
-                        Vec::new(),
-                        Vec::new(),
-                    ),
-                );
-            }
+        if !server_config.disabled
+            && let Some(snapshot) = manager.snapshot.as_mut()
+        {
+            replace_mcp_server_snapshot(
+                snapshot,
+                mcp_server_snapshot_from_config(
+                    &server_config,
+                    "connecting",
+                    None,
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            );
         }
         manager.generation
     };
@@ -865,11 +865,9 @@ impl McpManager {
     }
 
     fn stop_server(&mut self, name: &str) {
-        if let Some(server) = self.servers.remove(name) {
-            if let McpRuntimeServer::Stdio { mut child, .. } = server {
-                let _ = child.kill();
-                let _ = child.wait();
-            }
+        if let Some(McpRuntimeServer::Stdio { mut child, .. }) = self.servers.remove(name) {
+            let _ = child.kill();
+            let _ = child.wait();
         }
         self.tool_map
             .retain(|_, (server_name, _)| server_name != name);

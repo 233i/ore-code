@@ -78,7 +78,7 @@ pub(crate) fn write_artifact(
     let metadata = ArtifactMetadata {
         id: id.clone(),
         artifact_type,
-        size: content.as_bytes().len() as u64,
+        size: content.len() as u64,
         created_at: timestamp_now(),
         summary: summary.to_string(),
         source_call_id,

@@ -73,12 +73,12 @@ pub(crate) fn run_process(
     let mut child = command_process.spawn().map_err(|error| error.to_string())?;
     bind_child_to_runtime(&sandbox_runtime, &child);
 
-    if let Some(stdin_text) = input.stdin {
-        if let Some(mut stdin) = child.stdin.take() {
-            thread::spawn(move || {
-                let _ = stdin.write_all(stdin_text.as_bytes());
-            });
-        }
+    if let Some(stdin_text) = input.stdin
+        && let Some(mut stdin) = child.stdin.take()
+    {
+        thread::spawn(move || {
+            let _ = stdin.write_all(stdin_text.as_bytes());
+        });
     }
 
     let stdout = child
@@ -92,38 +92,38 @@ pub(crate) fn run_process(
 
     loop {
         if let Some(status) = child.try_wait().map_err(|error| error.to_string())? {
-            return Ok(process_result_from_parts(
+            return Ok(process_result_from_parts(ProcessResultParts {
                 program,
-                input.args,
-                status.code(),
+                args: input.args,
+                exit_code: status.code(),
                 stdout,
                 stderr,
                 started_at,
-                false,
-                sandbox_metadata(&sandbox_runtime),
-            ));
+                timed_out: false,
+                sandbox: sandbox_metadata(&sandbox_runtime),
+            }));
         }
 
         if started_at.elapsed() >= timeout {
             terminate_child_tree(&mut child, &sandbox_runtime);
             let _ = child.wait().map_err(|error| error.to_string())?;
-            return Ok(process_result_from_parts(
+            return Ok(process_result_from_parts(ProcessResultParts {
                 program,
-                input.args,
-                None,
+                args: input.args,
+                exit_code: None,
                 stdout,
                 stderr,
                 started_at,
-                true,
-                sandbox_metadata(&sandbox_runtime),
-            ));
+                timed_out: true,
+                sandbox: sandbox_metadata(&sandbox_runtime),
+            }));
         }
 
         thread::sleep(Duration::from_millis(10));
     }
 }
 
-fn process_result_from_parts(
+struct ProcessResultParts {
     program: String,
     args: Vec<String>,
     exit_code: Option<i32>,
@@ -132,17 +132,19 @@ fn process_result_from_parts(
     started_at: Instant,
     timed_out: bool,
     sandbox: Option<SandboxRunMetadata>,
-) -> ProcessRunResult {
+}
+
+fn process_result_from_parts(parts: ProcessResultParts) -> ProcessRunResult {
     ProcessRunResult {
-        command: process_command_string(&program, &args),
-        program,
-        args,
-        exit_code,
-        stdout: String::from_utf8_lossy(&join_pipe_reader(stdout)).to_string(),
-        stderr: String::from_utf8_lossy(&join_pipe_reader(stderr)).to_string(),
-        duration_ms: started_at.elapsed().as_millis(),
-        timed_out,
-        sandbox,
+        command: process_command_string(&parts.program, &parts.args),
+        program: parts.program,
+        args: parts.args,
+        exit_code: parts.exit_code,
+        stdout: String::from_utf8_lossy(&join_pipe_reader(parts.stdout)).to_string(),
+        stderr: String::from_utf8_lossy(&join_pipe_reader(parts.stderr)).to_string(),
+        duration_ms: parts.started_at.elapsed().as_millis(),
+        timed_out: parts.timed_out,
+        sandbox: parts.sandbox,
     }
 }
 

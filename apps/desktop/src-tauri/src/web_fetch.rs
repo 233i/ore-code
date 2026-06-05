@@ -21,7 +21,8 @@ pub(crate) async fn web_fetch_url(
         &url,
         timeout_ms.unwrap_or(20_000),
         max_bytes.unwrap_or(500_000),
-    ).await
+    )
+    .await
 }
 
 pub(crate) async fn fetch_url_with_http_client(

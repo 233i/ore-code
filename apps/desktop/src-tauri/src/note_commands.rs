@@ -13,7 +13,10 @@ pub(crate) struct NoteRecord {
 }
 
 #[tauri::command]
-pub(crate) fn note_list(app: tauri::AppHandle, workspace_path: String) -> Result<Vec<NoteRecord>, String> {
+pub(crate) fn note_list(
+    app: tauri::AppHandle,
+    workspace_path: String,
+) -> Result<Vec<NoteRecord>, String> {
     let notes = read_notes(&app)?;
     Ok(notes
         .into_iter()

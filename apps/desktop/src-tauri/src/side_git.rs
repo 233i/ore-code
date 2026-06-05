@@ -284,7 +284,6 @@ pub(crate) fn copy_dir_filtered(
 pub(crate) fn should_skip_side_snapshot_name(name: &str) -> bool {
     matches!(
         name,
-        ".git" | ".ore-code" | "node_modules" | "target" | "dist" | "build" | ".next"
-        | ".turbo"
+        ".git" | ".ore-code" | "node_modules" | "target" | "dist" | "build" | ".next" | ".turbo"
     )
 }

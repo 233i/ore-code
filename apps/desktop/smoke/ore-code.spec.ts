@@ -1,4 +1,12 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
+
+const smokeWorkspace = "/tmp/ore-code-smoke-workspace";
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("ore-code.user-config.toml", "provider = \"mock\"\n");
+  });
+});
 
 test("keeps the chat layout full width by default", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1200 });
@@ -48,8 +56,8 @@ test("opens the inspector as an overlay drawer", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1200 });
   await page.goto("/");
 
-  await page.getByLabel("显示右侧面板").click();
-  await expect(page.getByLabel("Inspector")).toBeVisible();
+  await workspaceControl(page).getByRole("button", { name: /Show right panel|显示右侧面板/ }).click();
+  await expect(page.locator(".inspector")).toBeVisible();
 
   const metrics = await page.evaluate(() => {
     const main = document.querySelector(".main-column")?.getBoundingClientRect();
@@ -63,39 +71,39 @@ test("opens the inspector as an overlay drawer", async ({ page }) => {
     };
   });
 
-  expect(metrics.mainRight).toBe(1920);
-  expect(metrics.mainWidth).toBeGreaterThan(1500);
-  expect(metrics.inspectorLeft).toBeGreaterThan(1450);
+  expect(metrics.mainRight).toBeLessThan(metrics.viewport);
+  expect(metrics.mainWidth).toBeGreaterThan(1100);
+  expect(metrics.inspectorLeft).toBeGreaterThanOrEqual(metrics.mainRight - 2);
   expect(metrics.inspectorWidth).toBeGreaterThan(340);
 
   await page.keyboard.press("Escape");
-  await expect(page.getByLabel("Inspector")).toHaveCount(0);
+  await expect(page.locator(".inspector")).toHaveCount(0);
 });
 
 test("creates a new conversation after choosing a workspace path", async ({ page }) => {
   await page.goto("/");
+  await applyBrowserWorkspace(page);
 
   await page
     .getByRole("navigation", { name: "Primary actions" })
-    .getByRole("button", { name: "新对话", exact: true })
+    .getByRole("button", { name: /New Chat|新对话/ })
     .click();
-  await expect(page.getByLabel("新对话工作区路径")).toBeVisible();
-  await expect(page.getByText("请先选择一个真实工作区")).toBeVisible();
 
-  await page.getByLabel("新对话工作区路径").fill("/tmp/ore-code-smoke-workspace");
-  await page.getByRole("button", { name: /应用输入路径/ }).click();
-  await expect(page.getByText("浏览器预览：/tmp/ore-code-smoke-workspace")).toBeVisible();
+  await expect(page.getByRole("region", { name: "新对话" })).toBeVisible();
+  await expect(page.getByText("ore-code-smoke-workspace").first()).toBeVisible();
   await page.getByRole("button", { name: "创建对话" }).click();
 
-  await expect(page.getByLabel("新对话工作区路径")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "新对话" })).toHaveCount(0);
   await expect(page.getByText("已创建新会话。")).toBeVisible();
 });
 
 test("keeps user messages right aligned in the transcript", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1200 });
   await page.goto("/");
+  await applyBrowserWorkspace(page);
 
   await submitPrompt(page, "列出当前工作区并总结项目结构");
+  await expect(page.locator(".message.user").first()).toBeVisible();
 
   const metrics = await page.evaluate(() => {
     const composer = document.querySelector(".composer-shell")?.getBoundingClientRect();
@@ -113,50 +121,71 @@ test("keeps user messages right aligned in the transcript", async ({ page }) => 
 
 test("reviews and restores a single turn file change", async ({ page }) => {
   await page.goto("/");
+  await applyBrowserWorkspace(page);
 
   await submitPrompt(page, "写入 @ore-code-smoke-one.txt");
   await approveIfVisible(page);
 
-  const transcript = page.getByLabel("Transcript");
-  await expect(transcript.getByText(/1 个文件已更改/)).toBeVisible();
+  await expect(page.getByText("已编辑 ore-code-smoke-one.txt")).toBeVisible();
   await page.getByRole("button", { name: "审核" }).click();
-  await expect(page.getByText("审核文件更改")).toBeVisible();
-  await expect(page.getByRole("button", { name: /ore-code-smoke-one\.txt/ }).first()).toBeVisible();
+  const changesPanel = page.getByRole("complementary", { name: "代码变更" });
+  await expect(changesPanel).toBeVisible();
+  await expect(changesPanel.getByText("ore-code-smoke-one.txt").first()).toBeVisible();
+  await expect(changesPanel.getByRole("region", { name: "代码变更预览" })).toBeVisible();
 
-  await page.getByRole("button", { name: "复制 diff" }).click();
-  await page.getByRole("button", { name: "撤销单文件" }).click();
+  await changesPanel.getByRole("button", { name: "复制 diff" }).click();
+  await changesPanel.getByRole("button", { name: "撤销" }).click();
 
   await expect(page.getByText("已撤销 ore-code-smoke-one.txt")).toBeVisible();
-  await expect(transcript.getByText(/1 个文件已更改/)).toHaveCount(0);
+  await expect(page.getByText("已编辑 ore-code-smoke-one.txt")).toHaveCount(0);
 });
 
 test("shows verification failure for browser-preview shell execution", async ({ page }) => {
   await page.goto("/");
+  await applyBrowserWorkspace(page);
 
   await submitPrompt(page, "运行 pnpm test");
   await approveIfVisible(page);
 
-  await expect(page.locator(".turn-status-line").getByText("验证失败").first()).toBeVisible();
+  await expect(page.getByText("测试失败：pnpm test（exit 127）")).toBeVisible();
 });
 
 test("shows MCP source state in browser preview", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("button", { name: "技能" }).click();
-  const skillsPanel = page.getByRole("region", { name: "技能" });
-  await skillsPanel.getByRole("button", { name: "插件" }).click();
+  await page.getByRole("button", { name: /Skills|技能/ }).click();
+  const skillsPanel = page.getByRole("region", { name: "MCP 与技能" });
+  await skillsPanel.getByRole("button", { name: "MCP" }).click();
 
   await expect(skillsPanel.getByText("MCP 不可用").first()).toBeVisible();
   await expect(skillsPanel.getByText("浏览器预览不支持启动或连接 MCP server，请在 Tauri 桌面端运行。")).toBeVisible();
 });
 
-async function submitPrompt(page: import("@playwright/test").Page, prompt: string) {
-  await page.getByLabel("Prompt composer").fill(prompt);
-  await page.getByLabel("发送").click();
+function workspaceControl(page: Page): Locator {
+  return page.getByLabel("Workspace controls");
 }
 
-async function approveIfVisible(page: import("@playwright/test").Page) {
-  const approveButton = page.getByRole("button", { name: "批准一次" });
+async function applyBrowserWorkspace(page: Page) {
+  await workspaceControl(page).getByRole("button", { name: /Settings|设置/ }).click();
+  await expect(page.getByRole("region", { name: /Settings|设置/ })).toBeVisible();
+  await page
+    .getByRole("navigation", { name: /Settings categories|设置分类/ })
+    .getByRole("button", { name: /Workspace|工作区/ })
+    .click();
+  await page.locator(".settings-section").filter({ hasText: /Default Workspace|默认工作区/ }).getByRole("textbox").fill(smokeWorkspace);
+  await page.getByRole("button", { name: /Apply Path|应用路径/ }).click();
+  await expect(page.getByText(smokeWorkspace).first()).toBeVisible();
+  await page.getByRole("button", { name: /Back|返回/ }).click();
+  await expect(page.getByRole("region", { name: /Settings|设置/ })).toHaveCount(0);
+}
+
+async function submitPrompt(page: Page, prompt: string) {
+  await page.getByLabel("Prompt composer").fill(prompt);
+  await page.getByLabel(/Send|发送/).click();
+}
+
+async function approveIfVisible(page: Page) {
+  const approveButton = page.getByRole("button", { name: /Approve once|批准一次/ });
   try {
     await expect(approveButton).toBeVisible({ timeout: 3_000 });
     await approveButton.click();

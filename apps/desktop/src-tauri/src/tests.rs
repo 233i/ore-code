@@ -192,7 +192,7 @@ fn shell_job_start_records_completed_output() {
     assert_eq!(completed.exit_code, Some(7));
     assert_eq!(completed.stdout.trim(), "out");
     assert_eq!(completed.stderr.trim(), "err");
-    assert_eq!(completed.duration_ms.is_some(), true);
+    assert!(completed.duration_ms.is_some());
 }
 
 #[test]
@@ -529,7 +529,8 @@ fn config_source_reports_loaded_and_missing_files() {
 #[test]
 fn user_ore_code_config_write_round_trips_non_secret_content() {
     let root = make_temp_workspace();
-    let content = "provider = \"deepseek\"\n\n[providers.deepseek]\napi_key_env = \"DEEPSEEK_API_KEY\"\n";
+    let content =
+        "provider = \"deepseek\"\n\n[providers.deepseek]\napi_key_env = \"DEEPSEEK_API_KEY\"\n";
 
     let status = write_user_ore_code_config(&root, content).unwrap();
 
@@ -545,10 +546,8 @@ fn user_ore_code_config_write_round_trips_non_secret_content() {
 #[test]
 fn user_ore_code_config_write_rejects_inline_secrets() {
     let root = make_temp_workspace();
-    let result = write_user_ore_code_config(
-        &root,
-        "provider = \"deepseek\"\napi_key = \"sk-test\"\n",
-    );
+    let result =
+        write_user_ore_code_config(&root, "provider = \"deepseek\"\napi_key = \"sk-test\"\n");
 
     assert!(result.is_err());
     assert!(!root.join(".ore-code").join("config.toml").exists());
@@ -1762,11 +1761,11 @@ fn read_http_json_request(stream: &mut TcpStream) -> serde_json::Value {
         let read = stream.read(&mut chunk).unwrap();
         assert!(read > 0, "HTTP MCP test server received an empty request");
         buffer.extend_from_slice(&chunk[..read]);
-        if let Some((body_start, content_length)) = http_request_body_start_and_len(&buffer) {
-            if buffer.len() >= body_start + content_length {
-                return serde_json::from_slice(&buffer[body_start..body_start + content_length])
-                    .unwrap();
-            }
+        if let Some((body_start, content_length)) = http_request_body_start_and_len(&buffer)
+            && buffer.len() >= body_start + content_length
+        {
+            return serde_json::from_slice(&buffer[body_start..body_start + content_length])
+                .unwrap();
         }
     }
 }
