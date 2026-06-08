@@ -1,5 +1,5 @@
 import { Button, Dialog, Input, Select, Tag } from "tdesign-react";
-import type { AutomationRecord, DeepSeekModelMode, DeepSeekThinkingLevel, DurableTaskSnapshot, NoteRecord } from "@ore-code/agent-core";
+import type { AutomationRecord, DeepSeekModelMode, DurableTaskSnapshot, NoteRecord, ProviderThinkingLevel } from "@ore-code/agent-core";
 import type { ThemePreference } from "../services/appSettings";
 import type { UiLocalePreference } from "../services/uiLocale";
 import type { ConfigFieldSource, ProviderConfig, ProviderConfigSources, ResolvedOreCodeConfig } from "../services/oreCodeConfig";
@@ -12,7 +12,7 @@ import type { Provider } from "../hooks/useProviderConfig";
 import { localeOptions, modeOptions, permissionPresetOptions, themeOptions, type SettingsSection } from "./settingsConfig";
 import type { AppMode, PermissionPreset } from "./permissionPreset";
 import { deepSeekModelOptions } from "./deepSeekModelOptions";
-import { deepSeekThinkingOptions } from "./deepSeekThinkingOptions";
+import { thinkingOptionsForProvider } from "./deepSeekThinkingOptions";
 import { useI18n, type TranslateFunction } from "../i18n/I18nProvider";
 
 type ProviderOption = {
@@ -150,13 +150,13 @@ export type ProviderSettingsSectionProps = {
   deepSeekBaseUrl: string;
   deepSeekModel: string;
   deepSeekModelMode: DeepSeekModelMode;
-  deepSeekThinkingLevel: DeepSeekThinkingLevel;
+  deepSeekThinkingLevel: ProviderThinkingLevel;
   effectiveProviderConfig: ProviderConfig | null;
   fieldSources?: ProviderConfigSources;
   onApiKeyChange: (value: string) => void;
   onBaseUrlChange: (value: string) => void;
   onDeepSeekModelModeChange: (value: DeepSeekModelMode) => void;
-  onDeepSeekThinkingLevelChange: (value: DeepSeekThinkingLevel) => void;
+  onDeepSeekThinkingLevelChange: (value: ProviderThinkingLevel) => void;
   onLoadApiKey: () => void | Promise<void>;
   onModelChange: (value: string) => void;
   onProviderChange: (provider: Provider) => void;
@@ -203,6 +203,10 @@ export function ProviderSettingsSection({
   secretStatusText
 }: ProviderSettingsSectionProps) {
   const providerDisabled = provider === "mock";
+  const thinkingOptions = thinkingOptionsForProvider(provider);
+  const thinkingSelectValue = thinkingOptions.some((option) => option.value === deepSeekThinkingLevel)
+    ? deepSeekThinkingLevel
+    : "auto";
 
   return (
     <>
@@ -275,15 +279,15 @@ export function ProviderSettingsSection({
           </div>
           <div className="settings-row">
             <div>
-              <strong>思考等级</strong>
-              <p>仅 DeepSeek V4 thinking 请求生效；关闭适合低延迟，高和最强适合复杂编码。</p>
+              <strong>{provider === "mimo" ? "Mimo 思考" : "思考等级"}</strong>
+              <p>{thinkingControlDescription(provider)}</p>
             </div>
             <div className="settings-control-stack">
               <Select
-                disabled={provider !== "deepseek"}
-                options={deepSeekThinkingOptions.map((option) => ({ label: option.label, value: option.value }))}
-                value={deepSeekThinkingLevel}
-                onChange={(value) => onDeepSeekThinkingLevelChange(String(value) as DeepSeekThinkingLevel)}
+                disabled={!thinkingOptions.length}
+                options={thinkingOptions.map((option) => ({ label: option.label, value: option.value }))}
+                value={thinkingSelectValue}
+                onChange={(value) => onDeepSeekThinkingLevelChange(String(value) as ProviderThinkingLevel)}
               />
               <ConfigSourceTag source={fieldSources?.thinkingLevel} />
             </div>
@@ -291,7 +295,7 @@ export function ProviderSettingsSection({
           <div className="settings-row">
             <div>
               <strong>Base URL</strong>
-              <p>DeepSeek OpenAI-compatible API 地址。</p>
+              <p>当前 provider 的 OpenAI-compatible API 地址。</p>
             </div>
             <div className="settings-control-stack">
               <Input onChange={(value) => onBaseUrlChange(String(value))} value={deepSeekBaseUrl} />
@@ -330,6 +334,16 @@ export function ProviderSettingsSection({
       </section>
     </>
   );
+}
+
+function thinkingControlDescription(provider: Provider) {
+  if (provider === "mimo") {
+    return "Mimo 支持显式开启或关闭 thinking；自动则不传 thinking 参数。";
+  }
+  if (provider === "deepseek") {
+    return "DeepSeek V4 thinking 支持关闭、高和最强；关闭适合低延迟，高和最强适合复杂编码。";
+  }
+  return "当前 provider 暂未暴露 thinking 控制。";
 }
 
 function ConfigSourceTag({ source }: { source?: ConfigFieldSource }) {

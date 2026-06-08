@@ -1,8 +1,8 @@
 import { Button, Popup } from "tdesign-react";
-import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@ore-code/agent-core";
+import type { DeepSeekModelMode, ProviderThinkingLevel } from "@ore-code/agent-core";
 import { CheckIcon, ChevronDownIcon, ShieldErrorIcon } from "tdesign-icons-react";
 import { deepSeekModelModeLabel, deepSeekModelOptions } from "./deepSeekModelOptions";
-import { deepSeekThinkingOptions, deepSeekThinkingLabel } from "./deepSeekThinkingOptions";
+import { thinkingLabelForProvider, thinkingOptionsForProvider } from "./deepSeekThinkingOptions";
 import { permissionPresetLabel, type PermissionPreset } from "./permissionPreset";
 
 export type ProviderOption = {
@@ -92,11 +92,11 @@ export function PermissionMenu({ permissionPreset, setPermissionPreset }: Permis
 
 type ProviderMenuProps = {
   deepSeekModelMode: DeepSeekModelMode;
-  deepSeekThinkingLevel: DeepSeekThinkingLevel;
+  deepSeekThinkingLevel: ProviderThinkingLevel;
   lastResolvedDeepSeekModel?: string;
   modelLabel: string;
   onDeepSeekModelModeChange: (mode: DeepSeekModelMode) => void;
-  onDeepSeekThinkingLevelChange: (level: DeepSeekThinkingLevel) => void;
+  onDeepSeekThinkingLevelChange: (level: ProviderThinkingLevel) => void;
   onProviderChange: (provider: string) => void;
   provider: string;
   providerOptions: readonly ProviderOption[];
@@ -113,6 +113,17 @@ export function ProviderMenu({
   provider,
   providerOptions
 }: ProviderMenuProps) {
+  const thinkingOptions = thinkingOptionsForProvider(provider);
+  const thinkingValue = thinkingOptions.some((option) => option.value === deepSeekThinkingLevel)
+    ? deepSeekThinkingLevel
+    : "auto";
+  const providerLabel = providerOptions.find((option) => option.value === provider)?.label ?? modelLabel;
+  const triggerLabel = provider === "deepseek"
+    ? `${providerLabel} · ${deepSeekProviderButtonLabel(deepSeekModelMode, lastResolvedDeepSeekModel)} · ${thinkingLabelForProvider(provider, thinkingValue)}`
+    : provider === "mimo"
+      ? `${providerLabel} · ${thinkingLabelForProvider(provider, thinkingValue)}`
+      : modelLabel;
+
   return (
     <Popup
       destroyOnClose
@@ -121,62 +132,88 @@ export function ProviderMenu({
       trigger="click"
       content={(
         <div className="provider-menu">
-          {providerOptions.map((option) => (
-            <button
-              className={option.value === provider ? "provider-option active" : "provider-option"}
-              key={option.value}
-              type="button"
-              onClick={() => onProviderChange(option.value)}
-            >
-              <span>{option.label}</span>
-              {option.value === provider ? <CheckIcon size="16px" /> : null}
-            </button>
-          ))}
+          <div className="provider-menu-section">
+            <div className="provider-menu-label">Provider</div>
+            <div className="provider-switcher" role="group" aria-label="Provider">
+              {providerOptions.map((option) => (
+                <button
+                  className={option.value === provider ? "provider-chip active" : "provider-chip"}
+                  key={option.value}
+                  type="button"
+                  onClick={() => onProviderChange(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
           {provider === "deepseek" ? (
             <>
-              <div className="composer-menu-divider" />
-              <div className="provider-menu-heading">DeepSeek 模型</div>
-              {deepSeekModelOptions.map((option) => (
-                <button
-                  className={option.value === deepSeekModelMode ? "provider-option thinking active" : "provider-option thinking"}
-                  key={option.value}
-                  type="button"
-                  onClick={() => onDeepSeekModelModeChange(option.value)}
-                >
-                  <span>
-                    <strong>{option.label}</strong>
-                    <small>{option.description}</small>
-                  </span>
-                  {option.value === deepSeekModelMode ? <CheckIcon size="16px" /> : null}
-                </button>
-              ))}
-              <div className="composer-menu-divider" />
-              <div className="provider-menu-heading">DeepSeek 思考</div>
-              {deepSeekThinkingOptions.map((option) => (
-                <button
-                  className={option.value === deepSeekThinkingLevel ? "provider-option thinking active" : "provider-option thinking"}
-                  key={option.value}
-                  type="button"
-                  onClick={() => onDeepSeekThinkingLevelChange(option.value)}
-                >
-                  <span>
-                    <strong>{option.label}</strong>
-                    <small>{option.description}</small>
-                  </span>
-                  {option.value === deepSeekThinkingLevel ? <CheckIcon size="16px" /> : null}
-                </button>
-              ))}
+              <ProviderSegmentGroup
+                ariaLabel="DeepSeek 模型"
+                label="模型"
+                options={deepSeekModelOptions}
+                value={deepSeekModelMode}
+                onChange={onDeepSeekModelModeChange}
+              />
+              <ProviderSegmentGroup
+                ariaLabel="DeepSeek 思考"
+                label="思考"
+                options={thinkingOptions}
+                value={thinkingValue}
+                onChange={onDeepSeekThinkingLevelChange}
+              />
             </>
+          ) : null}
+          {provider === "mimo" ? (
+            <ProviderSegmentGroup
+              ariaLabel="Mimo 思考"
+              label="思考"
+              options={thinkingOptions}
+              value={thinkingValue}
+              onChange={onDeepSeekThinkingLevelChange}
+            />
           ) : null}
         </div>
       )}
     >
       <Button className="provider-trigger" suffix={<ChevronDownIcon size="14px" />} type="button" variant="text">
-        {provider === "deepseek"
-          ? `${deepSeekProviderButtonLabel(deepSeekModelMode, lastResolvedDeepSeekModel)} · ${deepSeekThinkingLabel(deepSeekThinkingLevel)}`
-          : modelLabel}
+        {triggerLabel}
       </Button>
     </Popup>
+  );
+}
+
+function ProviderSegmentGroup<T extends string>({
+  ariaLabel,
+  label,
+  options,
+  value,
+  onChange
+}: {
+  ariaLabel: string;
+  label: string;
+  options: Array<{ description?: string; label: string; value: T }>;
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div className="provider-menu-section">
+      <div className="provider-menu-label">{label}</div>
+      <div className="provider-segmented" role="group" aria-label={ariaLabel}>
+        {options.map((option) => (
+          <button
+            className={option.value === value ? "provider-segment active" : "provider-segment"}
+            key={option.value}
+            title={option.description}
+            type="button"
+            onClick={() => onChange(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

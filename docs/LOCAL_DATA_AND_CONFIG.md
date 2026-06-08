@@ -10,9 +10,32 @@ User-level data lives in the user's home directory:
 | --- | --- | --- |
 | `~/.ore-code/skills` | Global skill definitions loaded by the Skills page. | No |
 | `~/.ore-code/mcp.json` | Local MCP server configuration. | No |
-| `~/.ore-code/config.toml` | DeepSeek-compatible provider configuration. | No |
+| `~/.ore-code/config.toml` | Provider configuration for DeepSeek, Mimo, and OpenAI-compatible endpoints. | No |
 
 These files may contain local paths, MCP command details, or provider-specific settings. Treat them as user-private configuration.
+
+Example provider configuration:
+
+```toml
+provider = "mimo"
+
+[providers.mimo]
+model = "mimo-v2.5-pro"
+base_url = "https://api.xiaomimimo.com/v1"
+api_key_env = "MIMO_API_KEY"
+thinking_level = "auto" # auto, on, or off
+```
+
+DeepSeek accepts `thinking_level = "auto"`, `"off"`, `"high"`, or `"max"`.
+Mimo accepts `thinking_level = "auto"`, `"on"`, or `"off"`; Ore Code sends only Mimo's `thinking.type` field and does not send DeepSeek `reasoning_effort` to Mimo.
+
+Environment overrides:
+
+- `ORE_CODE_THINKING` applies to the active provider.
+- `ORE_CODE_DEEPSEEK_THINKING` applies to DeepSeek and takes priority over `ORE_CODE_THINKING`.
+- `ORE_CODE_MIMO_THINKING` applies to Mimo and takes priority over `ORE_CODE_THINKING`.
+
+API keys should come from the OS keychain or the configured environment variable, not from inline TOML fields.
 
 ## App Data
 

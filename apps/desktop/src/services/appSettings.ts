@@ -8,7 +8,9 @@ export const DEFAULT_PROVIDER = "deepseek";
 export const DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-pro";
 export const DEFAULT_DEEPSEEK_MODEL_MODE = "auto";
 export const DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com/beta";
-export const DEFAULT_DEEPSEEK_THINKING_LEVEL = "auto";
+export const DEFAULT_PROVIDER_THINKING_LEVEL = "auto";
+export const DEFAULT_MIMO_MODEL = "mimo-v2.5-pro";
+export const DEFAULT_MIMO_BASE_URL = "https://api.xiaomimimo.com/v1";
 export type ThemePreference = "system" | "light" | "dark";
 
 export const AppSettingsSchema = z.object({

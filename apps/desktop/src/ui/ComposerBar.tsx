@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Tag, Textarea, Tooltip } from "tdesign-react";
-import type { DeepSeekModelMode, DeepSeekThinkingLevel } from "@ore-code/agent-core";
+import type { DeepSeekModelMode, ProviderThinkingLevel } from "@ore-code/agent-core";
 import {
   AiTerminalIcon,
   ArrowUpIcon,
@@ -31,13 +31,13 @@ type ComposerBarProps = {
   isRunning: boolean;
   modelLabel: string;
   deepSeekModelMode: DeepSeekModelMode;
-  deepSeekThinkingLevel: DeepSeekThinkingLevel;
+  deepSeekThinkingLevel: ProviderThinkingLevel;
   lastResolvedDeepSeekModel?: string;
   usageSummary: UsageSummary;
   onAddAttachment: () => void;
   onProviderChange: (provider: string) => void;
   onDeepSeekModelModeChange: (mode: DeepSeekModelMode) => void;
-  onDeepSeekThinkingLevelChange: (level: DeepSeekThinkingLevel) => void;
+  onDeepSeekThinkingLevelChange: (level: ProviderThinkingLevel) => void;
   onRemoveAttachment: (id: string) => void;
   onSend: (prompt: string) => void;
   onStop: () => void;

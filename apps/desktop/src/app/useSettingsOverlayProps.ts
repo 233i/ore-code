@@ -1,4 +1,4 @@
-import type { DeepSeekModelMode, DeepSeekThinkingLevel, NoteRecord } from "@ore-code/agent-core";
+import type { DeepSeekModelMode, NoteRecord, ProviderThinkingLevel } from "@ore-code/agent-core";
 import type { ResolvedOreCodeConfig, ProviderConfig } from "../services/oreCodeConfig";
 import { isTauriRuntime } from "../services/fileHost";
 import type { McpToolSnapshot } from "../services/mcpHost";
@@ -35,7 +35,7 @@ type UseSettingsOverlayPropsInput = {
   deepSeekBaseUrl: string;
   deepSeekModel: string;
   deepSeekModelMode: DeepSeekModelMode;
-  deepSeekThinkingLevel: DeepSeekThinkingLevel;
+  deepSeekThinkingLevel: ProviderThinkingLevel;
   doctorChecks: DoctorCheck[];
   environmentInstallDialogOpen: boolean;
   environmentInstallPlan: EnvironmentInstallPlan | null;
@@ -90,7 +90,7 @@ type UseSettingsOverlayPropsInput = {
   setDeepSeekBaseUrl: (value: string) => void;
   setDeepSeekModel: (value: string) => void;
   setDeepSeekModelMode: (value: DeepSeekModelMode) => void;
-  setDeepSeekThinkingLevel: (value: DeepSeekThinkingLevel) => void;
+  setDeepSeekThinkingLevel: (value: ProviderThinkingLevel) => void;
   setEnableCacheWarmup: (value: boolean) => void;
   setIncludeIdeContext: (value: boolean) => void;
   setLocalePreference: (value: UiLocalePreference) => void;

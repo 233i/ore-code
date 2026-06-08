@@ -529,7 +529,8 @@ fn config_source_reports_loaded_and_missing_files() {
 #[test]
 fn user_ore_code_config_write_round_trips_non_secret_content() {
     let root = make_temp_workspace();
-    let content = "provider = \"deepseek\"\n\n[providers.deepseek]\napi_key_env = \"DEEPSEEK_API_KEY\"\n";
+    let content =
+        "provider = \"deepseek\"\n\n[providers.deepseek]\napi_key_env = \"DEEPSEEK_API_KEY\"\n";
 
     let status = write_user_ore_code_config(&root, content).unwrap();
 
@@ -545,10 +546,8 @@ fn user_ore_code_config_write_round_trips_non_secret_content() {
 #[test]
 fn user_ore_code_config_write_rejects_inline_secrets() {
     let root = make_temp_workspace();
-    let result = write_user_ore_code_config(
-        &root,
-        "provider = \"deepseek\"\napi_key = \"sk-test\"\n",
-    );
+    let result =
+        write_user_ore_code_config(&root, "provider = \"deepseek\"\napi_key = \"sk-test\"\n");
 
     assert!(result.is_err());
     assert!(!root.join(".ore-code").join("config.toml").exists());
@@ -578,6 +577,9 @@ fn bootstrap_creates_user_environment_without_project_files() {
     let config = fs::read_to_string(home.join(".ore-code").join("config.toml")).unwrap();
     assert!(config.contains("model = \"deepseek-v4-pro\""));
     assert!(config.contains("api_key_env = \"DEEPSEEK_API_KEY\""));
+    assert!(config.contains("[providers.mimo]"));
+    assert!(config.contains("model = \"mimo-v2.5-pro\""));
+    assert!(config.contains("api_key_env = \"MIMO_API_KEY\""));
 
     let instructions = fs::read_to_string(home.join(".ore-code").join("instructions.md")).unwrap();
     assert!(instructions.contains("# Ore Code User Instructions"));

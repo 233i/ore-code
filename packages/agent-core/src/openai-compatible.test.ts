@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   createDeepSeekClient,
+  createMimoClient,
   DEFAULT_DEEPSEEK_BASE_URL,
   DEFAULT_DEEPSEEK_MODEL,
+  DEFAULT_MIMO_BASE_URL,
+  DEFAULT_MIMO_MODEL,
   OpenAiCompatibleLlmClient,
   type FetchInit,
   type StreamResponse
@@ -58,6 +61,65 @@ describe("OpenAiCompatibleLlmClient", () => {
     }
 
     expect(JSON.parse(requests[0].init.body).model).toBe("deepseek-v4-flash");
+  });
+
+  it("uses Mimo defaults for the Mimo client factory", async () => {
+    const requests: Array<{ url: string; init: FetchInit }> = [];
+    const client = createMimoClient({
+      apiKey: "test-key",
+      fetch: async (url, init) => {
+        requests.push({ url, init });
+        return streamResponse(["data: [DONE]\n\n"]);
+      }
+    });
+
+    for await (const chunk of client.streamTurn({
+      threadId: "thread-1",
+      turnId: "turn-1",
+      messages: [{ role: "user", content: "hi" }]
+    })) {
+      void chunk;
+    }
+
+    expect(requests[0].url).toBe(`${DEFAULT_MIMO_BASE_URL}/chat/completions`);
+    expect(requests[0].init.headers.authorization).toBe("Bearer test-key");
+    expect(JSON.parse(requests[0].init.body)).toMatchObject({
+      model: DEFAULT_MIMO_MODEL
+    });
+    expect(JSON.parse(requests[0].init.body)).not.toHaveProperty("thinking");
+    expect(JSON.parse(requests[0].init.body)).not.toHaveProperty("reasoning_effort");
+  });
+
+  it("serializes Mimo thinking as on and off without DeepSeek reasoning effort", async () => {
+    const requests: Array<{ url: string; init: FetchInit }> = [];
+
+    for (const mimoThinkingLevel of ["off", "on"] as const) {
+      const client = createMimoClient({
+        apiKey: "test-key",
+        mimoThinkingLevel,
+        fetch: async (url, init) => {
+          requests.push({ url, init });
+          return streamResponse(["data: [DONE]\n\n"]);
+        }
+      });
+
+      for await (const chunk of client.streamTurn({
+        threadId: "thread-1",
+        turnId: `turn-${mimoThinkingLevel}`,
+        messages: [{ role: "user", content: "hi" }]
+      })) {
+        void chunk;
+      }
+    }
+
+    expect(JSON.parse(requests[0].init.body)).toMatchObject({
+      thinking: { type: "disabled" }
+    });
+    expect(JSON.parse(requests[0].init.body)).not.toHaveProperty("reasoning_effort");
+    expect(JSON.parse(requests[1].init.body)).toMatchObject({
+      thinking: { type: "enabled" }
+    });
+    expect(JSON.parse(requests[1].init.body)).not.toHaveProperty("reasoning_effort");
   });
 
   it("serializes DeepSeek thinking level controls for chat requests", async () => {

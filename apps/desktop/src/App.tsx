@@ -166,6 +166,7 @@ function App() {
     providerError,
     setProviderError,
     providerTestMessage,
+    providerSwitchMessage,
     secretStatus,
     secretMessage,
     providerOptions,
@@ -1326,7 +1327,7 @@ function App() {
           onToggleInspector={() => setShowInspector((visible) => !visible)}
           projectIndexStatus={projectIndexStatus}
           resolvedTheme={resolvedTheme}
-          sessionMessage={sessionMessage}
+          sessionMessage={providerSwitchMessage ?? sessionMessage}
           showInspector={showInspector}
           showTasks={showTasks}
           workspacePath={workspacePath}

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "./appSettings";
+import {
+  DEFAULT_DEEPSEEK_BASE_URL,
+  DEFAULT_DEEPSEEK_MODEL,
+  DEFAULT_MIMO_BASE_URL,
+  DEFAULT_MIMO_MODEL
+} from "./appSettings";
 import { buildUserOreCodeConfigContent, parseMiniToml, resolveOreCodeConfig, resolveProvider } from "./oreCodeConfig";
 
 describe("ore-code config", () => {
@@ -49,7 +54,7 @@ model = "deepseek-v4-pro"
       deepSeekModelMode: "auto",
       baseUrl: "https://api.deepseek.com/beta",
       apiKeyEnv: "DEEPSEEK_API_KEY",
-      deepSeekThinkingLevel: "max"
+      thinkingLevel: "max"
     });
   });
 
@@ -98,6 +103,22 @@ api_key_env = "LOCAL_GATEWAY_API_KEY"
       model: DEFAULT_DEEPSEEK_MODEL,
       deepSeekModelMode: "auto",
       baseUrl: DEFAULT_DEEPSEEK_BASE_URL
+    });
+    expect(resolveProvider(resolved, "mimo")).toMatchObject({
+      id: "mimo",
+      label: "Mimo",
+      model: DEFAULT_MIMO_MODEL,
+      baseUrl: DEFAULT_MIMO_BASE_URL,
+      apiKeyEnv: "MIMO_API_KEY"
+    });
+  });
+
+  it("resolves built-in Mimo defaults before config finishes loading", () => {
+    expect(resolveProvider(null, "mimo")).toMatchObject({
+      id: "mimo",
+      model: DEFAULT_MIMO_MODEL,
+      baseUrl: DEFAULT_MIMO_BASE_URL,
+      apiKeyEnv: "MIMO_API_KEY"
     });
   });
 
@@ -182,7 +203,7 @@ api_key_env = "LOCAL_GATEWAY_API_KEY"
       model: "deepseek-v4-pro",
       deepSeekModelMode: "flash",
       baseUrl: "https://api.deepseek.com/beta",
-      deepSeekThinkingLevel: "high"
+      thinkingLevel: "high"
     });
 
     expect(parseMiniToml(content)).toMatchObject({
@@ -198,6 +219,30 @@ api_key_env = "LOCAL_GATEWAY_API_KEY"
           model_mode: "flash",
           thinking_level: "high",
           api_key_env: "DEEPSEEK_API_KEY"
+        }
+      }
+    });
+  });
+
+  it("writes Mimo provider settings with Mimo defaults", () => {
+    const content = buildUserOreCodeConfigContent(undefined, {
+      providerId: "mimo",
+      model: "",
+      deepSeekModelMode: "auto",
+      baseUrl: "",
+      thinkingLevel: "on"
+    });
+
+    expect(parseMiniToml(content)).toMatchObject({
+      provider: "mimo",
+      model: DEFAULT_MIMO_MODEL,
+      base_url: DEFAULT_MIMO_BASE_URL,
+      providers: {
+        mimo: {
+          model: DEFAULT_MIMO_MODEL,
+          base_url: DEFAULT_MIMO_BASE_URL,
+          thinking_level: "on",
+          api_key_env: "MIMO_API_KEY"
         }
       }
     });

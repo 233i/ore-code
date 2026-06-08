@@ -16,7 +16,7 @@ Use this guide before opening a GitHub issue. Ore Code is pre-release software, 
 
    - Skills: `~/.ore-code/skills`
    - MCP config: `~/.ore-code/mcp.json`
-   - DeepSeek config: `~/.ore-code/config.toml`
+   - Provider config: `~/.ore-code/config.toml`
    - Project-local runtime data: `.ore-code/`
 
 3. Check [Known Limitations](./KNOWN_LIMITATIONS.md) and [Local Data and Configuration](./LOCAL_DATA_AND_CONFIG.md).
@@ -33,7 +33,7 @@ Use this guide before opening a GitHub issue. Ore Code is pre-release software, 
 
 - Confirm provider settings are present and do not contain placeholder values.
 - Store API keys through the app's secure storage flow where supported.
-- For DeepSeek-compatible providers, verify the base URL, model name, and API key outside the app if possible.
+- For DeepSeek, Mimo, or custom OpenAI-compatible providers, verify the base URL, model name, and API key outside the app if possible.
 - If a model response appears truncated, check the context usage panel and current model capacity.
 
 ## Workspace Problems

@@ -20,13 +20,13 @@ See [Known Limitations](./KNOWN_LIMITATIONS.md).
 
 Ore Code is designed around DeepSeek coding workflows: long context, model-aware capacity budgets, structured tools, prompt/cache stability, and DeepSeek-compatible provider configuration.
 
-Other OpenAI-compatible providers may work where configuration supports them, but the primary optimization target is DeepSeek.
+Mimo is also available as a built-in OpenAI-compatible provider. Other OpenAI-compatible providers may work where configuration supports them, but the primary optimization target remains DeepSeek.
 
 ## Do I Need an API Key?
 
 Yes, real model use requires a compatible provider configuration and API key. The desktop app should store provider keys through the secure storage flow where supported.
 
-Local DeepSeek-style configuration can also live in `~/.ore-code/config.toml`. Do not commit API keys or provider secrets to the repository.
+Local provider configuration can also live in `~/.ore-code/config.toml`. Do not commit API keys or provider secrets to the repository.
 
 ## Where Does Ore Code Store Local Data?
 

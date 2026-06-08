@@ -6,6 +6,12 @@ const DEFAULT_ORE_CODE_CONFIG: &str = r#"provider = "deepseek"
 model = "deepseek-v4-pro"
 base_url = "https://api.deepseek.com/beta"
 api_key_env = "DEEPSEEK_API_KEY"
+
+[providers.mimo]
+model = "mimo-v2.5-pro"
+base_url = "https://api.xiaomimimo.com/v1"
+api_key_env = "MIMO_API_KEY"
+thinking_level = "auto"
 "#;
 
 const DEFAULT_MCP_CONFIG: &str = "{\n  \"servers\": {}\n}\n";

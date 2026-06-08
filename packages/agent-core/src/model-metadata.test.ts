@@ -5,6 +5,7 @@ import {
   inputBudgetForModel,
   isDeepSeekThinkingModel,
   maxOutputTokensForModel,
+  MIMO_V25_MAX_OUTPUT_TOKENS,
   SAFETY_HEADROOM_TOKENS
 } from "./model-metadata";
 
@@ -14,6 +15,13 @@ describe("model metadata", () => {
     expect(contextWindowForModel("deepseek-v4-flash")).toBe(1_000_000);
     expect(maxOutputTokensForModel("deepseek-v4-pro")).toBe(DEEPSEEK_V4_MAX_OUTPUT_TOKENS);
     expect(maxOutputTokensForModel("deepseek-v4-flash")).toBe(DEEPSEEK_V4_MAX_OUTPUT_TOKENS);
+  });
+
+  it("uses 1M context windows and 128K output reserve for Mimo v2.5 models", () => {
+    expect(contextWindowForModel("mimo-v2.5-pro")).toBe(1_000_000);
+    expect(contextWindowForModel("mimo-v2.5")).toBe(1_000_000);
+    expect(maxOutputTokensForModel("mimo-v2.5-pro")).toBe(MIMO_V25_MAX_OUTPUT_TOKENS);
+    expect(maxOutputTokensForModel("mimo-v2.5")).toBe(MIMO_V25_MAX_OUTPUT_TOKENS);
   });
 
   it("uses 128K for legacy DeepSeek and unknown models", () => {
@@ -39,6 +47,7 @@ describe("model metadata", () => {
 
   it("calculates input budget with output reserve and safety headroom", () => {
     expect(inputBudgetForModel("deepseek-v4-pro")).toBe(1_000_000 - 65_536 - SAFETY_HEADROOM_TOKENS);
+    expect(inputBudgetForModel("mimo-v2.5-pro")).toBe(1_000_000 - 128_000 - SAFETY_HEADROOM_TOKENS);
     expect(inputBudgetForModel("deepseek-chat")).toBe(128_000 - 8_192 - SAFETY_HEADROOM_TOKENS);
   });
 });

@@ -145,7 +145,10 @@ pub(crate) fn ore_code_config_status(
             "ORE_CODE_BASE_URL",
             "ORE_CODE_DEEPSEEK_MODEL_MODE",
             "ORE_CODE_DEEPSEEK_THINKING",
+            "ORE_CODE_THINKING",
+            "ORE_CODE_MIMO_THINKING",
             "DEEPSEEK_API_KEY",
+            "MIMO_API_KEY",
         ]),
     })
 }

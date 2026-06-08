@@ -2,7 +2,9 @@ import { estimateUsageCostDetails } from "./capacity";
 import {
   deepSeekThinkingRequestPatch,
   isDeepSeekThinkingExplicitlyEnabled,
-  type DeepSeekThinkingLevel
+  mimoThinkingRequestPatch,
+  type DeepSeekThinkingLevel,
+  type MimoThinkingLevel
 } from "./deepseek-thinking";
 import type {
   LlmClient,
@@ -27,6 +29,7 @@ export interface OpenAiCompatibleConfig {
   provider?: string;
   reasoningContentPolicy?: ReasoningContentPolicy;
   deepSeekThinkingLevel?: DeepSeekThinkingLevel;
+  mimoThinkingLevel?: MimoThinkingLevel;
 }
 
 export type FetchLike = (url: string, init: FetchInit) => Promise<StreamResponse>;
@@ -304,8 +307,13 @@ export class OpenAiCompatibleLlmClient implements LlmClient {
     input: Pick<LlmTurnInput, "messages" | "tools">,
     options: { stream: boolean; maxTokens?: number }
   ) {
-    const thinkingPatch = deepSeekThinkingRequestPatch(this.config.deepSeekThinkingLevel);
-    const includeTemperature = !isDeepSeekThinkingExplicitlyEnabled(this.config.deepSeekThinkingLevel);
+    const thinkingPatch = this.config.provider === "mimo"
+      ? mimoThinkingRequestPatch(this.config.mimoThinkingLevel)
+      : this.config.provider === "deepseek"
+      ? deepSeekThinkingRequestPatch(this.config.deepSeekThinkingLevel)
+      : {};
+    const includeTemperature = this.config.provider !== "deepseek" ||
+      !isDeepSeekThinkingExplicitlyEnabled(this.config.deepSeekThinkingLevel);
     return {
       model: this.config.model,
       messages: input.messages.map((message) => toProviderMessage(
@@ -586,6 +594,8 @@ function formatProviderError(response: StreamResponse, body: string, config: Ope
 
 export const DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com/beta";
 export const DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-pro";
+export const DEFAULT_MIMO_BASE_URL = "https://api.xiaomimimo.com/v1";
+export const DEFAULT_MIMO_MODEL = "mimo-v2.5-pro";
 
 export function createDeepSeekClient(input: {
   apiKey: string;
@@ -602,6 +612,24 @@ export function createDeepSeekClient(input: {
     fetch: input.fetch,
     reasoningContentPolicy: "required-for-tool-calls",
     deepSeekThinkingLevel: input.deepSeekThinkingLevel
+  });
+}
+
+export function createMimoClient(input: {
+  apiKey: string;
+  model?: string;
+  baseUrl?: string;
+  fetch?: FetchLike;
+  mimoThinkingLevel?: MimoThinkingLevel;
+}): OpenAiCompatibleLlmClient {
+  return new OpenAiCompatibleLlmClient({
+    apiKey: input.apiKey,
+    baseUrl: input.baseUrl ?? DEFAULT_MIMO_BASE_URL,
+    model: input.model ?? DEFAULT_MIMO_MODEL,
+    provider: "mimo",
+    fetch: input.fetch,
+    reasoningContentPolicy: "required-for-tool-calls",
+    mimoThinkingLevel: input.mimoThinkingLevel
   });
 }
 

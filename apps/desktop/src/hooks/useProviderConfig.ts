@@ -1,20 +1,23 @@
 import { useMemo, useState } from "react";
 import {
   createDeepSeekClient,
+  createMimoClient,
   DEEPSEEK_V4_PRO_MODEL,
   modelForDeepSeekMode,
   MockLlmClient,
   OpenAiCompatibleLlmClient,
+  parseDeepSeekThinkingLevel,
+  parseMimoThinkingLevel,
   runProviderSmokeTest,
   type DeepSeekModelMode,
-  type DeepSeekThinkingLevel,
   type LlmClient
 } from "@ore-code/agent-core";
+import type { ProviderThinkingLevel } from "@ore-code/agent-core";
 import {
   DEFAULT_DEEPSEEK_BASE_URL,
   DEFAULT_DEEPSEEK_MODEL,
   DEFAULT_DEEPSEEK_MODEL_MODE,
-  DEFAULT_DEEPSEEK_THINKING_LEVEL,
+  DEFAULT_PROVIDER_THINKING_LEVEL,
   DEFAULT_PROVIDER
 } from "../services/appSettings";
 import {
@@ -36,9 +39,11 @@ import {
 } from "../services/providerSecrets";
 
 const PROVIDER_TEST_TIMEOUT_MS = 30_000;
+const PROVIDER_SWITCH_MESSAGE = "Provider 已切换，下一轮将重建模型上下文。复杂任务执行中不建议切换。";
 const DEVELOPER_HARNESS_ENABLED = import.meta.env.DEV || import.meta.env.MODE === "test";
 const baseProviderOptions = [
   { label: "DeepSeek", value: "deepseek" },
+  { label: "Mimo", value: "mimo" },
   ...(DEVELOPER_HARNESS_ENABLED ? [{ label: "Mock Harness", value: "mock" }] : [])
 ];
 
@@ -48,22 +53,23 @@ export type CreateLlmClientOptions = {
 };
 
 export function useProviderConfig() {
-  const [provider, setProvider] = useState<Provider>(DEFAULT_PROVIDER);
+  const [provider, setProviderState] = useState<Provider>(DEFAULT_PROVIDER);
   const [deepSeekApiKey, setDeepSeekApiKey] = useState("");
   const [deepSeekModel, setDeepSeekModel] = useState(DEFAULT_DEEPSEEK_MODEL);
   const [deepSeekModelMode, setDeepSeekModelMode] = useState<DeepSeekModelMode>(DEFAULT_DEEPSEEK_MODEL_MODE);
   const [deepSeekBaseUrl, setDeepSeekBaseUrl] = useState(DEFAULT_DEEPSEEK_BASE_URL);
-  const [deepSeekThinkingLevel, setDeepSeekThinkingLevel] = useState<DeepSeekThinkingLevel>(DEFAULT_DEEPSEEK_THINKING_LEVEL);
+  const [deepSeekThinkingLevel, setDeepSeekThinkingLevel] = useState<ProviderThinkingLevel>(DEFAULT_PROVIDER_THINKING_LEVEL);
   const [oreCodeConfig, setOreCodeConfig] = useState<ResolvedOreCodeConfig | null>(null);
   const [configMessage, setConfigMessage] = useState<string | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
   const [providerTestMessage, setProviderTestMessage] = useState<string | null>(null);
+  const [providerSwitchMessage, setProviderSwitchMessage] = useState<string | null>(null);
   const [secretStatus, setSecretStatus] = useState<ProviderSecretStatus | null>(null);
   const [secretMessage, setSecretMessage] = useState<string | null>(null);
 
   const providerOptions = useMemo(() => {
     const configured = oreCodeConfig?.providers
-      .filter((item) => item.id !== "deepseek" && (DEVELOPER_HARNESS_ENABLED || item.id !== "mock"))
+      .filter((item) => !["deepseek", "mimo"].includes(item.id) && (DEVELOPER_HARNESS_ENABLED || item.id !== "mock"))
       .map((item) => ({ label: item.label, value: item.id })) ?? [];
     return uniqueProviderOptions([...baseProviderOptions, ...configured]);
   }, [oreCodeConfig]);
@@ -107,7 +113,7 @@ export function useProviderConfig() {
         model: deepSeekModel,
         deepSeekModelMode,
         baseUrl: deepSeekBaseUrl,
-        deepSeekThinkingLevel
+        thinkingLevel: deepSeekThinkingLevel
       });
       setOreCodeConfig(config);
       syncProviderStateFromConfig(config);
@@ -125,17 +131,20 @@ export function useProviderConfig() {
       ? DEFAULT_PROVIDER
       : config.providerId;
     const providerConfig = resolveProvider(config, nextProvider);
-    setProvider(nextProvider);
+    setProviderState(nextProvider);
+    setProviderSwitchMessage(null);
+    setDeepSeekApiKey("");
     if (!providerConfig || providerConfig.id === "mock") {
       return;
     }
     setDeepSeekModel(providerConfig.model || DEFAULT_DEEPSEEK_MODEL);
     setDeepSeekBaseUrl(providerConfig.baseUrl || DEFAULT_DEEPSEEK_BASE_URL);
     setDeepSeekModelMode(providerConfig.deepSeekModelMode ?? DEFAULT_DEEPSEEK_MODEL_MODE);
-    setDeepSeekThinkingLevel(providerConfig.deepSeekThinkingLevel ?? DEFAULT_DEEPSEEK_THINKING_LEVEL);
+    setDeepSeekThinkingLevel(providerConfig.thinkingLevel ?? DEFAULT_PROVIDER_THINKING_LEVEL);
   }
 
   async function createLlmClient(userPrompt: string, options: CreateLlmClientOptions = {}): Promise<LlmClient | null> {
+    setProviderSwitchMessage(null);
     if (DEVELOPER_HARNESS_ENABLED && provider === "mock") {
       const { planMockTurn } = await import("../testing/mockTurnPlanner");
       return new MockLlmClient(planMockTurn(userPrompt));
@@ -163,11 +172,16 @@ export function useProviderConfig() {
           ? providerConfig.model
           : modelForDeepSeekMode(effectiveDeepSeekModelMode)),
         baseUrl: providerConfig.baseUrl,
-        deepSeekThinkingLevel: isConfigFieldExternallyOverridden(oreCodeConfig?.providerConfigSources, "thinkingLevel")
-          ? providerConfig.deepSeekThinkingLevel ?? DEFAULT_DEEPSEEK_THINKING_LEVEL
-          : deepSeekThinkingLevel === DEFAULT_DEEPSEEK_THINKING_LEVEL
-          ? providerConfig.deepSeekThinkingLevel ?? deepSeekThinkingLevel
-          : deepSeekThinkingLevel
+        deepSeekThinkingLevel: parseDeepSeekThinkingLevel(effectiveThinkingLevel(providerConfig)) ?? DEFAULT_PROVIDER_THINKING_LEVEL
+      });
+    }
+
+    if (providerConfig.id === "mimo") {
+      return createMimoClient({
+        apiKey,
+        model: options.modelOverride ?? providerConfig.model,
+        baseUrl: providerConfig.baseUrl,
+        mimoThinkingLevel: parseMimoThinkingLevel(effectiveThinkingLevel(providerConfig)) ?? DEFAULT_PROVIDER_THINKING_LEVEL
       });
     }
 
@@ -179,8 +193,17 @@ export function useProviderConfig() {
     });
   }
 
+  function effectiveThinkingLevel(providerConfig: ProviderConfig): ProviderThinkingLevel {
+    if (isConfigFieldExternallyOverridden(oreCodeConfig?.providerConfigSources, "thinkingLevel")) {
+      return providerConfig.thinkingLevel ?? DEFAULT_PROVIDER_THINKING_LEVEL;
+    }
+    return deepSeekThinkingLevel === DEFAULT_PROVIDER_THINKING_LEVEL
+      ? providerConfig.thinkingLevel ?? deepSeekThinkingLevel
+      : deepSeekThinkingLevel;
+  }
+
   async function resolveProviderApiKey(providerConfig: ProviderConfig): Promise<string | null> {
-    const typedKey = providerConfig.id === "deepseek" ? deepSeekApiKey.trim() : "";
+    const typedKey = deepSeekApiKey.trim();
     if (typedKey) {
       return typedKey;
     }
@@ -224,7 +247,8 @@ export function useProviderConfig() {
 
   async function testProviderConnection() {
     setProviderError(null);
-    setProviderTestMessage("正在测试 DeepSeek 连接...");
+    setProviderSwitchMessage(null);
+    setProviderTestMessage(`正在测试 ${effectiveProviderConfig?.label ?? providerLabel(provider)} 连接...`);
 
     const client = await createLlmClient("provider smoke test");
     if (!client) {
@@ -236,7 +260,7 @@ export function useProviderConfig() {
       const result = await withTimeout(
         runProviderSmokeTest(client),
         PROVIDER_TEST_TIMEOUT_MS,
-        "DeepSeek 连接测试超时。"
+        `${effectiveProviderConfig?.label ?? providerLabel(provider)} 连接测试超时。`
       );
       setProviderTestMessage(
         `连接正常：${result.text || result.finishReason || "ok"} (${result.durationMs}ms)`
@@ -246,6 +270,26 @@ export function useProviderConfig() {
       setProviderTestMessage(`连接失败：${message}`);
       setProviderError(message);
     }
+  }
+
+  function setProvider(nextProvider: Provider) {
+    const hasChanged = nextProvider !== provider;
+    setProviderState(nextProvider);
+    setDeepSeekApiKey("");
+    setSecretStatus(null);
+    setSecretMessage(null);
+    setProviderError(null);
+    setProviderSwitchMessage(hasChanged ? PROVIDER_SWITCH_MESSAGE : null);
+    setProviderTestMessage(hasChanged ? PROVIDER_SWITCH_MESSAGE : null);
+
+    const providerConfig = resolveProvider(oreCodeConfig, nextProvider);
+    if (!providerConfig || providerConfig.id === "mock") {
+      return;
+    }
+    setDeepSeekModel(providerConfig.model || DEFAULT_DEEPSEEK_MODEL);
+    setDeepSeekBaseUrl(providerConfig.baseUrl || DEFAULT_DEEPSEEK_BASE_URL);
+    setDeepSeekModelMode(providerConfig.deepSeekModelMode ?? DEFAULT_DEEPSEEK_MODEL_MODE);
+    setDeepSeekThinkingLevel(providerConfig.thinkingLevel ?? DEFAULT_PROVIDER_THINKING_LEVEL);
   }
 
   async function refreshProviderSecretStatus(providerId = provider) {
@@ -285,9 +329,7 @@ export function useProviderConfig() {
   async function loadDeepSeekApiKey() {
     try {
       const secret = await getProviderSecret(provider);
-      if (provider === "deepseek") {
-        setDeepSeekApiKey(secret.value);
-      }
+      setDeepSeekApiKey(secret.value);
       setSecretStatus({
         provider: secret.provider,
         source: "keychain",
@@ -331,6 +373,7 @@ export function useProviderConfig() {
     setProviderError,
     providerTestMessage,
     setProviderTestMessage,
+    providerSwitchMessage,
     secretStatus,
     setSecretStatus,
     secretMessage,
@@ -358,6 +401,8 @@ export function providerLabel(provider: Provider) {
       return "Mock Harness";
     case "deepseek":
       return "DeepSeek";
+    case "mimo":
+      return "Mimo";
     default:
       return provider;
   }
@@ -372,7 +417,7 @@ export function fallbackDeepSeekProvider(model: string, baseUrl: string): Provid
     deepSeekModelMode: DEFAULT_DEEPSEEK_MODEL_MODE,
     baseUrl: baseUrl.trim() || DEFAULT_DEEPSEEK_BASE_URL,
     apiKeyEnv: "DEEPSEEK_API_KEY",
-    deepSeekThinkingLevel: DEFAULT_DEEPSEEK_THINKING_LEVEL
+    thinkingLevel: DEFAULT_PROVIDER_THINKING_LEVEL
   };
 }
 
@@ -405,7 +450,7 @@ export function effectiveConfiguredProvider(
         ? uiBaseUrl
         : config?.baseUrl || DEFAULT_DEEPSEEK_BASE_URL,
     apiKeyEnv: config?.apiKeyEnv || "DEEPSEEK_API_KEY",
-    deepSeekThinkingLevel: config?.deepSeekThinkingLevel ?? DEFAULT_DEEPSEEK_THINKING_LEVEL
+    thinkingLevel: config?.thinkingLevel ?? DEFAULT_PROVIDER_THINKING_LEVEL
   };
 }
 

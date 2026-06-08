@@ -100,12 +100,12 @@ const TOKEN_CHARS_DIVISOR = 3.3;
 const CONSERVATIVE_TOKEN_MULTIPLIER = 1.35;
 const MESSAGE_FRAMING_TOKENS = 4;
 const TOOL_SCHEMA_FRAMING_TOKENS = 8;
-const DEEPSEEK_SEAMS: Array<{ level: ContextSeamLevel; threshold: number; message: string }> = [
+const LARGE_CONTEXT_SEAMS: Array<{ level: ContextSeamLevel; threshold: number; message: string }> = [
   { level: "hard", threshold: 930_000, message: "需要压缩或减少上下文后再发送。" },
   { level: "cycle", threshold: 768_000, message: "建议生成本轮 briefing，并准备压缩旧历史。" },
   { level: "l3", threshold: 576_000, message: "建议压缩旧历史，避免后续工具输出推高上下文。" },
   { level: "l2", threshold: 384_000, message: "自动压缩大型工具输出，只保留摘要和 artifact 引用。" },
-  { level: "l1", threshold: 192_000, message: "接近 DeepSeek 大上下文 L1 阈值。" },
+  { level: "l1", threshold: 192_000, message: "接近 1M 大上下文 L1 阈值。" },
   { level: "ok", threshold: 0, message: "上下文压力正常。" }
 ];
 const DEFAULT_CNY_PER_USD = 7.2;
@@ -327,7 +327,7 @@ function contextSeamForTokens(tokens: number, maxInputTokens: number, contextWin
     };
   }
 
-  const seam = DEEPSEEK_SEAMS.find((candidate) => tokens >= candidate.threshold) ?? DEEPSEEK_SEAMS[DEEPSEEK_SEAMS.length - 1];
+  const seam = LARGE_CONTEXT_SEAMS.find((candidate) => tokens >= candidate.threshold) ?? LARGE_CONTEXT_SEAMS[LARGE_CONTEXT_SEAMS.length - 1];
   return {
     level: seam.level,
     threshold: seam.threshold,

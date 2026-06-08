@@ -1,13 +1,18 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
   parseDeepSeekModelMode,
-  parseDeepSeekThinkingLevel,
+  parseProviderThinkingLevel,
   type DeepSeekModelMode,
-  type DeepSeekThinkingLevel
+  type ProviderThinkingLevel
 } from "@ore-code/agent-core";
 import { parse as parseToml, stringify as stringifyToml, type TomlTable } from "smol-toml";
 import { z } from "zod";
-import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "./appSettings";
+import {
+  DEFAULT_DEEPSEEK_BASE_URL,
+  DEFAULT_DEEPSEEK_MODEL,
+  DEFAULT_MIMO_BASE_URL,
+  DEFAULT_MIMO_MODEL
+} from "./appSettings";
 import { isTauriRuntime } from "./fileHost";
 
 export type ConfigScope = "global" | "project";
@@ -52,7 +57,7 @@ export interface ProviderConfig {
   deepSeekModelMode?: DeepSeekModelMode;
   baseUrl: string;
   apiKeyEnv: string;
-  deepSeekThinkingLevel?: DeepSeekThinkingLevel;
+  thinkingLevel?: ProviderThinkingLevel;
 }
 
 export interface ResolvedOreCodeConfig {
@@ -73,7 +78,7 @@ export interface UserOreCodeProviderConfig {
   model: string;
   deepSeekModelMode: DeepSeekModelMode;
   baseUrl: string;
-  deepSeekThinkingLevel: DeepSeekThinkingLevel;
+  thinkingLevel: ProviderThinkingLevel;
 }
 
 const USER_CONFIG_STORAGE_KEY = "ore-code.user-config.toml";
@@ -83,8 +88,11 @@ const CONFIG_ENV_NAMES = [
   "ORE_CODE_MODEL",
   "ORE_CODE_DEEPSEEK_MODEL_MODE",
   "ORE_CODE_BASE_URL",
+  "ORE_CODE_THINKING",
   "ORE_CODE_DEEPSEEK_THINKING",
-  "DEEPSEEK_API_KEY"
+  "ORE_CODE_MIMO_THINKING",
+  "DEEPSEEK_API_KEY",
+  "MIMO_API_KEY"
 ];
 
 const ConfigSourceSchema = z.object({
@@ -199,7 +207,16 @@ export function resolveOreCodeConfig(status: ConfigStatus): ResolvedOreCodeConfi
     deepSeekModelMode: "auto",
     baseUrl: DEFAULT_DEEPSEEK_BASE_URL,
     apiKeyEnv: "DEEPSEEK_API_KEY",
-    deepSeekThinkingLevel: "auto"
+    thinkingLevel: "auto"
+  });
+  providers.set("mimo", {
+    id: "mimo",
+    label: "Mimo",
+    kind: "openai-compatible",
+    model: DEFAULT_MIMO_MODEL,
+    baseUrl: DEFAULT_MIMO_BASE_URL,
+    apiKeyEnv: "MIMO_API_KEY",
+    thinkingLevel: "auto"
   });
 
   for (const [id, value] of Object.entries(providerTables)) {
@@ -218,14 +235,14 @@ export function resolveOreCodeConfig(status: ConfigStatus): ResolvedOreCodeConfi
   if (selected) {
     const profileProviderTable = tableValue(tableValue(profileConfig.provider)[providerId]);
     const thinkingLevel =
-      env.ORE_CODE_DEEPSEEK_THINKING ||
+      providerThinkingEnvValue(env, providerId) ||
       stringValue(profileProviderTable.thinking_level) ||
       stringValue(profileProviderTable.thinkingLevel) ||
       stringValue(profileProviderTable.reasoning_effort) ||
       stringValue(profileConfig.thinking_level) ||
       stringValue(profileConfig.thinkingLevel) ||
       stringValue(profileConfig.reasoning_effort) ||
-      selected.deepSeekThinkingLevel;
+      selected.thinkingLevel;
     const modelMode =
       env.ORE_CODE_DEEPSEEK_MODEL_MODE ||
       stringValue(profileProviderTable.model_mode) ||
@@ -274,6 +291,17 @@ export function resolveProvider(config: ResolvedOreCodeConfig | null, providerId
       apiKeyEnv: ""
     };
   }
+  if (providerId === "mimo") {
+    return config?.providers.find((provider) => provider.id === providerId) ?? {
+      id: "mimo",
+      label: "Mimo",
+      kind: "openai-compatible",
+      model: DEFAULT_MIMO_MODEL,
+      baseUrl: DEFAULT_MIMO_BASE_URL,
+      apiKeyEnv: "MIMO_API_KEY",
+      thinkingLevel: "auto"
+    };
+  }
   return config?.providers.find((provider) => provider.id === providerId) ?? null;
 }
 
@@ -288,20 +316,25 @@ export function buildUserOreCodeConfigContent(
   target.provider = providerId;
 
   if (providerId !== "mock") {
-    target.model = normalizeConfigString(input.model, DEFAULT_DEEPSEEK_MODEL);
-    target.base_url = normalizeConfigString(input.baseUrl, DEFAULT_DEEPSEEK_BASE_URL);
+    const defaults = defaultProviderConfig(providerId);
+    target.model = normalizeConfigString(input.model, defaults.model);
+    target.base_url = normalizeConfigString(input.baseUrl, defaults.baseUrl);
     const providers = ensureChildTable(root, "providers");
     const providerTable = ensureChildTable(providers, providerId);
-    providerTable.model = normalizeConfigString(input.model, DEFAULT_DEEPSEEK_MODEL);
-    providerTable.base_url = normalizeConfigString(input.baseUrl, DEFAULT_DEEPSEEK_BASE_URL);
-    providerTable.api_key_env = stringValue(providerTable.api_key_env) || defaultApiKeyEnv(providerId);
+    providerTable.model = normalizeConfigString(input.model, defaults.model);
+    providerTable.base_url = normalizeConfigString(input.baseUrl, defaults.baseUrl);
+    providerTable.api_key_env = stringValue(providerTable.api_key_env) || defaults.apiKeyEnv;
 
     if (providerId === "deepseek") {
       target.model_mode = input.deepSeekModelMode;
-      target.thinking_level = input.deepSeekThinkingLevel;
+      target.thinking_level = input.thinkingLevel;
       providerTable.model_mode = input.deepSeekModelMode;
-      providerTable.thinking_level = input.deepSeekThinkingLevel;
+      providerTable.thinking_level = input.thinkingLevel;
       providerTable.api_key_env = "DEEPSEEK_API_KEY";
+    } else if (providerId === "mimo") {
+      target.thinking_level = input.thinkingLevel;
+      providerTable.thinking_level = input.thinkingLevel;
+      providerTable.api_key_env = "MIMO_API_KEY";
     }
   }
 
@@ -367,7 +400,7 @@ function resolveProviderConfigSources(
     ),
     thinkingLevel: sourceForField(
       env,
-      "ORE_CODE_DEEPSEEK_THINKING",
+      providerThinkingEnvName(providerId),
       sources,
       (table) => firstStringValue(
         providerProfileTable(table, activeProfile, providerId).thinking_level,
@@ -404,14 +437,15 @@ function normalizeProviderConfig(id: string, table: TomlTable, base?: ProviderCo
       ) ?? base?.deepSeekModelMode,
     baseUrl: stringValue(table.base_url) || stringValue(table.baseUrl) || base?.baseUrl || DEFAULT_DEEPSEEK_BASE_URL,
     apiKeyEnv: stringValue(table.api_key_env) || stringValue(table.apiKeyEnv) || base?.apiKeyEnv || `${id.toUpperCase().replace(/\W+/g, "_")}_API_KEY`,
-    deepSeekThinkingLevel:
-      parseDeepSeekThinkingLevel(
+    thinkingLevel:
+      parseProviderThinkingLevel(
+        id,
         stringValue(table.thinking_level) ||
         stringValue(table.thinkingLevel) ||
         stringValue(table.reasoning_effort) ||
         stringValue(table.reasoningEffort) ||
         stringValue(table.thinking)
-      ) ?? base?.deepSeekThinkingLevel
+      ) ?? base?.thinkingLevel
   };
 }
 
@@ -427,13 +461,15 @@ export const parseMiniToml = parseOreCodeToml;
 
 function sourceForField(
   env: ConfigEnvStatus[],
-  envName: string,
+  envNames: string | string[],
   sources: ParsedConfigSource[],
   readValue: (table: TomlTable) => string | undefined
 ): ConfigFieldSource {
-  const envItem = env.find((item) => item.name === envName);
-  if (stringValue(envItem?.value)) {
-    return { source: "env", envName };
+  for (const envName of Array.isArray(envNames) ? envNames : [envNames]) {
+    const envItem = env.find((item) => item.name === envName);
+    if (stringValue(envItem?.value)) {
+      return { source: "env", envName };
+    }
   }
 
   for (let index = sources.length - 1; index >= 0; index -= 1) {
@@ -447,6 +483,28 @@ function sourceForField(
   }
 
   return { source: "default" };
+}
+
+function providerThinkingEnvName(providerId: string) {
+  switch (providerId) {
+    case "deepseek":
+      return ["ORE_CODE_DEEPSEEK_THINKING", "ORE_CODE_THINKING"];
+    case "mimo":
+      return ["ORE_CODE_MIMO_THINKING", "ORE_CODE_THINKING"];
+    default:
+      return "ORE_CODE_THINKING";
+  }
+}
+
+function providerThinkingEnvValue(env: Record<string, string | undefined>, providerId: string) {
+  const envNames = providerThinkingEnvName(providerId);
+  for (const envName of Array.isArray(envNames) ? envNames : [envNames]) {
+    const value = env[envName];
+    if (value) {
+      return value;
+    }
+  }
+  return undefined;
 }
 
 function profileConfigTable(table: TomlTable, activeProfile: string): TomlTable {
@@ -515,10 +573,27 @@ function normalizeConfigString(value: string, fallback: string) {
   return value.trim() || fallback;
 }
 
-function defaultApiKeyEnv(providerId: string) {
-  return providerId === "deepseek"
-    ? "DEEPSEEK_API_KEY"
-    : `${providerId.toUpperCase().replace(/\W+/g, "_")}_API_KEY`;
+function defaultProviderConfig(providerId: string) {
+  switch (providerId) {
+    case "deepseek":
+      return {
+        model: DEFAULT_DEEPSEEK_MODEL,
+        baseUrl: DEFAULT_DEEPSEEK_BASE_URL,
+        apiKeyEnv: "DEEPSEEK_API_KEY"
+      };
+    case "mimo":
+      return {
+        model: DEFAULT_MIMO_MODEL,
+        baseUrl: DEFAULT_MIMO_BASE_URL,
+        apiKeyEnv: "MIMO_API_KEY"
+      };
+    default:
+      return {
+        model: DEFAULT_DEEPSEEK_MODEL,
+        baseUrl: DEFAULT_DEEPSEEK_BASE_URL,
+        apiKeyEnv: `${providerId.toUpperCase().replace(/\W+/g, "_")}_API_KEY`
+      };
+  }
 }
 
 function readPreviewUserConfig() {

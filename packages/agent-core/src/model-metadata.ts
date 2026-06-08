@@ -3,6 +3,8 @@ export const DEFAULT_MAX_OUTPUT_TOKENS = 8_192;
 export const DEEPSEEK_V4_CONTEXT_WINDOW = 1_000_000;
 export const DEEPSEEK_V4_MAX_OUTPUT_TOKENS = 65_536;
 export const DEEPSEEK_LEGACY_CONTEXT_WINDOW = 128_000;
+export const MIMO_V25_CONTEXT_WINDOW = 1_000_000;
+export const MIMO_V25_MAX_OUTPUT_TOKENS = 128_000;
 export const SAFETY_HEADROOM_TOKENS = 4_096;
 
 const SUFFIX_CONTEXT_WINDOWS: Array<{ pattern: RegExp; contextWindow: number }> = [
@@ -23,6 +25,10 @@ export function contextWindowForModel(model: string | undefined): number {
     return DEEPSEEK_V4_CONTEXT_WINDOW;
   }
 
+  if (isMimoV25Model(normalized)) {
+    return MIMO_V25_CONTEXT_WINDOW;
+  }
+
   if (/deepseek-(chat|reasoner)/i.test(normalized)) {
     return DEEPSEEK_LEGACY_CONTEXT_WINDOW;
   }
@@ -31,9 +37,14 @@ export function contextWindowForModel(model: string | undefined): number {
 }
 
 export function maxOutputTokensForModel(model: string | undefined): number {
-  return /deepseek-v4-(pro|flash)/i.test(normalizeModel(model))
-    ? DEEPSEEK_V4_MAX_OUTPUT_TOKENS
-    : DEFAULT_MAX_OUTPUT_TOKENS;
+  const normalized = normalizeModel(model);
+  if (/deepseek-v4-(pro|flash)/i.test(normalized)) {
+    return DEEPSEEK_V4_MAX_OUTPUT_TOKENS;
+  }
+  if (isMimoV25Model(normalized)) {
+    return MIMO_V25_MAX_OUTPUT_TOKENS;
+  }
+  return DEFAULT_MAX_OUTPUT_TOKENS;
 }
 
 export function inputBudgetForModel(model: string | undefined): number {
@@ -46,4 +57,8 @@ export function isDeepSeekThinkingModel(model: string | undefined): boolean {
 
 function normalizeModel(model: string | undefined) {
   return (model ?? "").trim();
+}
+
+function isMimoV25Model(model: string) {
+  return /^mimo-v2\.5(?:-pro)?$/i.test(model);
 }

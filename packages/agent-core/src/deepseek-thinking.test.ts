@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   deepSeekThinkingRequestPatch,
+  mimoThinkingRequestPatch,
   normalizeDeepSeekThinkingLevel,
+  normalizeMimoThinkingLevel,
   parseDeepSeekThinkingLevel
 } from "./deepseek-thinking";
 
@@ -25,5 +27,14 @@ describe("DeepSeek thinking levels", () => {
       thinking: { type: "enabled" },
       reasoning_effort: "max"
     });
+  });
+
+  it("maps Mimo thinking controls without DeepSeek reasoning effort", () => {
+    expect(normalizeMimoThinkingLevel(undefined)).toBe("auto");
+    expect(normalizeMimoThinkingLevel("enabled")).toBe("on");
+    expect(mimoThinkingRequestPatch("auto")).toEqual({});
+    expect(mimoThinkingRequestPatch("off")).toEqual({ thinking: { type: "disabled" } });
+    expect(mimoThinkingRequestPatch("on")).toEqual({ thinking: { type: "enabled" } });
+    expect(mimoThinkingRequestPatch("max")).toEqual({ thinking: { type: "enabled" } });
   });
 });
