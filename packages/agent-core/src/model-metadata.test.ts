@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  ARK_CODE_LATEST_CONTEXT_WINDOW,
+  ARK_CODE_LATEST_MAX_OUTPUT_TOKENS,
   contextWindowForModel,
   DEEPSEEK_V4_MAX_OUTPUT_TOKENS,
   inputBudgetForModel,
@@ -22,6 +24,11 @@ describe("model metadata", () => {
     expect(contextWindowForModel("mimo-v2.5")).toBe(1_000_000);
     expect(maxOutputTokensForModel("mimo-v2.5-pro")).toBe(MIMO_V25_MAX_OUTPUT_TOKENS);
     expect(maxOutputTokensForModel("mimo-v2.5")).toBe(MIMO_V25_MAX_OUTPUT_TOKENS);
+  });
+
+  it("uses Ark Coding Plan limits for ark-code-latest", () => {
+    expect(contextWindowForModel("ark-code-latest")).toBe(ARK_CODE_LATEST_CONTEXT_WINDOW);
+    expect(maxOutputTokensForModel("ark-code-latest")).toBe(ARK_CODE_LATEST_MAX_OUTPUT_TOKENS);
   });
 
   it("uses 128K for legacy DeepSeek and unknown models", () => {
@@ -48,6 +55,7 @@ describe("model metadata", () => {
   it("calculates input budget with output reserve and safety headroom", () => {
     expect(inputBudgetForModel("deepseek-v4-pro")).toBe(1_000_000 - 65_536 - SAFETY_HEADROOM_TOKENS);
     expect(inputBudgetForModel("mimo-v2.5-pro")).toBe(1_000_000 - 128_000 - SAFETY_HEADROOM_TOKENS);
+    expect(inputBudgetForModel("ark-code-latest")).toBe(ARK_CODE_LATEST_CONTEXT_WINDOW - ARK_CODE_LATEST_MAX_OUTPUT_TOKENS - SAFETY_HEADROOM_TOKENS);
     expect(inputBudgetForModel("deepseek-chat")).toBe(128_000 - 8_192 - SAFETY_HEADROOM_TOKENS);
   });
 });

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  Long-context coding, structured tool execution, local project context, DeepSeek / Mimo providers, MCP integrations, skills, automation, and a native desktop shell for macOS and Windows.
+  Long-context coding, structured tool execution, local project context, DeepSeek / Mimo / Ark Coding providers, MCP integrations, skills, automation, and a native desktop shell for macOS and Windows.
 </p>
 
 <p align="center">
@@ -41,10 +41,10 @@ Ore Code is built for coding workflows where the agent needs to inspect real pro
 
 ## Highlights
 
-- DeepSeek-first agent runtime with Mimo and custom OpenAI-compatible provider support.
+- DeepSeek-first agent runtime with Mimo, Ark Coding, and custom OpenAI-compatible provider support.
 - Desktop UI for chat, tool approvals, skills, automations, project indexing, usage/context visibility, and code changes.
 - Structured tools for file operations, shell/process execution, tests, Git diff review, code execution, web fetch, LSP diagnostics, and MCP servers.
-- Provider configuration for DeepSeek, Mimo, and custom endpoints in `~/.ore-code/config.toml`, with API keys kept in the OS keychain.
+- Provider configuration for DeepSeek, Mimo, Ark Coding, and custom endpoints in `~/.ore-code/config.toml`, with API keys kept in the OS keychain.
 - Harness and replay packages for testing agent behavior without relying on live models.
 - Cross-platform desktop work for macOS and Windows.
 

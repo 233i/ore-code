@@ -12,6 +12,11 @@ model = "mimo-v2.5-pro"
 base_url = "https://api.xiaomimimo.com/v1"
 api_key_env = "MIMO_API_KEY"
 thinking_level = "auto"
+
+[providers.ark-coding]
+model = "ark-code-latest"
+base_url = "https://ark.cn-beijing.volces.com/api/coding/v3"
+api_key_env = "ARK_CODING_API_KEY"
 "#;
 
 const DEFAULT_MCP_CONFIG: &str = "{\n  \"servers\": {}\n}\n";

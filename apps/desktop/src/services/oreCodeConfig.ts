@@ -8,6 +8,8 @@ import {
 import { parse as parseToml, stringify as stringifyToml, type TomlTable } from "smol-toml";
 import { z } from "zod";
 import {
+  DEFAULT_ARK_CODING_BASE_URL,
+  DEFAULT_ARK_CODING_MODEL,
   DEFAULT_DEEPSEEK_BASE_URL,
   DEFAULT_DEEPSEEK_MODEL,
   DEFAULT_MIMO_BASE_URL,
@@ -91,6 +93,7 @@ const CONFIG_ENV_NAMES = [
   "ORE_CODE_THINKING",
   "ORE_CODE_DEEPSEEK_THINKING",
   "ORE_CODE_MIMO_THINKING",
+  "ARK_CODING_API_KEY",
   "DEEPSEEK_API_KEY",
   "MIMO_API_KEY"
 ];
@@ -218,6 +221,15 @@ export function resolveOreCodeConfig(status: ConfigStatus): ResolvedOreCodeConfi
     apiKeyEnv: "MIMO_API_KEY",
     thinkingLevel: "auto"
   });
+  providers.set("ark-coding", {
+    id: "ark-coding",
+    label: "Ark Coding",
+    kind: "openai-compatible",
+    model: DEFAULT_ARK_CODING_MODEL,
+    baseUrl: DEFAULT_ARK_CODING_BASE_URL,
+    apiKeyEnv: "ARK_CODING_API_KEY",
+    thinkingLevel: "auto"
+  });
 
   for (const [id, value] of Object.entries(providerTables)) {
     const table = tableValue(value);
@@ -299,6 +311,17 @@ export function resolveProvider(config: ResolvedOreCodeConfig | null, providerId
       model: DEFAULT_MIMO_MODEL,
       baseUrl: DEFAULT_MIMO_BASE_URL,
       apiKeyEnv: "MIMO_API_KEY",
+      thinkingLevel: "auto"
+    };
+  }
+  if (providerId === "ark-coding") {
+    return config?.providers.find((provider) => provider.id === providerId) ?? {
+      id: "ark-coding",
+      label: "Ark Coding",
+      kind: "openai-compatible",
+      model: DEFAULT_ARK_CODING_MODEL,
+      baseUrl: DEFAULT_ARK_CODING_BASE_URL,
+      apiKeyEnv: "ARK_CODING_API_KEY",
       thinkingLevel: "auto"
     };
   }
@@ -586,6 +609,12 @@ function defaultProviderConfig(providerId: string) {
         model: DEFAULT_MIMO_MODEL,
         baseUrl: DEFAULT_MIMO_BASE_URL,
         apiKeyEnv: "MIMO_API_KEY"
+      };
+    case "ark-coding":
+      return {
+        model: DEFAULT_ARK_CODING_MODEL,
+        baseUrl: DEFAULT_ARK_CODING_BASE_URL,
+        apiKeyEnv: "ARK_CODING_API_KEY"
       };
     default:
       return {

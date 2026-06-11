@@ -72,30 +72,38 @@ export function Transcript({
   const isEmpty = items.length === 0;
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
   const shouldFollowOutputRef = useRef(true);
+  const initializedScrollKeyRef = useRef<string | undefined>(undefined);
   const lastScrollKeyRef = useRef<string | undefined>(scrollKey);
   const lastItemKeyRef = useRef("");
+  const pendingScrollFrameRef = useRef<number | null>(null);
+  const pendingScrollTimerRef = useRef<number | null>(null);
+  const wasRunningRef = useRef(isRunning);
   const [showJumpToBottom, setShowJumpToBottom] = useState(false);
 
   useLayoutEffect(() => {
     if (scrollKey === undefined || items.length === 0) {
       return;
     }
+    if (initializedScrollKeyRef.current === scrollKey) {
+      return;
+    }
 
+    initializedScrollKeyRef.current = scrollKey;
     shouldFollowOutputRef.current = true;
     setShowJumpToBottom(false);
-    const scrollToBottom = () => {
-      virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: items.length - 1 });
-    };
-    const animationFrame = window.requestAnimationFrame(scrollToBottom);
-    const immediateTimer = window.setTimeout(scrollToBottom, 0);
-    const settledTimer = window.setTimeout(scrollToBottom, 80);
-
-    return () => {
-      window.cancelAnimationFrame(animationFrame);
-      window.clearTimeout(immediateTimer);
-      window.clearTimeout(settledTimer);
-    };
+    scheduleScrollToBottom();
   }, [items.length, scrollKey]);
+
+  useLayoutEffect(() => {
+    if (isRunning && !wasRunningRef.current) {
+      shouldFollowOutputRef.current = true;
+      setShowJumpToBottom(false);
+      scheduleScrollToBottom();
+    }
+    wasRunningRef.current = isRunning;
+  }, [isRunning, items.length]);
+
+  useLayoutEffect(() => cancelPendingScrollToBottom, []);
 
   useLayoutEffect(() => {
     const itemKey = transcriptTailKey(items);
@@ -113,16 +121,7 @@ export function Transcript({
       return;
     }
 
-    const scrollToBottom = () => {
-      virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: Math.max(0, items.length - 1) });
-    };
-    const animationFrame = window.requestAnimationFrame(scrollToBottom);
-    const settledTimer = window.setTimeout(scrollToBottom, 80);
-
-    return () => {
-      window.cancelAnimationFrame(animationFrame);
-      window.clearTimeout(settledTimer);
-    };
+    scheduleScrollToBottom();
   }, [isRunning, items, scrollKey]);
 
   return (
@@ -148,7 +147,7 @@ export function Transcript({
             Footer: () => <div className="transcript-virtual-footer">{children}</div>
           }}
           data={items}
-          followOutput={(isAtBottom) => (isAtBottom ? "auto" : false)}
+          followOutput={() => (shouldFollowOutputRef.current ? "auto" : false)}
           increaseViewportBy={{ bottom: 360, top: 360 }}
           initialTopMostItemIndex={Math.max(0, items.length - 1)}
           itemContent={(_index, item) => (
@@ -205,8 +204,38 @@ export function Transcript({
       return;
     }
     shouldFollowOutputRef.current = true;
+    cancelPendingScrollToBottom();
     virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: items.length - 1 });
     setShowJumpToBottom(false);
+  }
+
+  function scheduleScrollToBottom() {
+    if (items.length === 0) {
+      return;
+    }
+    cancelPendingScrollToBottom();
+    const scrollToBottom = () => {
+      virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: Math.max(0, items.length - 1) });
+    };
+    pendingScrollFrameRef.current = window.requestAnimationFrame(() => {
+      pendingScrollFrameRef.current = null;
+      scrollToBottom();
+    });
+    pendingScrollTimerRef.current = window.setTimeout(() => {
+      pendingScrollTimerRef.current = null;
+      scrollToBottom();
+    }, 80);
+  }
+
+  function cancelPendingScrollToBottom() {
+    if (pendingScrollFrameRef.current !== null) {
+      window.cancelAnimationFrame(pendingScrollFrameRef.current);
+      pendingScrollFrameRef.current = null;
+    }
+    if (pendingScrollTimerRef.current !== null) {
+      window.clearTimeout(pendingScrollTimerRef.current);
+      pendingScrollTimerRef.current = null;
+    }
   }
 }
 

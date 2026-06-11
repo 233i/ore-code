@@ -24,6 +24,7 @@ mod git_commands;
 mod mcp;
 mod note_commands;
 mod process_commands;
+mod provider_http;
 mod sandbox_commands;
 mod session_commands;
 mod shell_commands;
@@ -52,6 +53,8 @@ pub(crate) use git_commands::*;
 pub(crate) use mcp::*;
 #[cfg(test)]
 pub(crate) use process_commands::*;
+#[cfg(test)]
+pub(crate) use provider_http::*;
 #[cfg(test)]
 pub(crate) use sandbox_commands::*;
 #[cfg(test)]
@@ -162,6 +165,8 @@ pub fn run() {
             config_status::ore_code_config_status,
             config_status::ore_code_config_write,
             config_status::ore_code_config_env_secret_get,
+            provider_http::provider_http_request,
+            provider_http::provider_http_stream,
             web_fetch::web_fetch_url,
             mcp::mcp_config_status,
             mcp::mcp_init_config,

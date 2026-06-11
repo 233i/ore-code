@@ -580,6 +580,9 @@ fn bootstrap_creates_user_environment_without_project_files() {
     assert!(config.contains("[providers.mimo]"));
     assert!(config.contains("model = \"mimo-v2.5-pro\""));
     assert!(config.contains("api_key_env = \"MIMO_API_KEY\""));
+    assert!(config.contains("[providers.ark-coding]"));
+    assert!(config.contains("model = \"ark-code-latest\""));
+    assert!(config.contains("api_key_env = \"ARK_CODING_API_KEY\""));
 
     let instructions = fs::read_to_string(home.join(".ore-code").join("instructions.md")).unwrap();
     assert!(instructions.contains("# Ore Code User Instructions"));
@@ -675,6 +678,49 @@ fn web_fetch_http_client_returns_metadata_and_truncates_body() {
     assert_eq!(result.content_type.as_deref(), Some("text/plain"));
     assert_eq!(result.body.len(), 1024);
     assert!(result.truncated);
+}
+
+#[test]
+fn provider_http_request_posts_provider_payloads() {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let url = format!("http://{}", listener.local_addr().unwrap());
+    let server = thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .unwrap();
+        let mut buffer = [0_u8; 4096];
+        let read = stream.read(&mut buffer).unwrap();
+        let request = String::from_utf8_lossy(&buffer[..read]);
+        assert!(request.starts_with("POST / HTTP/1.1"));
+        assert!(request.contains("authorization: Bearer test-key"));
+        assert!(request.contains("{\"model\":\"ark-code-latest\"}"));
+        let body = "data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}]}\n\ndata: [DONE]\n\n";
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        stream.write_all(response.as_bytes()).unwrap();
+    });
+
+    let result = tauri::async_runtime::block_on(provider_http_request_with_client(
+        ProviderHttpRequest {
+            url,
+            headers: HashMap::from([
+                ("authorization".to_string(), "Bearer test-key".to_string()),
+                ("content-type".to_string(), "application/json".to_string()),
+            ]),
+            body: "{\"model\":\"ark-code-latest\"}".to_string(),
+            timeout_ms: Some(5_000),
+        },
+    ))
+    .unwrap();
+    server.join().unwrap();
+
+    assert_eq!(result.status, 200);
+    assert_eq!(result.status_text, "OK");
+    assert!(result.body.contains("data: [DONE]"));
 }
 
 #[test]

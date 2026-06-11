@@ -20,7 +20,7 @@ See [Known Limitations](./KNOWN_LIMITATIONS.md).
 
 Ore Code is designed around DeepSeek coding workflows: long context, model-aware capacity budgets, structured tools, prompt/cache stability, and DeepSeek-compatible provider configuration.
 
-Mimo is also available as a built-in OpenAI-compatible provider. Other OpenAI-compatible providers may work where configuration supports them, but the primary optimization target remains DeepSeek.
+Mimo and Ark Coding are also available as built-in OpenAI-compatible providers. Other OpenAI-compatible providers may work where configuration supports them, but the primary optimization target remains DeepSeek.
 
 ## Do I Need an API Key?
 

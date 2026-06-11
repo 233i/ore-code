@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_ARK_CODING_BASE_URL,
+  DEFAULT_ARK_CODING_MODEL,
   DEFAULT_DEEPSEEK_BASE_URL,
   DEFAULT_DEEPSEEK_MODEL,
   DEFAULT_MIMO_BASE_URL,
@@ -111,6 +113,13 @@ api_key_env = "LOCAL_GATEWAY_API_KEY"
       baseUrl: DEFAULT_MIMO_BASE_URL,
       apiKeyEnv: "MIMO_API_KEY"
     });
+    expect(resolveProvider(resolved, "ark-coding")).toMatchObject({
+      id: "ark-coding",
+      label: "Ark Coding",
+      model: DEFAULT_ARK_CODING_MODEL,
+      baseUrl: DEFAULT_ARK_CODING_BASE_URL,
+      apiKeyEnv: "ARK_CODING_API_KEY"
+    });
   });
 
   it("resolves built-in Mimo defaults before config finishes loading", () => {
@@ -119,6 +128,16 @@ api_key_env = "LOCAL_GATEWAY_API_KEY"
       model: DEFAULT_MIMO_MODEL,
       baseUrl: DEFAULT_MIMO_BASE_URL,
       apiKeyEnv: "MIMO_API_KEY"
+    });
+  });
+
+  it("resolves built-in Ark Coding defaults before config finishes loading", () => {
+    expect(resolveProvider(null, "ark-coding")).toMatchObject({
+      id: "ark-coding",
+      label: "Ark Coding",
+      model: DEFAULT_ARK_CODING_MODEL,
+      baseUrl: DEFAULT_ARK_CODING_BASE_URL,
+      apiKeyEnv: "ARK_CODING_API_KEY"
     });
   });
 
@@ -243,6 +262,29 @@ api_key_env = "LOCAL_GATEWAY_API_KEY"
           base_url: DEFAULT_MIMO_BASE_URL,
           thinking_level: "on",
           api_key_env: "MIMO_API_KEY"
+        }
+      }
+    });
+  });
+
+  it("writes Ark Coding provider settings with Ark defaults", () => {
+    const content = buildUserOreCodeConfigContent(undefined, {
+      providerId: "ark-coding",
+      model: "",
+      deepSeekModelMode: "auto",
+      baseUrl: "",
+      thinkingLevel: "auto"
+    });
+
+    expect(parseMiniToml(content)).toMatchObject({
+      provider: "ark-coding",
+      model: DEFAULT_ARK_CODING_MODEL,
+      base_url: DEFAULT_ARK_CODING_BASE_URL,
+      providers: {
+        "ark-coding": {
+          model: DEFAULT_ARK_CODING_MODEL,
+          base_url: DEFAULT_ARK_CODING_BASE_URL,
+          api_key_env: "ARK_CODING_API_KEY"
         }
       }
     });

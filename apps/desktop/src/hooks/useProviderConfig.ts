@@ -37,6 +37,7 @@ import {
   setProviderSecret,
   type ProviderSecretStatus
 } from "../services/providerSecrets";
+import { createArkProviderFetch } from "../services/providerHttpFetch";
 
 const PROVIDER_TEST_TIMEOUT_MS = 30_000;
 const PROVIDER_SWITCH_MESSAGE = "Provider 已切换，下一轮将重建模型上下文。复杂任务执行中不建议切换。";
@@ -44,8 +45,10 @@ const DEVELOPER_HARNESS_ENABLED = import.meta.env.DEV || import.meta.env.MODE ==
 const baseProviderOptions = [
   { label: "DeepSeek", value: "deepseek" },
   { label: "Mimo", value: "mimo" },
+  { label: "Ark Coding", value: "ark-coding" },
   ...(DEVELOPER_HARNESS_ENABLED ? [{ label: "Mock Harness", value: "mock" }] : [])
 ];
+const BUILT_IN_PROVIDER_IDS = new Set(baseProviderOptions.map((option) => option.value));
 
 export type Provider = string;
 export type CreateLlmClientOptions = {
@@ -69,7 +72,7 @@ export function useProviderConfig() {
 
   const providerOptions = useMemo(() => {
     const configured = oreCodeConfig?.providers
-      .filter((item) => !["deepseek", "mimo"].includes(item.id) && (DEVELOPER_HARNESS_ENABLED || item.id !== "mock"))
+      .filter((item) => !BUILT_IN_PROVIDER_IDS.has(item.id) && (DEVELOPER_HARNESS_ENABLED || item.id !== "mock"))
       .map((item) => ({ label: item.label, value: item.id })) ?? [];
     return uniqueProviderOptions([...baseProviderOptions, ...configured]);
   }, [oreCodeConfig]);
@@ -189,7 +192,8 @@ export function useProviderConfig() {
       apiKey,
       provider: providerConfig.id,
       model: providerConfig.model,
-      baseUrl: providerConfig.baseUrl
+      baseUrl: providerConfig.baseUrl,
+      fetch: providerConfig.id === "ark-coding" ? createArkProviderFetch() : undefined
     });
   }
 
@@ -403,6 +407,8 @@ export function providerLabel(provider: Provider) {
       return "DeepSeek";
     case "mimo":
       return "Mimo";
+    case "ark-coding":
+      return "Ark Coding";
     default:
       return provider;
   }

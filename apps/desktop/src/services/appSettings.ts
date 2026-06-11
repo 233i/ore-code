@@ -11,6 +11,8 @@ export const DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com/beta";
 export const DEFAULT_PROVIDER_THINKING_LEVEL = "auto";
 export const DEFAULT_MIMO_MODEL = "mimo-v2.5-pro";
 export const DEFAULT_MIMO_BASE_URL = "https://api.xiaomimimo.com/v1";
+export const DEFAULT_ARK_CODING_MODEL = "ark-code-latest";
+export const DEFAULT_ARK_CODING_BASE_URL = "https://ark.cn-beijing.volces.com/api/coding/v3";
 export type ThemePreference = "system" | "light" | "dark";
 
 export const AppSettingsSchema = z.object({

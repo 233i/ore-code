@@ -147,6 +147,7 @@ pub(crate) fn ore_code_config_status(
             "ORE_CODE_DEEPSEEK_THINKING",
             "ORE_CODE_THINKING",
             "ORE_CODE_MIMO_THINKING",
+            "ARK_CODING_API_KEY",
             "DEEPSEEK_API_KEY",
             "MIMO_API_KEY",
         ]),
