@@ -1347,7 +1347,7 @@ function App() {
           }}
           onOpenWorkspaceDialog={openNewSessionDialog}
           onRunStarter={(prompt) => void runAgentTurn(prompt)}
-          runDisabled={isRunning || sessionRuntimeLoading}
+          runDisabled={isCurrentThreadRunning || sessionRuntimeLoading}
           onToggleMessageFeedback={toggleMessageFeedback}
           scrollKey={threadId}
         >
@@ -1379,7 +1379,7 @@ function App() {
 
         <ComposerBar
           attachments={composerAttachments}
-          disabled={isRunning || sessionRuntimeLoading}
+          disabled={isCurrentThreadRunning || sessionRuntimeLoading}
           hasWorkspace={workspacePath !== "."}
           includeIdeContext={includeIdeContext}
           isRunning={isCurrentThreadRunning}

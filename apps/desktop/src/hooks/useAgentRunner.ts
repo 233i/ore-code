@@ -116,17 +116,16 @@ export type UseAgentRunnerInput = {
 };
 
 export function useAgentRunner(input: UseAgentRunnerInput) {
-  const [isRunning, setIsRunning] = useState(false);
-  const [runningThreadId, setRunningThreadId] = useState<string | null>(null);
+  const [runningThreadIds, setRunningThreadIds] = useState<Set<string>>(() => new Set());
   const [pendingApproval, setPendingApproval] = useState<ToolCall | null>(null);
   const [pendingInteraction, setPendingInteraction] = useState<InteractionRequestEvent | null>(null);
   const [sessionApprovalCacheCount, setSessionApprovalCacheCount] = useState(0);
-  const approvalResolver = useRef<((decision: ApprovalDecision | undefined) => void) | null>(null);
-  const interactionResolver = useRef<((decision: InteractionDecision | undefined) => void) | null>(null);
-  const pendingApprovalRequest = useRef<PendingApprovalRequest | null>(null);
-  const pendingInteractionRequest = useRef<PendingInteractionRequest | null>(null);
-  const runAbortController = useRef<AbortController | null>(null);
-  const runningThreadIdRef = useRef<string | null>(null);
+  const approvalResolvers = useRef(new Map<string, (decision: ApprovalDecision | undefined) => void>());
+  const interactionResolvers = useRef(new Map<string, (decision: InteractionDecision | undefined) => void>());
+  const pendingApprovalRequests = useRef(new Map<string, PendingApprovalRequest>());
+  const pendingInteractionRequests = useRef(new Map<string, PendingInteractionRequest>());
+  const runAbortControllers = useRef(new Map<string, AbortController>());
+  const runningThreadIdsRef = useRef(new Set<string>());
   const cacheWarmupRecords = useRef(new Map<string, CacheWarmupRecord>());
   const immutablePrefixSnapshots = useRef(new Map<string, ImmutablePrefixSnapshot>());
   const assembledRequestSnapshots = useRef(new Map<string, AssembledRequest>());
@@ -136,17 +135,32 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
   const visibleThreadIdRef = useRef(input.threadId);
   const pendingApprovalRisk = useMemo(() => getShellApprovalRisk(pendingApproval), [pendingApproval]);
   visibleThreadIdRef.current = input.threadId;
+  const isRunning = runningThreadIds.size > 0;
+  const runningThreadId = runningThreadIds.has(input.threadId)
+    ? input.threadId
+    : runningThreadIds.values().next().value ?? null;
 
   useEffect(() => {
-    const approval = pendingApprovalRequest.current;
+    const approval = pendingApprovalRequests.current.get(input.threadId);
     setPendingApproval(approval?.threadId === input.threadId ? approval.call : null);
 
-    const interaction = pendingInteractionRequest.current;
+    const interaction = pendingInteractionRequests.current.get(input.threadId);
     setPendingInteraction(interaction?.threadId === input.threadId ? interaction.request : null);
   }, [input.threadId]);
 
-  function setActiveRunningThreadId(threadId: string | null) {
-    setRefAndState(runningThreadIdRef, setRunningThreadId, threadId);
+  function addRunningThread(threadId: string, controller: AbortController) {
+    runAbortControllers.current.set(threadId, controller);
+    runningThreadIdsRef.current = new Set(runAbortControllers.current.keys());
+    setRunningThreadIds(new Set(runningThreadIdsRef.current));
+  }
+
+  function removeRunningThread(threadId: string, controller: AbortController) {
+    if (runAbortControllers.current.get(threadId) !== controller) {
+      return;
+    }
+    runAbortControllers.current.delete(threadId);
+    runningThreadIdsRef.current = new Set(runAbortControllers.current.keys());
+    setRunningThreadIds(new Set(runningThreadIdsRef.current));
   }
 
   async function runAgentTurn(prompt = "", options: {
@@ -155,13 +169,13 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
     skipLocalRouting?: boolean;
     visibleUserEvent?: Extract<RuntimeEvent, { type: "user_message" }>;
   } = {}) {
-    if (isRunning || runAbortController.current) {
-      stopAgentTurn();
+    let userPrompt = prompt.trim() || "列出当前工作区";
+    const activeThreadId = input.threadId;
+    if (runAbortControllers.current.has(activeThreadId)) {
+      stopAgentTurn(activeThreadId);
       return;
     }
 
-    let userPrompt = prompt.trim() || "列出当前工作区";
-    const activeThreadId = input.threadId;
     const activeThreadVisible = () => visibleThreadIdRef.current === activeThreadId;
     const skillPrompt = resolveSkillPromptFromSlashInput(userPrompt, input.availableSlashCommands);
     if (skillPrompt) {
@@ -235,8 +249,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
     }
 
     const runController = new AbortController();
-    runAbortController.current = runController;
-    setActiveRunningThreadId(activeThreadId);
+    addRunningThread(activeThreadId, runController);
     let activeTaskFileChanges: TrackedFileChange[] = [];
     const setActiveTaskFileChanges = (changes: TrackedFileChange[]) => {
       activeTaskFileChanges = changes;
@@ -246,7 +259,6 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       input.taskFileChangesRef.current = changes;
       input.setTaskFileChanges(changes);
     };
-    setIsRunning(true);
     setPendingApproval(null);
     input.setProviderError(null);
     setActiveSessionMessage("正在准备请求。");
@@ -433,14 +445,14 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       syncModelMessageLedgerRecord(modelLedgerRecord, sequencedEvent, nextEvents.length);
       if (sequencedEvent.type === "interaction_requested") {
         pendingInteractionEvent = sequencedEvent;
-        pendingInteractionRequest.current = { threadId: activeThreadId, request: sequencedEvent };
+        pendingInteractionRequests.current.set(activeThreadId, { threadId: activeThreadId, request: sequencedEvent });
         if (activeThreadVisible()) {
           setPendingInteraction(sequencedEvent);
         }
       }
       if (sequencedEvent.type === "interaction_decided" && pendingInteractionEvent?.requestId === sequencedEvent.requestId) {
         pendingInteractionEvent = null;
-        pendingInteractionRequest.current = null;
+        pendingInteractionRequests.current.delete(activeThreadId);
         if (activeThreadVisible()) {
           setPendingInteraction(null);
         }
@@ -636,8 +648,8 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
           }
 
           return new Promise((resolve) => {
-            approvalResolver.current = resolve;
-            pendingApprovalRequest.current = { threadId: activeThreadId, call };
+            approvalResolvers.current.set(activeThreadId, resolve);
+            pendingApprovalRequests.current.set(activeThreadId, { threadId: activeThreadId, call });
             if (activeThreadVisible()) {
               setPendingApproval(call);
             }
@@ -645,8 +657,8 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
         },
         requestInteraction: (request) => {
           return new Promise((resolve) => {
-            interactionResolver.current = resolve;
-            pendingInteractionRequest.current = { threadId: activeThreadId, request };
+            interactionResolvers.current.set(activeThreadId, resolve);
+            pendingInteractionRequests.current.set(activeThreadId, { threadId: activeThreadId, request });
             if (activeThreadVisible()) {
               setPendingInteraction(request);
             }
@@ -777,11 +789,7 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
           await input.persistSession(activeThreadId, nextEvents);
         }
       }
-      if (runAbortController.current === runController) {
-        runAbortController.current = null;
-        setActiveRunningThreadId(null);
-        setIsRunning(false);
-      }
+      removeRunningThread(activeThreadId, runController);
       if (pendingInteractionEvent && activeThreadVisible()) {
         setPendingInteraction(pendingInteractionEvent);
       }
@@ -801,36 +809,38 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
         input.setProviderError(messageFromUnknown(error));
       }
     } finally {
-      if (runAbortController.current === runController) {
-        runAbortController.current = null;
-        setActiveRunningThreadId(null);
-        setIsRunning(false);
-        setActiveSessionMessage(null);
-      }
+      removeRunningThread(activeThreadId, runController);
+      setActiveSessionMessage(null);
     }
   }
 
-  function stopAgentTurn() {
-    runAbortController.current?.abort();
-    if (pendingApprovalRequest.current) {
-      approvalResolver.current?.({ callId: pendingApprovalRequest.current.call.id, decision: "denied" });
-      approvalResolver.current = null;
-      pendingApprovalRequest.current = null;
-      setPendingApproval(null);
+  function stopAgentTurn(threadId = input.threadId) {
+    runAbortControllers.current.get(threadId)?.abort();
+    const approval = pendingApprovalRequests.current.get(threadId);
+    if (approval) {
+      approvalResolvers.current.get(threadId)?.({ callId: approval.call.id, decision: "denied" });
+      approvalResolvers.current.delete(threadId);
+      pendingApprovalRequests.current.delete(threadId);
+      if (threadId === input.threadId) {
+        setPendingApproval(null);
+      }
     }
-    if (pendingInteractionRequest.current) {
-      interactionResolver.current?.(undefined);
-      interactionResolver.current = null;
-      pendingInteractionRequest.current = null;
-      setPendingInteraction(null);
+    const interaction = pendingInteractionRequests.current.get(threadId);
+    if (interaction) {
+      interactionResolvers.current.get(threadId)?.(undefined);
+      interactionResolvers.current.delete(threadId);
+      pendingInteractionRequests.current.delete(threadId);
+      if (threadId === input.threadId) {
+        setPendingInteraction(null);
+      }
     }
-    if (runningThreadIdRef.current === input.threadId) {
+    if (threadId === input.threadId) {
       input.setSessionMessage("正在停止当前任务。");
     }
   }
 
   function decideApproval(decision: ApprovalDecision["decision"], editedInput?: unknown, rememberForSession = false) {
-    const approval = pendingApprovalRequest.current;
+    const approval = pendingApprovalRequests.current.get(input.threadId);
     if (!approval || approval.threadId !== input.threadId) {
       return;
     }
@@ -845,14 +855,14 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       sessionApprovalCache.current.set(approvalCacheKey(pendingApprovalCall), resolvedDecision);
       setSessionApprovalCacheCount(sessionApprovalCache.current.size);
     }
-    approvalResolver.current?.(resolvedDecision);
-    approvalResolver.current = null;
-    pendingApprovalRequest.current = null;
+    approvalResolvers.current.get(input.threadId)?.(resolvedDecision);
+    approvalResolvers.current.delete(input.threadId);
+    pendingApprovalRequests.current.delete(input.threadId);
     setPendingApproval(null);
   }
 
   async function decideInteraction(decision: InteractionDecision) {
-    const interaction = pendingInteractionRequest.current;
+    const interaction = pendingInteractionRequests.current.get(input.threadId);
     if (!interaction || interaction.threadId !== input.threadId) {
       return;
     }
@@ -868,17 +878,18 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
       requestId: pendingInteractionEvent.requestId,
       decision
     };
-    if (interactionResolver.current) {
-      interactionResolver.current(decision);
-      interactionResolver.current = null;
-      pendingInteractionRequest.current = null;
+    const resolver = interactionResolvers.current.get(input.threadId);
+    if (resolver) {
+      resolver(decision);
+      interactionResolvers.current.delete(input.threadId);
+      pendingInteractionRequests.current.delete(input.threadId);
       setPendingInteraction(null);
       return;
     }
 
     const nextEvents = [...input.events, decisionEvent];
     input.setEvents(nextEvents);
-    pendingInteractionRequest.current = null;
+    pendingInteractionRequests.current.delete(input.threadId);
     setPendingInteraction(null);
     await input.persistSession(input.threadId, nextEvents, { silent: true });
     void runAgentTurn(INTERACTION_CONTINUE_PROMPT, { priorEvents: nextEvents });
@@ -903,11 +914,6 @@ export function useAgentRunner(input: UseAgentRunnerInput) {
     setPendingApproval,
     stopAgentTurn
   };
-}
-
-function setRefAndState<T>(ref: MutableRefObject<T>, setState: Dispatch<SetStateAction<T>>, value: T) {
-  ref.current = value;
-  setState(value);
 }
 
 function composePromptWithComposerContext(

@@ -72,57 +72,24 @@ export function Transcript({
   const isEmpty = items.length === 0;
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
   const shouldFollowOutputRef = useRef(true);
-  const initializedScrollKeyRef = useRef<string | undefined>(undefined);
   const lastScrollKeyRef = useRef<string | undefined>(scrollKey);
-  const lastItemKeyRef = useRef("");
-  const pendingScrollFrameRef = useRef<number | null>(null);
-  const pendingScrollTimerRef = useRef<number | null>(null);
-  const wasRunningRef = useRef(isRunning);
   const [showJumpToBottom, setShowJumpToBottom] = useState(false);
 
   useLayoutEffect(() => {
-    if (scrollKey === undefined || items.length === 0) {
+    if (lastScrollKeyRef.current === scrollKey && !isRunning) {
       return;
     }
-    if (initializedScrollKeyRef.current === scrollKey) {
-      return;
-    }
-
-    initializedScrollKeyRef.current = scrollKey;
+    lastScrollKeyRef.current = scrollKey;
     shouldFollowOutputRef.current = true;
     setShowJumpToBottom(false);
-    scheduleScrollToBottom();
-  }, [items.length, scrollKey]);
+  }, [isRunning, scrollKey]);
 
   useLayoutEffect(() => {
-    if (isRunning && !wasRunningRef.current) {
-      shouldFollowOutputRef.current = true;
-      setShowJumpToBottom(false);
-      scheduleScrollToBottom();
-    }
-    wasRunningRef.current = isRunning;
-  }, [isRunning, items.length]);
-
-  useLayoutEffect(() => cancelPendingScrollToBottom, []);
-
-  useLayoutEffect(() => {
-    const itemKey = transcriptTailKey(items);
-    const scrollKeyChanged = lastScrollKeyRef.current !== scrollKey;
-    const itemsChanged = lastItemKeyRef.current !== itemKey;
-    lastScrollKeyRef.current = scrollKey;
-    lastItemKeyRef.current = itemKey;
-
-    if (!itemsChanged || scrollKeyChanged) {
+    if (!shouldFollowOutputRef.current || items.length === 0) {
       return;
     }
-
-    if (!shouldFollowOutputRef.current) {
-      setShowJumpToBottom(true);
-      return;
-    }
-
-    scheduleScrollToBottom();
-  }, [isRunning, items, scrollKey]);
+    scrollTranscriptToBottom();
+  }, [items]);
 
   return (
     <div className="transcript-shell" onWheel={handleTranscriptWheel}>
@@ -140,6 +107,7 @@ export function Transcript({
       ) : (
         <Virtuoso
           alignToBottom
+          atBottomThreshold={80}
           atBottomStateChange={handleAtBottomStateChange}
           className="transcript transcript-virtuoso"
           computeItemKey={(_index, item) => item.id}
@@ -147,9 +115,9 @@ export function Transcript({
             Footer: () => <div className="transcript-virtual-footer">{children}</div>
           }}
           data={items}
-          followOutput={() => (shouldFollowOutputRef.current ? "auto" : false)}
+          followOutput="auto"
           increaseViewportBy={{ bottom: 360, top: 360 }}
-          initialTopMostItemIndex={Math.max(0, items.length - 1)}
+          initialTopMostItemIndex={{ align: "end", index: Math.max(0, items.length - 1) }}
           itemContent={(_index, item) => (
             <div className="transcript-item-frame">
               <div className="transcript-item-content">
@@ -186,13 +154,11 @@ export function Transcript({
       return;
     }
 
-    if (!isRunning) {
-      shouldFollowOutputRef.current = false;
-    }
+    setShowJumpToBottom(!shouldFollowOutputRef.current);
   }
 
   function handleTranscriptWheel(event: WheelEvent<HTMLDivElement>) {
-    if (!isRunning || event.deltaY >= 0) {
+    if (event.deltaY >= 0) {
       return;
     }
     shouldFollowOutputRef.current = false;
@@ -204,73 +170,13 @@ export function Transcript({
       return;
     }
     shouldFollowOutputRef.current = true;
-    cancelPendingScrollToBottom();
-    virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: items.length - 1 });
+    scrollTranscriptToBottom();
     setShowJumpToBottom(false);
   }
 
-  function scheduleScrollToBottom() {
-    if (items.length === 0) {
-      return;
-    }
-    cancelPendingScrollToBottom();
-    const scrollToBottom = () => {
-      virtuosoRef.current?.scrollToIndex({ align: "end", behavior: "auto", index: Math.max(0, items.length - 1) });
-    };
-    pendingScrollFrameRef.current = window.requestAnimationFrame(() => {
-      pendingScrollFrameRef.current = null;
-      scrollToBottom();
-    });
-    pendingScrollTimerRef.current = window.setTimeout(() => {
-      pendingScrollTimerRef.current = null;
-      scrollToBottom();
-    }, 80);
+  function scrollTranscriptToBottom() {
+    virtuosoRef.current?.scrollTo({ behavior: "auto", top: Number.MAX_SAFE_INTEGER });
   }
-
-  function cancelPendingScrollToBottom() {
-    if (pendingScrollFrameRef.current !== null) {
-      window.cancelAnimationFrame(pendingScrollFrameRef.current);
-      pendingScrollFrameRef.current = null;
-    }
-    if (pendingScrollTimerRef.current !== null) {
-      window.clearTimeout(pendingScrollTimerRef.current);
-      pendingScrollTimerRef.current = null;
-    }
-  }
-}
-
-function transcriptTailKey(items: TranscriptItem[]): string {
-  const item = items[items.length - 1];
-  if (!item) {
-    return "empty";
-  }
-  if (item.type === "message") {
-    return `${item.id}:${item.message.text.length}`;
-  }
-  if (item.type === "reasoning") {
-    return `${item.id}:${item.block.text.length}`;
-  }
-  if (item.type === "context") {
-    return `${item.id}:${item.context.status}:${item.context.fileCount}`;
-  }
-  if (item.type === "context_hint") {
-    return `${item.id}:${item.status}:${item.fileCount}`;
-  }
-  if (item.type === "activity") {
-    const toolKey = item.group.tools.map((tool) => `${tool.id}:${tool.status}`).join("|");
-    const reasoningChars = item.group.reasoning.reduce((total, block) => total + block.text.length, 0);
-    return `${item.id}:${reasoningChars}:${toolKey}`;
-  }
-  if (item.type === "activity_summary") {
-    return `${item.id}:${item.summary}:${item.runningCount}:${item.failedCount}`;
-  }
-  if (item.type === "tool_summary") {
-    return `${item.id}:${item.status}:${item.summary.length}`;
-  }
-  if (item.type === "history_gap") {
-    return `${item.id}:${item.hiddenItemCount}`;
-  }
-  return `${item.id}:${item.card.status}`;
 }
 
 function TranscriptItemView({
