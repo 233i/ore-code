@@ -99,6 +99,7 @@ export function useSessions(input: {
         includeTranscript: !options.silent
       });
       if (options.silent) {
+        setSessions((current) => upsertSessionSummary(current, summary));
         return;
       }
       setSessionMessage(`已保存会话：${summary.title}`);
@@ -306,6 +307,12 @@ export function useSessions(input: {
     removeSession,
     renameCurrentSessionFromCommand
   };
+}
+
+function upsertSessionSummary(summaries: SessionSummary[], summary: SessionSummary): SessionSummary[] {
+  return [summary, ...summaries.filter((item) => item.threadId !== summary.threadId)].sort((left, right) =>
+    right.updatedAt.localeCompare(left.updatedAt) || left.threadId.localeCompare(right.threadId)
+  );
 }
 
 function createThreadId() {
